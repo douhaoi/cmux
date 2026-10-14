@@ -290,7 +290,10 @@ def changed_swift_messages(root: Path, base: str, paths: Iterable[str]) -> tuple
 
 
 def discover_web_locales(root: Path) -> tuple[str, ...]:
-    routing = (root / "web/i18n/routing.ts").read_text(encoding="utf-8")
+    routing_file = root / "web/i18n/routing.ts"
+    if not (root / "web").exists():
+        return ()
+    routing = routing_file.read_text(encoding="utf-8")
     match = WEB_LOCALES.search(routing)
     if not match:
         raise ValueError("cannot parse web/i18n/routing.ts locale list")
@@ -702,6 +705,8 @@ def base_json(root: Path, base: str, path: str) -> dict:
 
 
 def web_work(root: Path, base: str, paths: Iterable[str], locales: tuple[str, ...]) -> tuple[list[dict], list[str], int]:
+    if not locales and not (root / "web").exists():
+        return [], [], 0
     english_path = "web/messages/en.json"
     relevant = any(path == "web/i18n/routing.ts" or
                    (path.startswith("web/messages/") and path.endswith(".json")) for path in paths)

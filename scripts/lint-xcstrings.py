@@ -20,7 +20,13 @@ def _tracked_catalogs() -> list[Path]:
         check=True,
         capture_output=True,
     )
-    return [Path(item) for item in result.stdout.decode().split("\0") if item]
+    deleted = subprocess.run(
+        ["git", "ls-files", "--deleted", "-z", "*.xcstrings"],
+        check=True,
+        capture_output=True,
+    )
+    deleted_paths = set(deleted.stdout.decode().split("\0"))
+    return [Path(item) for item in result.stdout.decode().split("\0") if item and item not in deleted_paths]
 
 
 def check_catalog(path: Path) -> list[str]:

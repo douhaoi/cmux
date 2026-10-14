@@ -72,7 +72,8 @@ SKIPPED_DIRS = {
 
 
 def git_ls_files(*args: str) -> list[str]:
-    return [line for line in git_stdout("ls-files", *args).splitlines() if line]
+    deleted = set(git_stdout("ls-files", "--deleted", *args).splitlines())
+    return [line for line in git_stdout("ls-files", *args).splitlines() if line and line not in deleted]
 
 
 def git_stdout(*args: str) -> str:
@@ -224,6 +225,9 @@ def workspace_package_roots(
     *,
     ref: str | None = None,
 ) -> set[str]:
+    # Removed product workspaces have no current SwiftPM resolution roots.
+    if ref is None and not Path(workspace_file).exists():
+        return set()
     text = (
         file_text_at(ref, workspace_file)
         if ref is not None
@@ -473,7 +477,7 @@ def main() -> int:
         )
         for root in changed_ios_workspace_members
     )
-    if (
+    if Path(IOS_WORKSPACE_FILE).is_file() and (
         ios_workspace_dependencies_changed
         or ios_workspace_resolution_membership_changed
         or xcode_package_reference_changed(

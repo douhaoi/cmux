@@ -68,6 +68,19 @@ class XCStringsLintTests(unittest.TestCase):
         result = self.run_lint()
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_deleted_tracked_catalog_does_not_block_working_tree_lint(self) -> None:
+        """Keep removals lintable before they are staged or committed."""
+        directory = Path(self.temp_directory.name)
+        catalog = {"sourceLanguage": "en", "strings": {}, "version": "1.0"}
+        for name in ("kept.xcstrings", "removed.xcstrings"):
+            (directory / name).write_text(json.dumps(catalog), encoding="utf-8")
+        subprocess.run(["git", "init", "--quiet"], cwd=directory, check=True)
+        subprocess.run(["git", "add", "kept.xcstrings", "removed.xcstrings"], cwd=directory, check=True)
+        (directory / "removed.xcstrings").unlink()
+        result = subprocess.run([sys.executable, str(LINT_PATH)], cwd=directory, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("1 catalog(s)", result.stdout)
+
     def test_invalid_utf8_is_reported_without_stopping_other_catalogs(self) -> None:
         """Report decoding errors and continue collecting errors from later catalogs."""
         invalid_path = Path(self.temp_directory.name) / "invalid.xcstrings"
