@@ -52,7 +52,7 @@ if ! ssh -o ControlPath="$MASTER" -O check "$HOST" >/dev/null 2>&1; then
   echo "no ssh master at $MASTER — open one first (this script stays read-only otherwise)" >&2
   exit 2
 fi
-if ! pgrep -f "cmux DEV $TAG.app/Contents/MacOS/cmux DEV" >/dev/null 2>&1; then
+if ! pgrep -f "LocalDeck DEV $TAG.app/Contents/MacOS/LocalDeck DEV" >/dev/null 2>&1; then
   echo "the '$TAG' app is not running; launch it first" >&2
   exit 2
 fi
@@ -89,10 +89,10 @@ sizes | sed 's/^/  /'
 echo "=== quitting the app, the way the close button does ==="
 osascript -e "tell application id \"$BUNDLE\" to quit" >/dev/null 2>&1
 for _ in $(seq 1 30); do
-  pgrep -f "cmux DEV $TAG.app/Contents/MacOS/cmux DEV" >/dev/null 2>&1 || break
+  pgrep -f "LocalDeck DEV $TAG.app/Contents/MacOS/LocalDeck DEV" >/dev/null 2>&1 || break
   sleep 1
 done
-check "the app exited" "0" "$(pgrep -f "cmux DEV $TAG.app/Contents/MacOS/cmux DEV" >/dev/null 2>&1 && echo 1 || echo 0)"
+check "the app exited" "0" "$(pgrep -f "LocalDeck DEV $TAG.app/Contents/MacOS/LocalDeck DEV" >/dev/null 2>&1 && echo 1 || echo 0)"
 
 # The server needs a moment to notice the detach.
 sleep 3

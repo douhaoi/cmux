@@ -23,15 +23,15 @@ make_app() {
 </dict>
 </plist>
 EOF
-  : > "$path/Contents/MacOS/cmux"
+  : > "$path/Contents/MacOS/LocalDeck"
 }
 
-stable_app="$TMP_DIR/cmux.app"
-nightly_app="$TMP_DIR/cmux NIGHTLY.app"
-dev_app="$TMP_DIR/cmux DEV dog.app"
+stable_app="$TMP_DIR/LocalDeck.app"
+nightly_app="$TMP_DIR/LocalDeck NIGHTLY.app"
+dev_app="$TMP_DIR/LocalDeck DEV dog.app"
 make_app "$stable_app" "com.cmuxterm.local" "cmux"
-make_app "$nightly_app" "com.cmuxterm.local.nightly" "cmux NIGHTLY"
-make_app "$dev_app" "com.cmuxterm.local.debug.dog" "cmux DEV dog"
+make_app "$nightly_app" "com.cmuxterm.local.nightly" "LocalDeck NIGHTLY"
+make_app "$dev_app" "com.cmuxterm.local.debug.dog" "LocalDeck DEV dog"
 
 plist_buddy="$TMP_DIR/plistbuddy"
 cat > "$plist_buddy" <<'EOF'
@@ -101,13 +101,13 @@ export CMUX_PROFILE_SYSTEM_PROFILER="$system_profiler_bin"
 
 ps_file="$TMP_DIR/ps.txt"
 cat > "$ps_file" <<EOF
-101 $stable_app/Contents/MacOS/cmux
-202 $nightly_app/Contents/MacOS/cmux
-303 $dev_app/Contents/MacOS/cmux
+101 $stable_app/Contents/MacOS/LocalDeck
+202 $nightly_app/Contents/MacOS/LocalDeck
+303 $dev_app/Contents/MacOS/LocalDeck
 EOF
 
 dry_run="$("$SCRIPT" --dry-run --test-ps-file "$ps_file" --channel dev --tag dog --duration 7 --out "$TMP_DIR/out")"
-if [[ "$dry_run" != *"Target: pid=303 channel=dev bundle=com.cmuxterm.local.debug.dog name=cmux DEV dog"* ]]; then
+if [[ "$dry_run" != *"Target: pid=303 channel=dev bundle=com.cmuxterm.local.debug.dog name=LocalDeck DEV dog"* ]]; then
   echo "FAIL: dev tag selector did not choose the tagged dev process" >&2
   echo "$dry_run" >&2
   exit 1
@@ -224,15 +224,15 @@ if [ ! -f "$timeout_out/system-info.txt" ] ||
   exit 1
 fi
 if ! grep -Fq "System:" "$timeout_out/summary.md" ||
-   ! grep -Fq "App: ~/cmux DEV dog.app" "$timeout_out/summary.md" ||
+   ! grep -Fq "App: ~/LocalDeck DEV dog.app" "$timeout_out/summary.md" ||
    ! grep -Fq "Keyboard/input source: U.S." "$timeout_out/summary.md" ||
    ! grep -Fq "More details: system-info.txt" "$timeout_out/summary.md"; then
   echo "FAIL: summary did not preview system info" >&2
   cat "$timeout_out/summary.md" >&2
   exit 1
 fi
-if grep -Fq "$TMP_DIR/cmux DEV dog.app" "$timeout_out/summary.md" ||
-   grep -Fq "$TMP_DIR/cmux DEV dog.app" "$timeout_out/system-info.txt"; then
+if grep -Fq "$TMP_DIR/LocalDeck DEV dog.app" "$timeout_out/summary.md" ||
+   grep -Fq "$TMP_DIR/LocalDeck DEV dog.app" "$timeout_out/system-info.txt"; then
   echo "FAIL: system info leaked an unredacted home path" >&2
   cat "$timeout_out/summary.md" >&2
   cat "$timeout_out/system-info.txt" >&2

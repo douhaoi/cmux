@@ -144,7 +144,7 @@ PY
           | grep -E 'xcodebuild|xctest|run-app-host-xcodebuild|app_host_test_lock|Contents/MacOS/cmux' \
           | grep -v grep || true
       } >>"$batch_output" 2>&1
-      for hang_pid in $(pgrep -f 'Contents/MacOS/cmux DEV( |$)' 2>/dev/null | head -2); do
+      for hang_pid in $(pgrep -f 'Contents/MacOS/LocalDeck DEV( |$)' 2>/dev/null | head -2); do
         hang_sample="$RUNNER_TEMP/app-host-hang-sample-${logical_shard}-run-${execution_attempt}-${hang_pid}.txt"
         if sample "$hang_pid" 3 -mayDie -file "$hang_sample" >/dev/null 2>&1; then
           {

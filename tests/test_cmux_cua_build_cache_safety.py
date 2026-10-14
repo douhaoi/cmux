@@ -186,7 +186,7 @@ def test_unmanaged_helper_bundle_is_preserved(sha: str) -> None:
     with tempfile.TemporaryDirectory(prefix="cmux-cua-helper-unmanaged-") as tmp:
         root = Path(tmp)
         cache_dir = root / "cache"
-        contents_dir = root / "cmux DEV.app" / "Contents"
+        contents_dir = root / "LocalDeck DEV.app" / "Contents"
         output = contents_dir / "Resources" / "bin" / "cmux-cua"
         helper = contents_dir / "Library" / "cmux Computer Use.app"
         helper.mkdir(parents=True)

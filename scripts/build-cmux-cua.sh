@@ -529,7 +529,7 @@ if [ -n "$HELPER_APP" ]; then
   # Keep the TCC-facing product name stable across release, tests, and tagged
   # dogfood builds. Runtime isolation comes from the tag-scoped install path,
   # socket, credential, and state directory.
-  HELPER_DISPLAY="${CMUX_CUA_HELPER_DISPLAY_NAME:-cmux Computer Use}"
+  HELPER_DISPLAY="${CMUX_CUA_HELPER_DISPLAY_NAME:-LocalDeck Computer Use}"
   validate_replaceable_helper_bundle "$HELPER_APP" "$HELPER_ID" "$HELPER_EXECUTABLE"
   /bin/rm -rf -- "$HELPER_APP"
   mkdir -p \

@@ -497,7 +497,7 @@ def test_variant_last_socket_markers(cli_path: str) -> bool:
         dev_agent_cli = bundled_cli_for_variant(
             cli_path,
             apps,
-            "cmux DEV agent",
+            "LocalDeck DEV agent",
             f"com.cmuxterm.app.debug.{dev_agent_slug}",
         )
 
@@ -592,7 +592,7 @@ def test_base_debug_cli_discovers_cmux_tag(cli_path: str) -> bool:
             debug_cli = bundled_cli_for_variant(
                 cli_path,
                 apps,
-                "cmux DEV issue3542",
+                "LocalDeck DEV issue3542",
                 "com.cmuxterm.app.debug",
             )
             env = os.environ.copy()

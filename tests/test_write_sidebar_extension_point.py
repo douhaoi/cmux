@@ -14,13 +14,13 @@ class ExtensionPointTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        self.extensions = self.root / "cmux DEV.app/Contents/Extensions"
+        self.extensions = self.root / "LocalDeck DEV.app/Contents/Extensions"
         self.point = "com.cmuxterm.app.debug.alpha.cmux.sidebar"
 
     def run_script(self, point=None):
         point = self.point if point is None else point
         env = dict(os.environ, BUILT_PRODUCTS_DIR=str(self.root),
-                   CONTENTS_FOLDER_PATH="cmux DEV.app/Contents",
+                   CONTENTS_FOLDER_PATH="LocalDeck DEV.app/Contents",
                    CMUX_SIDEBAR_EXTENSION_POINT_ID=point)
         subprocess.run(["bash", str(SCRIPT)], env=env, check=True,
                        capture_output=True, text=True)

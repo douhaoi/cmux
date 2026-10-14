@@ -5676,7 +5676,6 @@
 		C1ADE70001A1B2C3D4E5F719 /* cmux-pi-wrapper */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "Resources/bin/cmux-pi-wrapper"; sourceTree = SOURCE_ROOT; };
 		D96971000000000000000002 /* cmux-sudo */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "Resources/bin/cmux-sudo"; sourceTree = SOURCE_ROOT; };
 		F390E470FA17BD417C032222 /* cmux-tmux-agent.py */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.python; path = "Resources/bin/cmux-tmux-agent.py"; sourceTree = SOURCE_ROOT; };
-		A5001000 /* cmux.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cmux.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5001622 /* cmux.sdef */ = {isa = PBXFileReference; lastKnownFileType = text.sdef; path = cmux.sdef; sourceTree = "<group>"; };
 		B9000001A1B2C3D4E5F60719 /* cmux.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmux.swift; sourceTree = "<group>"; };
 		C0DE1A060000000000000002 /* cmux_layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cmux_layout.swift; sourceTree = "<group>"; };
@@ -6766,6 +6765,7 @@
 		CFSR00000000000000000006 /* LiveCloudFileExplorerCommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveCloudFileExplorerCommandRunner.swift; sourceTree = "<group>"; };
 		D10799010000000000000001 /* LiveTabDragCapabilityResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTabDragCapabilityResolver.swift; sourceTree = "<group>"; };
 		7B507A66B0F521925687F2ED /* LiveWorkspaceFixture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveWorkspaceFixture.swift; sourceTree = "<group>"; };
+		A5001000 /* LocalDeck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocalDeck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA7A10CA710E000000000001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		349A471149F2DC7797EE24F7 /* LocalSessionAttachProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalSessionAttachProfile.swift; sourceTree = "<group>"; };
 		1EDD243C7C87A2AB78B12BAD /* LocalSurfaceProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSurfaceProvider.swift; sourceTree = "<group>"; };
@@ -11917,7 +11917,7 @@
 			isa = PBXGroup;
 			name = Products;
 			children = (
-				A5001000 /* cmux.app */,
+				A5001000 /* LocalDeck.app */,
 				B9000004A1B2C3D4E5F60719 /* cmux */,
 				D1320AA0D1320AA0D1320AA5 /* CmuxDockTilePlugin.plugin */,
 				7E7E6EF344A568AC7FEE3715 /* cmuxUITests.xctest */,
@@ -13499,7 +13499,7 @@
 		};
 		A5001050 /* cmux */ = {
 			buildConfigurationList = A5001060 /* Build configuration list for PBXNativeTarget "cmux" */;
-			productReference = A5001000 /* cmux.app */;
+			productReference = A5001000 /* LocalDeck.app */;
 			productType = "com.apple.product-type.application";
 			packageProductDependencies = (
 				D0F6A0000000000000000002 /* CmuxAgentDeliveryCore */,
@@ -18580,7 +18580,8 @@
 				);
 				CMUX_SIDEBAR_EXTENSION_POINT_ID = com.cmuxterm.app.cmux.sidebar;
 				SWIFT_VERSION = 5.0;
-				PRODUCT_NAME = "cmux DEV";
+				PRODUCT_NAME = "LocalDeck DEV";
+				PRODUCT_MODULE_NAME = cmux_DEV;
 				OTHER_SWIFT_FLAGS = (
 					"-Xllvm",
 					"-global-isel=0",
@@ -18629,7 +18630,8 @@
 				);
 				CMUX_SIDEBAR_EXTENSION_POINT_ID = com.cmuxterm.app.cmux.sidebar;
 				SWIFT_VERSION = 5.0;
-				PRODUCT_NAME = cmux;
+				PRODUCT_NAME = "LocalDeck";
+				PRODUCT_MODULE_NAME = cmux;
 				SWIFT_OBJC_BRIDGING_HEADER = "cmux-Bridging-Header.h";
 				CMUX_IROH_RELAY_POLICY_NEXT_PUBLIC_KEY_BASE64 = "k+FND+WlELCkHs9QnWg1TfTuHXBwyv2907umX+mUOOU=";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -18709,7 +18711,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				WRAPPER_EXTENSION = plugin;
-				INFOPLIST_KEY_CFBundleDisplayName = "cmux Dock Tile Plugin";
+				INFOPLIST_KEY_CFBundleDisplayName = "LocalDeck Dock Tile Plugin";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				CODE_SIGN_STYLE = Manual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -18733,7 +18735,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				WRAPPER_EXTENSION = plugin;
-				INFOPLIST_KEY_CFBundleDisplayName = "cmux Dock Tile Plugin";
+				INFOPLIST_KEY_CFBundleDisplayName = "LocalDeck Dock Tile Plugin";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				CODE_SIGN_STYLE = Manual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -18760,7 +18762,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/cmux DEV.app/Contents/MacOS/cmux DEV";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV";
 				TEST_TARGET_NAME = cmux;
 			};
 			name = Debug;
@@ -18780,7 +18782,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/cmux.app/Contents/MacOS/cmux";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocalDeck.app/Contents/MacOS/LocalDeck";
 				TEST_TARGET_NAME = cmux;
 			};
 			name = Release;

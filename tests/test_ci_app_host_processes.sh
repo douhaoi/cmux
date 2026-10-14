@@ -260,7 +260,7 @@ make_scope() {
   local name="$1"
   TEST_DERIVED_DATA="$TMP_DIR/$name/Derived Data"
   TEST_RECEIPT_DIR="$TMP_DIR/$name/receipts"
-  TEST_EXECUTABLE="$TEST_DERIVED_DATA/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+  TEST_EXECUTABLE="$TEST_DERIVED_DATA/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
   mkdir -p "$(dirname "$TEST_EXECUTABLE")" "$TEST_RECEIPT_DIR"
   : > "$TEST_EXECUTABLE"
 }
@@ -377,7 +377,7 @@ fi
 make_scope wrong-path
 spawn_process
 wrong_path_pid="$CMUX_TEST_SPAWNED_PID"
-outside_executable="$TMP_DIR/outside/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+outside_executable="$TMP_DIR/outside/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
 mkdir -p "$(dirname "$outside_executable")"
 : > "$outside_executable"
 printf '%s|%s\n' "$wrong_path_pid" "$outside_executable" > "$CMUX_FAKE_LSOF_STATE"
@@ -547,8 +547,8 @@ preflight_runner_root="$TMP_DIR/preflight-runner-work"
 preflight_receipt_root="$TMP_DIR/preflight-receipts"
 preflight_key=13579bdf0246
 preflight_receipt_dir="$preflight_receipt_root/cmux-ah-$preflight_key-receipts"
-preflight_receipted_executable="$preflight_runner_root/old-job/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
-preflight_unreceipted_executable="$preflight_runner_root/current-job/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+preflight_receipted_executable="$preflight_runner_root/old-job/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
+preflight_unreceipted_executable="$preflight_runner_root/current-job/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
 mkdir -p \
   "$preflight_runner_root" \
   "$preflight_receipt_dir" \
@@ -588,7 +588,7 @@ deleted_receipt_root="$TMP_DIR/deleted-receipts"
 deleted_key=2468ace01357
 deleted_receipt_dir="$deleted_receipt_root/cmux-ah-$deleted_key-receipts"
 deleted_derived_data="$deleted_runner_root/old-job/deleted-derived-data"
-deleted_executable="$deleted_derived_data/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+deleted_executable="$deleted_derived_data/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
 mkdir -p "$deleted_runner_root" "$deleted_receipt_dir"
 spawn_process
 deleted_stale_pid="$CMUX_TEST_SPAWNED_PID"
@@ -611,7 +611,7 @@ untrack_pid "$deleted_stale_pid"
 reused_runner_root="$TMP_DIR/reused-runner-work"
 reused_receipt_dir="$TMP_DIR/reused-receipts/cmux-ah-$deleted_key-receipts"
 reused_derived_data="$reused_runner_root/old-job/derived-data"
-reused_executable="$reused_derived_data/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+reused_executable="$reused_derived_data/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
 mkdir -p "$reused_runner_root" "$reused_receipt_dir"
 spawn_process
 recovery_reused_pid="$CMUX_TEST_SPAWNED_PID"
@@ -648,7 +648,7 @@ make_durable_scope() {
   DURABLE_SCOPE_RECEIPT_DIR="$CMUX_RESOLVED_APP_HOST_RECEIPT_DIR"
   DURABLE_SCOPE_CONFIRMATION_FILE="$CMUX_RESOLVED_APP_HOST_CONFIRMATION_FILE"
   DURABLE_SCOPE_CONFIRMATION="$CMUX_RESOLVED_APP_HOST_CLEANUP_CONFIRMATION"
-  DURABLE_SCOPE_EXECUTABLE="$derived_data_path/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+  DURABLE_SCOPE_EXECUTABLE="$derived_data_path/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
   mkdir -p \
     "$DURABLE_SCOPE_HOME" \
     "$DURABLE_SCOPE_RECEIPT_DIR" \

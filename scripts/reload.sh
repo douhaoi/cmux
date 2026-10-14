@@ -6,10 +6,10 @@ RELOAD_ORIGINAL_ARGS=("$@")
 # shellcheck source=scripts/lib/mobile-attach.sh
 source "$SCRIPT_DIR/lib/mobile-attach.sh"
 
-APP_NAME="cmux DEV"
+APP_NAME="LocalDeck DEV"
 BUNDLE_ID="com.cmuxterm.local.debug"
-BASE_APP_NAME="cmux DEV"
-# The configuration xcodebuild builds and the app it produces (Release: cmux.app).
+BASE_APP_NAME="LocalDeck DEV"
+# The configuration xcodebuild builds and the app it produces (Release: LocalDeck.app).
 BUILD_CONFIGURATION="Debug"
 PRODUCT_APP_NAME="$BASE_APP_NAME"
 DERIVED_DATA=""
@@ -359,7 +359,7 @@ reload_cleanup_tag_state_with_lock() {
       close($fh);
       exit 1;
     }
-    my $cli_suffix = "/cmux LOCAL DEV ${slug}.app/Contents/Resources/bin/cmux";
+    my $cli_suffix = "/LocalDeck DEV ${slug}.app/Contents/Resources/bin/cmux";
     my $pointer_ok = length($publish_cli_path)
       ? write_discovery_file($pointer_path, $publish_cli_path)
       : clear_matching_discovery_file($pointer_path, $cli_suffix, 1);
@@ -514,8 +514,8 @@ cleanup_stale_cli_pointer_target() {
   esac
   local app_name="${bundle_path##*/}"
   app_name="${app_name%.app}"
-  [[ "$app_name" == "cmux DEV "* ]] || return 0
-  local slug="${app_name#cmux DEV }"
+  [[ "$app_name" == "LocalDeck DEV "* ]] || return 0
+  local slug="${app_name#LocalDeck DEV }"
   [[ "$slug" =~ ^[A-Za-z0-9_-]+$ ]] || return 0
   local socket_path=""
   if [[ -x /usr/libexec/PlistBuddy && -f "$bundle_path/Contents/Info.plist" ]]; then
@@ -634,8 +634,8 @@ bundle_socket_path() {
 
   local app_name="\${bundle_path##*/}"
   app_name="\${app_name%.app}"
-  if [[ "\$app_name" == "cmux DEV "* ]]; then
-    local tag="\${app_name#cmux DEV }"
+  if [[ "\$app_name" == "LocalDeck DEV "* ]]; then
+    local tag="\${app_name#LocalDeck DEV }"
     [[ "\$tag" =~ ^[A-Za-z0-9_-]+\$ ]] || return 1
     printf '/tmp/cmux-local-debug-%s.sock\\n' "\$tag"
     return 0
@@ -659,14 +659,14 @@ if [[ -n "\${CMUX_SOCKET_PATH:-}" || -n "\${CMUX_SOCKET:-}" ]]; then
 fi
 if [[ -n "\$SOCKET_ARG" ]]; then
   SOCKET_NAME="\$(basename "\$SOCKET_ARG")"
-  if [[ "\$SOCKET_NAME" == cmux-debug-*.sock ]]; then
-    TAG="\${SOCKET_NAME#cmux-debug-}"
+  if [[ "\$SOCKET_NAME" == cmux-local-debug-*.sock ]]; then
+    TAG="\${SOCKET_NAME#cmux-local-debug-}"
     TAG="\${TAG%.sock}"
     if [[ "\$TAG" =~ ^[A-Za-z0-9_-]+$ ]]; then
-      # reload.sh links /tmp/cmux-<tag> to the DerivedData it built the tag into,
+      # reload.sh links /tmp/cmux-local-<tag> to the DerivedData it built the tag into,
       # which is not the per-tag default when tags share one.
-      TAG_CLI_SUFFIX="cmux LOCAL DEV \$TAG.app/Contents/Resources/bin/cmux"
-      for TAG_CLI in "/tmp/cmux-\$TAG"/Build/Products/{Debug,Release}/"\$TAG_CLI_SUFFIX" \
+      TAG_CLI_SUFFIX="LocalDeck DEV \$TAG.app/Contents/Resources/bin/cmux"
+      for TAG_CLI in "/tmp/cmux-local-\$TAG"/Build/Products/{Debug,Release}/"\$TAG_CLI_SUFFIX" \
         "\$HOME/Library/Developer/Xcode/DerivedData/cmux-local-\$TAG"/Build/Products/{Debug,Release}/"\$TAG_CLI_SUFFIX"; do
         # /tmp is shared, so only trust a CLI this user owns.
         [[ -O "\$TAG_CLI" ]] || continue
@@ -719,7 +719,7 @@ EOF
 }
 
 select_cmux_shim_target() {
-  local app_cli_dir="/Applications/cmux.app/Contents/Resources/bin"
+  local app_cli_dir="/Applications/LocalDeck.app/Contents/Resources/bin"
   local marker="cmux dev shim (managed by scripts/reload.sh)"
   local target=""
   local path_entry=""
@@ -783,11 +783,11 @@ publish_reload_cli_links() {
 
   # Stable shim that always follows the last reload-selected dev CLI.
   DEV_CLI_SHIM="$HOME/.local/bin/cmux-dev"
-  write_dev_cli_shim "$DEV_CLI_SHIM" "/Applications/cmux.app/Contents/Resources/bin/cmux"
+  write_dev_cli_shim "$DEV_CLI_SHIM" "/Applications/LocalDeck.app/Contents/Resources/bin/cmux"
 
   CMUX_SHIM_TARGET="$(select_cmux_shim_target || true)"
   if [[ -n "${CMUX_SHIM_TARGET:-}" ]]; then
-    write_dev_cli_shim "$CMUX_SHIM_TARGET" "/Applications/cmux.app/Contents/Resources/bin/cmux"
+    write_dev_cli_shim "$CMUX_SHIM_TARGET" "/Applications/LocalDeck.app/Contents/Resources/bin/cmux"
   fi
 }
 
@@ -1120,7 +1120,7 @@ tag_build_cleanup_paths() {
     derived="$(readlink "$link" 2>/dev/null || true)"
   fi
   if [[ -n "$derived" && "$derived" != "$own" && "$derived" != "$link" ]]; then
-    printf '%q ' "${derived%/}/Build/Products/Debug/cmux LOCAL DEV ${tag}.app" "${derived%/}/Build/Products/Release/cmux LOCAL DEV ${tag}.app"
+    printf '%q ' "${derived%/}/Build/Products/Debug/LocalDeck DEV ${tag}.app" "${derived%/}/Build/Products/Release/LocalDeck DEV ${tag}.app"
     [[ -d "$own" ]] || return 0
   fi
   printf '%q ' "$own"
@@ -1131,10 +1131,10 @@ tag_build_cleanup_paths() {
 # argument is escaped with %q instead of being wrapped in quotes.
 print_tag_cleanup_commands() {
   local tag="$1" derived="${2:-}"
-  printf '  pkill -f %q\n' "cmux LOCAL DEV ${tag}.app/Contents/MacOS/cmux DEV"
+  printf '  pkill -f %q\n' "LocalDeck DEV ${tag}.app/Contents/MacOS/LocalDeck DEV"
   printf '  rm -rf %s%q %q\n' "$(tag_build_cleanup_paths "$tag" "$derived")" "/tmp/cmux-local-${tag}" "/tmp/cmux-local-debug-${tag}.sock"
   printf '  rm -f %q\n' "/tmp/cmux-local-debug-${tag}.log"
-  printf '  rm -f %q\n' "$HOME/Library/Application Support/cmux/cmuxd-dev-${tag}.sock"
+  printf '  rm -f %q\n' "$HOME/Library/Application Support/cmux-local/cmuxd-dev-${tag}.sock"
 }
 
 print_tag_cleanup_reminder() {
@@ -1146,8 +1146,8 @@ print_tag_cleanup_reminder() {
   local -a stale_tags=()
 
   while IFS= read -r -d '' path; do
-    if [[ "$path" == /tmp/cmux-* ]]; then
-      tag="${path#/tmp/cmux-}"
+    if [[ "$path" == /tmp/cmux-local-* ]]; then
+      tag="${path#/tmp/cmux-local-}"
     elif [[ "$path" == "$HOME/Library/Developer/Xcode/DerivedData/cmux-local-"* ]]; then
       tag="${path#"$HOME"/Library/Developer/Xcode/DerivedData/cmux-local-}"
     else
@@ -1171,8 +1171,8 @@ print_tag_cleanup_reminder() {
     stale_tags+=("$tag")
   done < <(
     # The trailing slash makes find descend when /tmp is itself a symlink.
-    find /tmp/ -maxdepth 1 -name 'cmux-*' -print0 2>/dev/null
-    find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 1 -type d -name 'cmux-*' -print0 2>/dev/null
+    find /tmp/ -maxdepth 1 -name 'cmux-local-*' -print0 2>/dev/null
+    find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 1 -type d -name 'cmux-local-*' -print0 2>/dev/null
   )
 
   echo
@@ -1292,11 +1292,11 @@ if [[ -z "$TAG" ]]; then
   exit 1
 fi
 
-# Release's product is cmux.app, which the tag step stages as the tagged app. It
+# Release's product is LocalDeck.app, which the tag step stages as the tagged app. It
 # bundles the pinned cmux-tui by default; dogfood the checkout's own instead. Its
 # entitlements need a signing team, and the tagged app is signed ad hoc.
 if [[ "$BUILD_CONFIGURATION" == Release ]]; then
-  PRODUCT_APP_NAME="cmux"
+  PRODUCT_APP_NAME="LocalDeck"
   export CMUX_NEXT_TUI_MODE=tree
 fi
 
@@ -1323,7 +1323,7 @@ if [[ -n "$TAG" ]]; then
       "$TAG_SLUG" "$0" "${RELOAD_ORIGINAL_ARGS[@]}"
   fi
   if [[ "$NAME_SET" -eq 0 ]]; then
-    APP_NAME="cmux LOCAL DEV ${TAG_SLUG}"
+    APP_NAME="LocalDeck DEV ${TAG_SLUG}"
   fi
   if [[ "$BUNDLE_SET" -eq 0 ]]; then
     BUNDLE_ID="com.cmuxterm.local.debug.${TAG_ID}"
@@ -1518,7 +1518,7 @@ fi
 # The helper is assembled before Xcode emits the host's processed Info.plist.
 # Pass the final tagged display name explicitly so its TCC entry matches the
 # app the user is dogfooding instead of falling back to the untagged product.
-XCODEBUILD_ARGS+=(CMUX_CUA_HELPER_DISPLAY_NAME="cmux Computer Use")
+XCODEBUILD_ARGS+=(CMUX_CUA_HELPER_DISPLAY_NAME="LocalDeck Computer Use")
 # Scope the sidebar ExtensionKit point per build tag so concurrent dev builds (and
 # their tagged sample extensions) don't share one point. The host bundle declares
 # the point under Contents/Extensions, and Info.plist carries the same identifier.

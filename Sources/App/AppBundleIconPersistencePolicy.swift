@@ -2,7 +2,7 @@ import Foundation
 
 enum AppBundleIconPersistencePolicy {
     private static let stableReleaseBundleIdentifier = "com.cmuxterm.local"
-    private static let stableReleaseAppBundleName = "cmux.app"
+    private static let stableReleaseAppBundleName = "LocalDeck.app"
     static let disablePersistenceArgument = "--cmux-disable-bundle-icon-persistence"
     static let disablePersistenceDefaultsKey = "cmuxDisableBundleIconPersistence"
 

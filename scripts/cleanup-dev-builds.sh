@@ -2,17 +2,17 @@
 # Clean up tagged dev-build artifacts created by scripts/reload.sh.
 #
 # Each `./scripts/reload.sh --tag <tag>` produces:
-#   ~/Library/Developer/Xcode/DerivedData/cmux-<tag>/      (multi-GB)
-#   /tmp/cmux-<tag>/                                       (build scratch)
-#   /tmp/cmux-debug-<tag>.sock                             (control socket)
-#   /tmp/cmux-debug-<tag>.log                              (debug log)
-#   /tmp/cmux-reload-<tag>.log                             (build log)
-#   ~/Library/Application Support/cmux/cmuxd-dev-<tag>.sock (cmuxd socket)
+#   ~/Library/Developer/Xcode/DerivedData/cmux-local-<tag>/      (multi-GB)
+#   /tmp/cmux-local-<tag>/                                       (build scratch)
+#   /tmp/cmux-local-debug-<tag>.sock                             (control socket)
+#   /tmp/cmux-local-debug-<tag>.log                              (debug log)
+#   /tmp/cmux-local-reload-<tag>.log                             (build log)
+#   ~/Library/Application Support/cmux-local/cmuxd-dev-<tag>.sock (cmuxd socket)
 #
 # This script removes those artifacts for tags that are safe to clean.
 # Safety rules (always on):
-#   - Skip any tag whose `cmux DEV <tag>` app is currently running.
-#   - Skip the tag pointed at by /tmp/cmux-last-cli-path (most recent reload).
+#   - Skip any tag whose `LocalDeck DEV <tag>` app is currently running.
+#   - Skip the tag pointed at by /tmp/cmux-local-last-cli-path (most recent reload).
 # A worktree merely existing on the same name is not treated as a
 # protection. Use --keep TAG when you want to preserve a build whose
 # worktree you still have around, or --older-than DAYS to skip anything
@@ -34,8 +34,8 @@
 set -euo pipefail
 
 DERIVED_DATA_ROOT="$HOME/Library/Developer/Xcode/DerivedData"
-APP_SUPPORT_DIR="$HOME/Library/Application Support/cmux"
-LAST_CLI_PATH_FILE="/tmp/cmux-last-cli-path"
+APP_SUPPORT_DIR="$HOME/Library/Application Support/cmux-local"
+LAST_CLI_PATH_FILE="/tmp/cmux-local-last-cli-path"
 
 apply=0
 older_than_days=0
@@ -64,29 +64,29 @@ done
 
 # ---- discovery --------------------------------------------------------------
 
-# Tags come from DerivedData dirs named cmux-<tag>. Authoritative because
+# Tags come from DerivedData dirs named cmux-local-<tag>. Authoritative because
 # reload.sh always creates one there.
 discover_tags() {
     [[ -d "$DERIVED_DATA_ROOT" ]] || return 0
     local d name
-    for d in "$DERIVED_DATA_ROOT"/cmux-*/; do
+    for d in "$DERIVED_DATA_ROOT"/cmux-local-*/; do
         # The glob leaves the literal pattern if no matches exist on macOS.
         [[ -d "$d" ]] || continue
         name="${d%/}"
         name="${name##*/}"
-        printf '%s\n' "${name#cmux-}"
+        printf '%s\n' "${name#cmux-local-}"
     done
 }
 
 artifact_paths_for_tag() {
     local tag="$1"
     printf '%s\n' \
-        "$DERIVED_DATA_ROOT/cmux-${tag}" \
-        "/tmp/cmux-${tag}" \
-        "/tmp/cmux-${tag}.tar" \
-        "/tmp/cmux-debug-${tag}.sock" \
-        "/tmp/cmux-debug-${tag}.log" \
-        "/tmp/cmux-reload-${tag}.log" \
+        "$DERIVED_DATA_ROOT/cmux-local-${tag}" \
+        "/tmp/cmux-local-${tag}" \
+        "/tmp/cmux-local-${tag}.tar" \
+        "/tmp/cmux-local-debug-${tag}.sock" \
+        "/tmp/cmux-local-debug-${tag}.log" \
+        "/tmp/cmux-local-reload-${tag}.log" \
         "$APP_SUPPORT_DIR/cmuxd-dev-${tag}.sock"
 }
 
@@ -122,24 +122,25 @@ derived_data_mtime_days() {
 # ---- safety probes ----------------------------------------------------------
 
 # Active tag (most recent reload) per the CLI symlink target. Match
-# `/cmux-<tag>/` anywhere in the path so we cover paths under DerivedData,
+# `/cmux-local-<tag>/` anywhere in the path so we cover paths under DerivedData,
 # /tmp, or other locations reload.sh may emit.
 active_tag=""
 if [[ -r "$LAST_CLI_PATH_FILE" ]]; then
     last_path="$(cat "$LAST_CLI_PATH_FILE" 2>/dev/null || true)"
-    if [[ "$last_path" =~ /cmux-([A-Za-z0-9._-]+)/ ]]; then
+    if [[ "$last_path" =~ /cmux-local-([A-Za-z0-9._-]+)/ ]]; then
         active_tag="${BASH_REMATCH[1]}"
     fi
 fi
 
-# Running cmux DEV processes by tag (the app name embeds the tag).
+# Running LocalDeck DEV processes by tag (the app name embeds the tag).
 running_tags=()
 while IFS= read -r line; do
-    # Match "cmux DEV <tag>" (with or without .app suffix).
-    if [[ "$line" =~ cmux\ DEV\ ([A-Za-z0-9._-]+) ]]; then
-        running_tags+=("${BASH_REMATCH[1]}")
+    # Match "LocalDeck DEV <tag>" (with or without .app suffix).
+    if [[ "$line" =~ LocalDeck\ DEV\ ([A-Za-z0-9._-]+) ]]; then
+        running_tag="${BASH_REMATCH[1]}"
+        running_tags+=("${running_tag%.app}")
     fi
-done < <(pgrep -fl "cmux DEV " 2>/dev/null || true)
+done < <(pgrep -fl "LocalDeck DEV " 2>/dev/null || true)
 
 # ---- planning ---------------------------------------------------------------
 
@@ -169,7 +170,7 @@ while IFS= read -r tag; do
         reasons+=("--keep")
     fi
     if (( older_than_days > 0 )); then
-        age="$(derived_data_mtime_days "$DERIVED_DATA_ROOT/cmux-${tag}")"
+        age="$(derived_data_mtime_days "$DERIVED_DATA_ROOT/cmux-local-${tag}")"
         # age == -1 means the DerivedData dir is gone (e.g., manually
         # deleted while orphan sockets/logs remain). Treat as "no age
         # signal, age filter does not apply" so the residue still gets

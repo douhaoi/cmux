@@ -103,7 +103,7 @@ if [ "${CMUX_MOCK_XCODEBUILD_PROCESS:-0}" = "1" ]; then
       ;;
   esac
   if [ "$emit_config_evidence" = "1" ]; then
-    echo "cmux DEV [$config_category] $config_message path=$config_home/$config_suffix"
+    echo "LocalDeck DEV [$config_category] $config_message path=$config_home/$config_suffix"
   fi
   [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" != "leak" ] || exit 0
   if [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" = "assertion-then-success" ]; then
@@ -121,14 +121,14 @@ if [ "${CMUX_MOCK_XCODEBUILD_PROCESS:-0}" = "1" ]; then
       echo "Failed to establish communication with the test runner"
       exit 65
     fi
-    echo 'cmux DEV message = "socket.listener.start"'
+    echo 'LocalDeck DEV message = "socket.listener.start"'
     echo "Executed 1 test, with 0 failures (0 unexpected)"
     exit 0
   fi
   if [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" = "startup-hang" ]; then
     # testmanagerd refused xcodebuild's channel: the host launched, and no
     # test ever starts.
-    echo 'cmux DEV message = "socket.listener.start"'
+    echo 'LocalDeck DEV message = "socket.listener.start"'
     echo "Testing started"
     sleep 30
     exit 0
@@ -136,7 +136,7 @@ if [ "${CMUX_MOCK_XCODEBUILD_PROCESS:-0}" = "1" ]; then
   if [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" = "crash-loop" ]; then
     # xcodebuild relaunching an app host that crashes on contact: the run is
     # resumed after every crash and never ends on its own.
-    echo 'cmux DEV message = "socket.listener.start"'
+    echo 'LocalDeck DEV message = "socket.listener.start"'
     for _ in 1 2 3 4 5 6 7 8; do
       echo "Test Case '-[cmuxTests.ExampleTests testExample]' started."
       echo "Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches."
@@ -154,7 +154,7 @@ if [ "${CMUX_MOCK_XCODEBUILD_PROCESS:-0}" = "1" ]; then
     || [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" = "published-config-alias" ] \
     || [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" = "published-default-sibling-leak" ] \
     || [ "${CMUX_MOCK_XCODEBUILD_MODE:-timeout}" = "published-config-sibling-leak" ]; then
-    echo 'cmux DEV message = "socket.listener.start"'
+    echo 'LocalDeck DEV message = "socket.listener.start"'
     if [ -n "${CMUX_MOCK_SUITE_LINES:-}" ]; then
       printf '%b\n' "$CMUX_MOCK_SUITE_LINES"
     fi

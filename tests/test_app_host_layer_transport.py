@@ -341,9 +341,9 @@ class LayerTransportTests(unittest.TestCase):
         import app_host_layered_products as local
         derived = self.root / "real-producer"
         products = derived / "Build/Products"
-        files = {"Debug/cmux DEV.app/Contents/MacOS/cmux": b"app",
-                 "Debug/cmux DEV.app/Contents/_CodeSignature/CodeResources": b"sealed entries",
-                 "Debug/cmux DEV.app/Contents/PlugIns/cmuxTests.xctest/test": b"tests",
+        files = {"Debug/LocalDeck DEV.app/Contents/MacOS/cmux": b"app",
+                 "Debug/LocalDeck DEV.app/Contents/_CodeSignature/CodeResources": b"sealed entries",
+                 "Debug/LocalDeck DEV.app/Contents/PlugIns/cmuxTests.xctest/test": b"tests",
                  "Debug/F.framework/Versions/A/F": b"runtime",
                  "Debug/helper.o": b"diagnostics", "Debug/cmux": b"cli", "cmux-unit.xctestrun": b"manifest"}
         for name, value in files.items():

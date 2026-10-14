@@ -227,7 +227,7 @@ CARGO_HOME="$shared_cargo_home" RUSTUP_HOME="$shared_rustup_home" \
   "/Users/ci-console|$GITHUB_REPOSITORY_ID|$shared_cargo_home|$shared_rustup_home" ] \
   || { echo "FAIL: configured shared toolchain homes were not forwarded"; exit 1; }
 
-APP_HOST_EXECUTABLE="$DERIVED_DATA_PATH/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+APP_HOST_EXECUTABLE="$DERIVED_DATA_PATH/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
 mkdir -p "$(dirname "$APP_HOST_EXECUTABLE")"
 : > "$APP_HOST_EXECUTABLE"
 /bin/bash -c 'trap "exit 0" TERM; while :; do /bin/sleep 0.1; done' &
@@ -273,7 +273,7 @@ grep -Fq "already absent" "$TMP_DIR/already-absent.log"
 # its exact executable even when that product lives in the workspace.
 runner_derived_data_path="$DERIVED_DATA_PATH"
 DERIVED_DATA_PATH="$TMP_DIR/workspace/DerivedData/cmux-e2e"
-APP_HOST_EXECUTABLE="$DERIVED_DATA_PATH/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+APP_HOST_EXECUTABLE="$DERIVED_DATA_PATH/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
 mkdir -p "$(dirname "$APP_HOST_EXECUTABLE")"
 : > "$APP_HOST_EXECUTABLE"
 prepare_scope
@@ -290,7 +290,7 @@ fi
 
 printf 'version=2\nkey=%s\npid=%s\nexecutable=%s\nreceipt_fd=9\n' \
   "$CMUX_APP_HOST_KEY" "$APP_HOST_PID" \
-  "$runner_derived_data_path/Build/Products/Debug/cmux DEV.app/Contents/MacOS/cmux DEV" \
+  "$runner_derived_data_path/Build/Products/Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV" \
   > "$CMUX_APP_HOST_RECEIPT_DIR/app-host-$APP_HOST_PID.receipt"
 if run_cleanup > "$TMP_DIR/workspace-wrong-product.log" 2>&1; then
   echo "FAIL: workspace cleanup accepted another product's receipt"

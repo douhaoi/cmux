@@ -7,7 +7,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TAG="Debug_Helper.Test"
 TAG_SLUG="debug-helper-test"
 TAG_BUNDLE_ID="debug.helper.test"
-SOCKET_PATH="/tmp/cmux-debug-${TAG_SLUG}.sock"
+SOCKET_PATH="/tmp/cmux-local-debug-${TAG_SLUG}.sock"
 TMP_DIR="$(mktemp -d)"
 SERVER_PID=""
 
@@ -21,7 +21,7 @@ cleanup() {
 trap cleanup EXIT
 
 FAKE_HOME="$TMP_DIR/home"
-FAKE_CLI_DIR="$FAKE_HOME/Library/Developer/Xcode/DerivedData/cmux-${TAG_SLUG}/Build/Products/Debug/cmux DEV ${TAG_SLUG}.app/Contents/Resources/bin"
+FAKE_CLI_DIR="$FAKE_HOME/Library/Developer/Xcode/DerivedData/cmux-local-${TAG_SLUG}/Build/Products/Debug/LocalDeck DEV ${TAG_SLUG}.app/Contents/Resources/bin"
 FAKE_CLI="$FAKE_CLI_DIR/cmux"
 mkdir -p "$FAKE_CLI_DIR"
 cat > "$FAKE_CLI" <<'EOF'
@@ -76,7 +76,7 @@ OUTPUT="$(
   CMUX_SOCKET_PATH="/tmp/main-cmux.sock" \
   CMUX_SOCKET_PASSWORD="main-secret" \
   CMUX_BUNDLE_ID="com.cmuxterm.app" \
-  CMUX_BUNDLED_CLI_PATH="/Applications/cmux.app/Contents/Resources/bin/cmux" \
+  CMUX_BUNDLED_CLI_PATH="/Applications/LocalDeck.app/Contents/Resources/bin/cmux" \
   CMUX_WORKSPACE_ID="main-workspace" \
   CMUX_TAB_ID="main-tab" \
   CMUX_SURFACE_ID="main-surface" \
@@ -106,7 +106,7 @@ reject_prefix() {
 
 require_line "CMUX_SOCKET_PATH=$SOCKET_PATH"
 require_line "CMUX_TAG=$TAG_SLUG"
-require_line "CMUX_BUNDLE_ID=com.cmuxterm.app.debug.${TAG_BUNDLE_ID}"
+require_line "CMUX_BUNDLE_ID=com.cmuxterm.local.debug.${TAG_BUNDLE_ID}"
 require_line "CMUX_BUNDLED_CLI_PATH=$FAKE_CLI"
 
 reject_prefix "CMUX_SOCKET"
@@ -119,7 +119,7 @@ reject_prefix "CMUXD_UNIX_PATH"
 reject_prefix "CMUX_DEBUG_LOG"
 
 # A build restored by publish-hq lives in the HQ Tag Opener cache, not DerivedData.
-CACHED_CLI_DIR="$FAKE_HOME/Library/Application Support/cmux/tag-app-cache/cmux-${TAG_SLUG}/cmux DEV ${TAG_SLUG}.app/Contents/Resources/bin"
+CACHED_CLI_DIR="$FAKE_HOME/Library/Application Support/cmux-local/tag-app-cache/cmux-${TAG_SLUG}/LocalDeck DEV ${TAG_SLUG}.app/Contents/Resources/bin"
 mkdir -p "$CACHED_CLI_DIR"
 cp "$FAKE_CLI" "$CACHED_CLI_DIR/cmux"
 rm -rf "$FAKE_HOME/Library/Developer/Xcode/DerivedData"

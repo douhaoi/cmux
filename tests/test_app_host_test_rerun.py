@@ -652,7 +652,7 @@ class WorkflowTests(unittest.TestCase):
             (temporary / "cmux-app-host-xcresults").mkdir()
             (temporary / "cmux-app-host-xcresults" / "receipt").write_text("result")
             derived = root / "derived"
-            (derived / "Build/Products/Debug/cmux DEV.app/Contents/PlugIns/cmuxTests.xctest").mkdir(parents=True)
+            (derived / "Build/Products/Debug/LocalDeck DEV.app/Contents/PlugIns/cmuxTests.xctest").mkdir(parents=True)
             env = {**os.environ, "PATH": f"{binaries}:{os.environ['PATH']}", "HOME": str(root),
                    "RUNNER_TEMP": str(temporary), "CMUX_DERIVED_DATA_PATH": str(derived),
                    "CMUX_APP_HOST_XCTESTRUN": str(root / "test.xctestrun"),

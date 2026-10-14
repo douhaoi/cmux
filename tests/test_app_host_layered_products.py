@@ -25,12 +25,12 @@ class LayerRoundTrip(unittest.TestCase):
         self.derived = self.root / "producer"
         self.products = self.derived / layers.ROOT
         files = {
-            "Debug/cmux DEV.app/Contents/MacOS/cmux DEV": b"signed executable",
-            "Debug/cmux DEV.app/Contents/_CodeSignature/CodeResources": b"sealed resources include cmuxTests.xctest",
-            "Debug/cmux DEV.app/Contents/Resources/data": b"resource",
-            "Debug/cmux DEV.app/Contents/PlugIns/cmuxTests.xctest/Contents/MacOS/test": b"tests",
-            "Debug/cmux DEV.app/Contents/Frameworks/F.framework/Versions/A/F": b"runtime",
-            "Debug/cmux DEV.app/Contents/Frameworks/F.framework/Versions/A/Modules/F.swiftmodule/arm64.swiftmodule": b"sealed framework module",
+            "Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV": b"signed executable",
+            "Debug/LocalDeck DEV.app/Contents/_CodeSignature/CodeResources": b"sealed resources include cmuxTests.xctest",
+            "Debug/LocalDeck DEV.app/Contents/Resources/data": b"resource",
+            "Debug/LocalDeck DEV.app/Contents/PlugIns/cmuxTests.xctest/Contents/MacOS/test": b"tests",
+            "Debug/LocalDeck DEV.app/Contents/Frameworks/F.framework/Versions/A/F": b"runtime",
+            "Debug/LocalDeck DEV.app/Contents/Frameworks/F.framework/Versions/A/Modules/F.swiftmodule/arm64.swiftmodule": b"sealed framework module",
             "Debug/CmuxTerminalCoreTests.xctest/test": b"direct xctest consumer",
             "Debug/cmux": b"cli",
             "Debug/input.o": b"diagnostic object",
@@ -48,7 +48,7 @@ class LayerRoundTrip(unittest.TestCase):
         (self.products / "Debug/private").chmod(0o600)
         (self.products / "Debug/cmux").chmod(0o755)
         subprocess.run(["xattr", "-w", "com.cmux.test", "preserve", str(self.products / "Debug/cmux")], check=True)
-        framework = self.products / "Debug/cmux DEV.app/Contents/Frameworks/F.framework"
+        framework = self.products / "Debug/LocalDeck DEV.app/Contents/Frameworks/F.framework"
         (framework / "Versions/Current").symlink_to("A")
         (framework / "F").symlink_to("Versions/Current/F")
         (framework / "Headers").symlink_to("Versions/Current/Headers")
@@ -76,7 +76,7 @@ class LayerRoundTrip(unittest.TestCase):
         self.assertEqual(owners["Build/Products/Debug/input.o"], "diagnostics")
         self.assertEqual(owners["Build/Products/Debug/input.o.keep"], "app-cli")
         self.assertEqual(owners["Build/Products/Debug/CmuxTerminalCoreTests.xctest/test"], "tests")
-        self.assertEqual(owners["Build/Products/Debug/cmux DEV.app/Contents/Frameworks/F.framework/Versions/A/Modules/F.swiftmodule/arm64.swiftmodule"], "runtime")
+        self.assertEqual(owners["Build/Products/Debug/LocalDeck DEV.app/Contents/Frameworks/F.framework/Versions/A/Modules/F.swiftmodule/arm64.swiftmodule"], "runtime")
 
     def test_corrupt_archive(self):
         with (self.output / "tests.aar").open("ab") as stream:
@@ -155,7 +155,7 @@ class LayerRoundTrip(unittest.TestCase):
         self.assertFalse((self.root / "escaped").exists())
 
     def test_archive_link_target_does_not_override_manifest(self):
-        framework = self.products / "Debug/cmux DEV.app/Contents/Frameworks/F.framework"
+        framework = self.products / "Debug/LocalDeck DEV.app/Contents/Frameworks/F.framework"
         (framework / "F").unlink()
         (framework / "F").symlink_to("/etc/passwd")
         directories = self.manifest["directories"]

@@ -4,7 +4,7 @@ the irx transport with zero disconnects, zero unexpected reconnects, and
 sub-3s establishment, using the transport's own JSONL journals as evidence.
 
 Preconditions (the runner sets these up):
-  - tagged Mac (cmux DEV <tag>) running with cmux.irx.enabled + force-relay
+  - tagged Mac (LocalDeck DEV <tag>) running with cmux.irx.enabled + force-relay
   - simulator app installed, signed in, paired, foregrounded on a terminal
   - both journals live: /tmp/cmux-irx-journal-mac-<tag>.jsonl and the sim app
     container's Documents/irx-journal.jsonl

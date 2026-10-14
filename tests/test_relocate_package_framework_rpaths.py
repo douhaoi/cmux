@@ -47,18 +47,18 @@ class Layout(unittest.TestCase):
         self.assertTrue(relocate.loadable(fw / "Versions/A/X_PackageProduct"))
         self.assertFalse(relocate.loadable(fw / "X_PackageProduct"))
         self.assertFalse(relocate.loadable(fw / "Versions/Current/X_PackageProduct"))
-        self.assertTrue(relocate.loadable(Path("/p/cmux DEV.app/Contents/Resources/bin/cmux")))
+        self.assertTrue(relocate.loadable(Path("/p/LocalDeck DEV.app/Contents/Resources/bin/cmux")))
 
     def test_signing_target_is_the_bundle_for_its_main_executable(self):
         with tempfile.TemporaryDirectory() as work:
-            app = Path(work) / "cmux DEV.app"
+            app = Path(work) / "LocalDeck DEV.app"
             (app / "Contents/MacOS").mkdir(parents=True)
             (app / "Contents/Info.plist").write_bytes(
                 b'<?xml version="1.0"?><plist version="1.0"><dict>'
                 b"<key>CFBundleExecutable</key><string>cmux DEV</string></dict></plist>")
-            self.assertEqual(relocate.signing_target(app / "Contents/MacOS/cmux DEV"), app)
-            self.assertEqual(relocate.signing_target(app / "Contents/MacOS/cmux DEV.debug.dylib"),
-                             app / "Contents/MacOS/cmux DEV.debug.dylib")
+            self.assertEqual(relocate.signing_target(app / "Contents/MacOS/LocalDeck DEV"), app)
+            self.assertEqual(relocate.signing_target(app / "Contents/MacOS/LocalDeck DEV.debug.dylib"),
+                             app / "Contents/MacOS/LocalDeck DEV.debug.dylib")
             fw = Path(work) / "X.framework/Versions/A/X"
             self.assertEqual(relocate.signing_target(fw), fw.parent)
 
@@ -70,7 +70,7 @@ class RoundTrip(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="relocate-rpaths-") as work:
             # A deep, long products directory like a runner's _work/_temp one.
             products = Path(work) / ("runner-temp-" + "x" * 90) / "Build/Products/Debug"
-            nested = products / "cmux DEV.app/Contents/Resources/bin"
+            nested = products / "LocalDeck DEV.app/Contents/Resources/bin"
             nested.mkdir(parents=True)
             source = Path(work) / "main.c"
             source.write_text("int main(void) { return 0; }\n")

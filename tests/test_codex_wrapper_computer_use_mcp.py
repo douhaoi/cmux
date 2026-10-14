@@ -703,7 +703,7 @@ exit 1
                         / "Build"
                         / "Products"
                         / "Debug"
-                        / "cmux DEV old.app"
+                        / "LocalDeck DEV old.app"
                         / "Contents"
                         / "Resources"
                         / "cmux-cua"
@@ -727,17 +727,17 @@ exit 1
                 old_root.mkdir(parents=True, exist_ok=True)
                 old_destination = old_root / "cmux-cua"
                 old_destination.symlink_to(
-                    "/Applications/cmux DEV old.app/Contents/Resources/cmux-cua"
+                    "/Applications/LocalDeck DEV old.app/Contents/Resources/cmux-cua"
                 )
             if preexisting_legacy_link:
                 skills_root.mkdir(parents=True, exist_ok=True)
                 (skills_root / "cmux-computer-use").symlink_to(
-                    "/Applications/cmux DEV old.app/Contents/Resources/cmux-computer-use"
+                    "/Applications/LocalDeck DEV old.app/Contents/Resources/cmux-computer-use"
                 )
             if preexisting_legacy_codex_link:
                 skills_root.mkdir(parents=True, exist_ok=True)
                 (skills_root / "codex-cua").symlink_to(
-                    "/Applications/cmux DEV old.app/Contents/Resources/codex-cua"
+                    "/Applications/LocalDeck DEV old.app/Contents/Resources/codex-cua"
                 )
             if preexisting_skill_directory:
                 owned = skills_root / "cmux-cua"

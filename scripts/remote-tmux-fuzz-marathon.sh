@@ -23,7 +23,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 cmux_attach_validate_dev_tag "$CMUX_TAG" || exit 2
 TAG_SLUG="$(cmux_attach__slug "$CMUX_TAG")"
 APP="${CMUX_FUZZ_APP:-$(cmux_attach_mac_app_path "$CMUX_TAG")}"
-APP_EXECUTABLE="$APP/Contents/MacOS/cmux DEV"
+APP_EXECUTABLE="$APP/Contents/MacOS/LocalDeck DEV"
 DEBUG_LOG="${CMUX_FUZZ_DEBUG_LOG:-/tmp/cmux-debug-${TAG_SLUG}.log}"
 export CMUX_FUZZ_DEBUG_LOG="$DEBUG_LOG"
 . "$HERE/remote-tmux-fuzz-lock.sh"

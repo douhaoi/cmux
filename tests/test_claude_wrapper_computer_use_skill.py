@@ -155,7 +155,7 @@ exit 1
         destination.symlink_to(preexisting_link_target)
     if preexisting_valid_cmux_link:
         destination.parent.mkdir(parents=True, exist_ok=True)
-        old_skill = home / "Library" / "Developer" / "Xcode" / "DerivedData" / "cmux-fixture" / "Build" / "Products" / "Debug" / "cmux DEV old.app" / "Contents" / "Resources" / "cmux-cua"
+        old_skill = home / "Library" / "Developer" / "Xcode" / "DerivedData" / "cmux-fixture" / "Build" / "Products" / "Debug" / "LocalDeck DEV old.app" / "Contents" / "Resources" / "cmux-cua"
         old_skill.mkdir(parents=True)
         (old_skill / "SKILL.md").write_text(
             "---\nname: cmux-cua\ndescription: Old cmux skill.\n---\n\nOld bundle.\n",
@@ -231,7 +231,7 @@ def test_claude_preserves_unverified_dangling_link_by_default(
     failures: list[str],
 ) -> None:
     dangling = Path(
-        "/Applications/cmux DEV old.app/Contents/Resources/cmux-cua"
+        "/Applications/LocalDeck DEV old.app/Contents/Resources/cmux-cua"
     )
     result, link, bundled_skill, args = run_wrapper(
         ["hello"],
@@ -426,7 +426,7 @@ def test_claude_explicit_global_opt_in_remains_available(failures: list[str]) ->
 
 def test_claude_preserves_unverified_legacy_computer_use_link(failures: list[str]) -> None:
     legacy_target = Path(
-        "/Applications/cmux DEV old.app/Contents/Resources/cmux-computer-use"
+        "/Applications/LocalDeck DEV old.app/Contents/Resources/cmux-computer-use"
     )
     result, link, bundled_skill, args = run_wrapper(
         ["hello"],

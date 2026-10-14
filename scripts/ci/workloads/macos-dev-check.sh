@@ -49,8 +49,8 @@ CMUX_RELOAD_NO_GLOBAL_CLI_LINKS=1 \
 stage end compile
 
 stage start validation
-app="$derived/Build/Products/Debug/cmux DEV $tag_slug.app"
-test -x "$app/Contents/MacOS/cmux DEV"
+app="$derived/Build/Products/Debug/LocalDeck DEV $tag_slug.app"
+test -x "$app/Contents/MacOS/LocalDeck DEV"
 bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")"
 test "$bundle_id" = "$expected_bundle_id"
 stage end validation

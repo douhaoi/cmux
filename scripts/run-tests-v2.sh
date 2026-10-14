@@ -12,7 +12,7 @@ fi
 cd "$(dirname "$0")/.."
 
 DERIVED_DATA_PATH="$HOME/Library/Developer/Xcode/DerivedData/cmux-tests-v2"
-APP="$DERIVED_DATA_PATH/Build/Products/Debug/cmux DEV.app"
+APP="$DERIVED_DATA_PATH/Build/Products/Debug/LocalDeck DEV.app"
 RUN_TAG="tests-v2"
 # CMUX_TAG gives the test app its own socket. Only ever touch that one so a
 # run cannot remove or drive another tagged app's socket.
@@ -32,14 +32,14 @@ xcodebuild \
   build >/dev/null
 
 if [ ! -d "$APP" ]; then
-  echo "ERROR: cmux DEV.app not found at expected path: $APP" >&2
+  echo "ERROR: LocalDeck DEV.app not found at expected path: $APP" >&2
   exit 1
 fi
 
 cleanup() {
   # Never touch the user's running stable app ("cmux", com.cmuxterm.app):
   # killing it drops their live agent sessions.
-  pkill -x "cmux DEV" || true
+  pkill -x "LocalDeck DEV" || true
   rm -f "$TEST_SOCK" || true
 }
 
@@ -48,7 +48,7 @@ launch_and_wait() {
   # Wait briefly for the previous instance to fully terminate; LaunchServices can flake if we
   # relaunch too quickly.
   for _ in {1..50}; do
-    pgrep -x "cmux DEV" >/dev/null 2>&1 || break
+    pgrep -x "LocalDeck DEV" >/dev/null 2>&1 || break
     sleep 0.1
   done
 
@@ -56,7 +56,7 @@ launch_and_wait() {
   defaults write com.cmuxterm.app.debug socketControlMode -string full >/dev/null 2>&1 || true
 
   # Launch directly with UI test mode enabled so startup follows deterministic test codepaths.
-  CMUX_TAG="$RUN_TAG" CMUX_UI_TEST_MODE=1 "$APP/Contents/MacOS/cmux DEV" >/dev/null 2>&1 &
+  CMUX_TAG="$RUN_TAG" CMUX_UI_TEST_MODE=1 "$APP/Contents/MacOS/LocalDeck DEV" >/dev/null 2>&1 &
 
   SOCK=""
   for _ in {1..120}; do

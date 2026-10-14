@@ -569,7 +569,7 @@ def test_inventory_refuses_hung_or_empty_enumeration() -> None:
     # What xcodebuild -enumerate-tests wrote (exit 0) when the runner hung on cmux9s.
     hung = {
         "errors": [
-            "cmux DEV (65703) encountered an error. (Underlying Error: The test runner hung before establishing connection.)"
+            "LocalDeck DEV (65703) encountered an error. (Underlying Error: The test runner hung before establishing connection.)"
         ],
         "values": [{"children": [{"kind": "target", "name": "cmuxTests"}], "kind": "plan", "name": "cmux-unit"}],
     }

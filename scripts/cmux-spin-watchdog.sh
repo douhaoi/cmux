@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Watches one tagged cmux DEV app for a sustained main-thread spin and, when
+# Watches one tagged LocalDeck DEV app for a sustained main-thread spin and, when
 # caught, captures the evidence and stops the burn — so a wedged app announces
 # itself instead of waiting for a human to notice the beachball.
 #
@@ -18,7 +18,7 @@ NEED="${CMUX_SPIN_SAMPLES:-3}"
 hits=0
 elapsed=0
 while [ "$elapsed" -lt "$TIMEOUT" ]; do
-  PID=$(pgrep -f "cmux DEV $TAG.app/Contents/MacOS" | head -1)
+  PID=$(pgrep -f "LocalDeck DEV $TAG.app/Contents/MacOS" | head -1)
   if [ -n "${PID:-}" ]; then
     CPU=$(ps -o %cpu= -p "$PID" 2>/dev/null | tr -d ' ' | cut -d. -f1)
     if [ "${CPU:-0}" -ge "$THRESH" ]; then

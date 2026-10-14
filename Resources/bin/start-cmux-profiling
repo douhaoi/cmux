@@ -398,8 +398,8 @@ write_system_info() {
       echo "- Version: $(plist_value "$app_path/Contents/Info.plist" CFBundleShortVersionString || true)"
       echo "- Build: $(plist_value "$app_path/Contents/Info.plist" CFBundleVersion || true)"
     fi
-    if [ -n "$app_path" ] && [ -f "$app_path/Contents/MacOS/cmux" ]; then
-      echo "- Executable: $(file -b "$app_path/Contents/MacOS/cmux" 2>/dev/null || printf 'unknown')"
+    if [ -n "$app_path" ] && [ -f "$app_path/Contents/MacOS/LocalDeck" ]; then
+      echo "- Executable: $(file -b "$app_path/Contents/MacOS/LocalDeck" 2>/dev/null || printf 'unknown')"
     fi
     echo
     echo "Privacy:"
@@ -461,9 +461,9 @@ discover_targets() {
   local pid args executable app_path plist bundle_id display_name channel
   while read -r pid args; do
     [[ "${pid:-}" =~ ^[0-9]+$ ]] || continue
-    [[ "${args:-}" =~ (/.*cmux[^/]*\.app/Contents/MacOS/cmux)([[:space:]]|$) ]] || continue
+    [[ "${args:-}" =~ (/.*LocalDeck[^/]*\.app/Contents/MacOS/LocalDeck( DEV)?)([[:space:]]|$) ]] || continue
     executable="${BASH_REMATCH[1]}"
-    app_path="${executable%/Contents/MacOS/cmux}"
+    app_path="${executable%/Contents/MacOS/*}"
     plist="${app_path}/Contents/Info.plist"
     bundle_id="$(plist_value "$plist" "CFBundleIdentifier")"
     display_name="$(plist_value "$plist" "CFBundleDisplayName")"
@@ -484,7 +484,7 @@ discover_targets() {
 
 print_targets() {
   if [ "${#pids[@]}" -eq 0 ]; then
-    echo "No running cmux app processes found."
+    echo "No running LocalDeck app processes found."
     return
   fi
 
@@ -512,14 +512,14 @@ tag_matches() {
       return 0
       ;;
   esac
-  [ "$display_name" = "cmux DEV ${path_tag}" ] && return 0
-  [ "$display_name" = "cmux NIGHTLY ${path_tag}" ] && return 0
-  [ "$display_name" = "cmux RC ${path_tag}" ] && return 0
-  [ "$display_name" = "cmux STAGING ${path_tag}" ] && return 0
-  [ "$app_base" = "cmux DEV ${path_tag}" ] && return 0
-  [ "$app_base" = "cmux NIGHTLY ${path_tag}" ] && return 0
-  [ "$app_base" = "cmux RC ${path_tag}" ] && return 0
-  [ "$app_base" = "cmux STAGING ${path_tag}" ] && return 0
+  [ "$display_name" = "LocalDeck DEV ${path_tag}" ] && return 0
+  [ "$display_name" = "LocalDeck NIGHTLY ${path_tag}" ] && return 0
+  [ "$display_name" = "LocalDeck RC ${path_tag}" ] && return 0
+  [ "$display_name" = "LocalDeck STAGING ${path_tag}" ] && return 0
+  [ "$app_base" = "LocalDeck DEV ${path_tag}" ] && return 0
+  [ "$app_base" = "LocalDeck NIGHTLY ${path_tag}" ] && return 0
+  [ "$app_base" = "LocalDeck RC ${path_tag}" ] && return 0
+  [ "$app_base" = "LocalDeck STAGING ${path_tag}" ] && return 0
   return 1
 }
 

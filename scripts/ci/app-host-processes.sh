@@ -119,7 +119,7 @@ cmux_app_host_executable_is_scoped() {
   if [ -z "$configuration" ] || [ "$configuration" = "." ] || [ "$configuration" = ".." ]; then
     return 1
   fi
-  [ "$remainder" = "$configuration/cmux DEV.app/Contents/MacOS/cmux DEV" ]
+  [ "$remainder" = "$configuration/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV" ]
 }
 
 cmux_validate_app_host_executable_scope() {
@@ -471,7 +471,7 @@ cmux_app_host_add_pid() {
 }
 
 # Inspect the first text vnode for every visible process and retain only exact
-# cmux DEV executable layouts beneath the supplied DerivedData root.
+# LocalDeck DEV executable layouts beneath the supplied DerivedData root.
 cmux_scan_app_host_target_pids() {
   local derived_data_path="$1"
   cmux_validate_app_host_derived_data "$derived_data_path" || return 1

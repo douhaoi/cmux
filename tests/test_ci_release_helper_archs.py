@@ -51,7 +51,7 @@ class ReleaseHelperArchitectures(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.bin = self.root / 'bin'
         self.bin.mkdir()
-        self.app = self.root / 'build-universal/Build/Products/Release/cmux.app'
+        self.app = self.root / 'build-universal/Build/Products/Release/LocalDeck.app'
         for name in ['scripts/ci/release-build-archs.sh', 'scripts/ci/verify-binary-archs.sh',
                      'scripts/install-prebuilt-ghostty-cli-helper.sh']:
             dest = self.root / name
@@ -99,7 +99,7 @@ if [[ "$1" == -version ]]; then printf 'Xcode 26.3\\nBuild version fixture\\n'; 
 archs=""
 for arg in "$@"; do case "$arg" in ARCHS=*) archs="${arg#ARCHS=}" ;; esac; done
 [[ -n "$archs" ]] || exit 1
-app=build-universal/Build/Products/Release/cmux.app
+app=build-universal/Build/Products/Release/LocalDeck.app
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources/bin" "$app/Contents/Library/cmux Computer Use.app/Contents/MacOS"
 for file in Contents/MacOS/cmux Contents/Resources/bin/cmux "Contents/Library/cmux Computer Use.app/Contents/MacOS/cmux-cua" Contents/Resources/bin/cmux-diff-sidecar; do
   printf '%s\\n' "$archs" > "$app/$file"; chmod +x "$app/$file"

@@ -49,7 +49,7 @@ HOOK_REFUSED = textwrap.dedent("""\
 # The shard's CLI tests failed by the dozen; the dyld line says why.
 MIXED_PRODUCTS = textwrap.dedent("""\
     2026-09-27T10:19:26.7431580Z /tmp/cmux-ci-2/src/cmuxTests/CLIAmpLifecycleIntegrationTests.swift:260: error: -[cmuxTests.CLINotifyProcessIntegrationRegressionTests testAmpCancelledTurnSettlesWithoutCompletionNotification] : XCTAssertEqual failed: ("6") is not equal to ("0") - dyld[9231]: Symbol not found: _$s15CMUXAgentLaunch05AgentB18CaptureArgvVerdictO
-    2026-09-27T10:19:26.7433260Z   Referenced from: <4150A975-C72E-3C4B-A99A-7113745B2919> /Users/cmux/actions-runner-glaeda-4/_work/_temp/cmux-derived-data-tests-36308928998-2-shard-7/Build/Products/Debug/cmux DEV.app/Contents/Resources/bin/cmux
+    2026-09-27T10:19:26.7433260Z   Referenced from: <4150A975-C72E-3C4B-A99A-7113745B2919> /Users/cmux/actions-runner-glaeda-4/_work/_temp/cmux-derived-data-tests-36308928998-2-shard-7/Build/Products/Debug/LocalDeck DEV.app/Contents/Resources/bin/cmux
     2026-09-27T10:19:26.7434490Z   Expected in:     <AEE55255-798E-3AEB-B342-06D79CC6F0CA> /private/tmp/cmux-ci-2/derived-data-compile-admission/Build/Products/Debug/PackageFrameworks/CMUXAgentLaunch_-158D461BD47E196A_PackageProduct.framework/Versions/A/CMUXAgentLaunch_-158D461BD47E196A_PackageProduct
     2026-09-27T10:21:17.5608820Z ✘ Test singleArgumentCommandStringIsSplitShellStyle() recorded an issue at CLITmuxCompatRemoteSplitTests.swift:119:13: Expectation failed: (result.status → 6) == 0
     2026-09-27T10:26:29.4506340Z RATCHET_NEW_FAILURE CLINotifyProcessIntegrationRegressionTests/testAmpCancelledTurnSettlesWithoutCompletionNotification()

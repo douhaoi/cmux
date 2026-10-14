@@ -47,7 +47,7 @@ if [[ "$CUA" != */* ]]; then CUA="$(command -v "$CUA" || true)"; fi
 [[ -x "$CAPTURE_HOST" ]] || die "capture-host is not executable: $CAPTURE_HOST"
 [[ -x "$CUA" ]] || die "cua-ssh is not executable: $CUA"
 [[ -n "$TAG" ]] || TAG="pr-capture-$$"
-[[ -n "$TARGET" ]] || TARGET="cmux DEV $TAG"
+[[ -n "$TARGET" ]] || TARGET="LocalDeck DEV $TAG"
 
 RUN_ROOT="${HOME}/cmux-next-capture-${GITHUB_RUN_ID:-$$}"
 REMOTE_BASE="$RUN_ROOT/base"

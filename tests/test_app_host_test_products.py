@@ -27,16 +27,16 @@ class TestProductHandoff(unittest.TestCase):
         self.identity = {"revision": "abc123", "architecture": "arm64", "xcode": "Xcode 26.5\nBuild 123",
                          "developer": "/producer/Xcode.app/Contents/Developer", "checkout": "/producer/work/cmux"}
         products = self.producer / "Build/Products"
-        self.bundle = Path("Debug/cmux DEV.app/Contents/PlugIns/cmuxTests.xctest")
+        self.bundle = Path("Debug/LocalDeck DEV.app/Contents/PlugIns/cmuxTests.xctest")
         (products / self.bundle).mkdir(parents=True)
-        executable = products / "Debug/cmux DEV.app/Contents/MacOS/cmux DEV"
+        executable = products / "Debug/LocalDeck DEV.app/Contents/MacOS/LocalDeck DEV"
         executable.parent.mkdir(parents=True)
         executable.write_text("binary")
         self.cli_bundle = Path("Debug/cmuxCLITests.xctest")
         (products / self.cli_bundle).mkdir(parents=True)
         for scheme in ("cmux", "cmux-unit", "cmux-cli-tests"):
             target = {
-                "TestHostPath": "__TESTROOT__/Debug/cmux DEV.app",
+                "TestHostPath": "__TESTROOT__/Debug/LocalDeck DEV.app",
                 "TestBundlePath": "__TESTHOST__/Contents/PlugIns/cmuxTests.xctest",
                 "EnvironmentVariables": {"SOURCE": "/producer/work/cmux/fixtures"},
                 "DependentProductPaths": [str(products / self.bundle)],
@@ -47,7 +47,7 @@ class TestProductHandoff(unittest.TestCase):
                 target.update({
                     "TestHostPath": "__TESTROOT__/Debug/cmuxUITests-Runner.app",
                     "TestBundlePath": "__TESTHOST__/Contents/PlugIns/cmuxUITests.xctest",
-                    "UITargetAppPath": "__TESTROOT__/Debug/cmux DEV.app",
+                    "UITargetAppPath": "__TESTROOT__/Debug/LocalDeck DEV.app",
                     "DependentProductPaths": [str(products / self.ui_bundle)],
                 })
             if scheme == "cmux-cli-tests":

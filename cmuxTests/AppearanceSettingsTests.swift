@@ -14,7 +14,7 @@ final class AppearanceSettingsTests: XCTestCase {
         XCTAssertTrue(
             AppBundleIconPersistencePolicy.shouldPersist(
                 bundleIdentifier: "com.cmuxterm.local",
-                appBundleLastPathComponent: "cmux.app",
+                appBundleLastPathComponent: "LocalDeck.app",
                 persistenceDisabled: false
             )
         )
@@ -51,14 +51,14 @@ final class AppearanceSettingsTests: XCTestCase {
         XCTAssertFalse(
             AppBundleIconPersistencePolicy.shouldPersist(
                 bundleIdentifier: "com.cmuxterm.local.debug",
-                appBundleLastPathComponent: "cmux DEV.app",
+                appBundleLastPathComponent: "LocalDeck DEV.app",
                 persistenceDisabled: false
             )
         )
         XCTAssertFalse(
             AppBundleIconPersistencePolicy.shouldPersist(
                 bundleIdentifier: "com.cmuxterm.local.debug.issue-4350",
-                appBundleLastPathComponent: "cmux DEV issue-4350.app",
+                appBundleLastPathComponent: "LocalDeck DEV issue-4350.app",
                 persistenceDisabled: false
             )
         )
@@ -68,7 +68,7 @@ final class AppearanceSettingsTests: XCTestCase {
         XCTAssertFalse(
             AppBundleIconPersistencePolicy.shouldPersist(
                 bundleIdentifier: "com.cmuxterm.local",
-                appBundleLastPathComponent: "cmux.app",
+                appBundleLastPathComponent: "LocalDeck.app",
                 persistenceDisabled: true
             )
         )

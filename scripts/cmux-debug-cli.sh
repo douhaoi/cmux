@@ -65,14 +65,14 @@ if [[ "$derived_data" != /* ]]; then
   echo "error: CMUX_DERIVED_DATA must be an absolute path, got '$derived_data'" >&2
   exit 1
 fi
-cli_path="${derived_data}/Build/Products/Debug/cmux LOCAL DEV ${tag_slug}.app/Contents/Resources/bin/cmux"
+cli_path="${derived_data}/Build/Products/Debug/LocalDeck DEV ${tag_slug}.app/Contents/Resources/bin/cmux"
 # reload.sh --release builds the same tagged app under Build/Products/Release.
-release_cli_path="${derived_data}/Build/Products/Release/cmux LOCAL DEV ${tag_slug}.app/Contents/Resources/bin/cmux"
+release_cli_path="${derived_data}/Build/Products/Release/LocalDeck DEV ${tag_slug}.app/Contents/Resources/bin/cmux"
 if [[ ! -x "$cli_path" && -x "$release_cli_path" ]]; then
   cli_path="$release_cli_path"
 fi
 # A fleet build restored with `cmux-ci publish-hq` lives in the HQ Tag Opener cache.
-cached_cli_path="${HOME}/Library/Application Support/cmux-local/tag-app-cache/cmux-${tag_slug}/cmux LOCAL DEV ${tag_slug}.app/Contents/Resources/bin/cmux"
+cached_cli_path="${HOME}/Library/Application Support/cmux-local/tag-app-cache/cmux-${tag_slug}/LocalDeck DEV ${tag_slug}.app/Contents/Resources/bin/cmux"
 if [[ ! -x "$cli_path" && -x "$cached_cli_path" ]]; then
   cli_path="$cached_cli_path"
 fi

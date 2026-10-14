@@ -62,7 +62,7 @@ HEALTHY_BROKER="${FUZZ_HEALTHY_BROKER:-local}"
 DEAD_BROKER="${FUZZ_DEAD_BROKER:-pipe}"
 DEAD_BROKER_EXEC="${FUZZ_DEAD_BROKER_EXEC:-$HOME/.cmux/et-pipebroker}"
 CMUX_JSON="${FUZZ_CMUX_JSON:-$HOME/.config/cmux/cmux.json}"
-APP_BUNDLE="${FUZZ_APP_BUNDLE:-$HOME/Library/Developer/Xcode/DerivedData/cmux-${TAG}/Build/Products/Debug/cmux DEV ${TAG}.app}"
+APP_BUNDLE="${FUZZ_APP_BUNDLE:-$HOME/Library/Developer/Xcode/DerivedData/cmux-${TAG}/Build/Products/Debug/LocalDeck DEV ${TAG}.app}"
 DEAD_ERROR_NEEDLE="${FUZZ_DEAD_ERROR_NEEDLE:-could not mirror any tmux session}"
 EXPECT_DROP="${FUZZ_EXPECT_DROP:-1}"
 BREAK_ORACLE="${FUZZ_BREAK_ORACLE:-}"
@@ -118,7 +118,7 @@ count_etclient() { ps -Ao command= | awk -v et="$ET_CLIENT_BIN" '$1==et' | wc -l
 # plain pattern kills the very connection running it (measured: ssh died with 144 and the rest of
 # the reap never ran). Writing one character as a class keeps the pattern from matching its own
 # argv while still matching the target.
-APP_PATTERN="cmux DEV ${TAG}[.]app/Contents/MacOS"
+APP_PATTERN="LocalDeck DEV ${TAG}[.]app/Contents/MacOS"
 app_pids() { pgrep -f "$APP_PATTERN" || true; }
 
 cli() { CMUX_TAG="$TAG" "$REPO_ROOT/scripts/cmux-debug-cli.sh" "$@"; }

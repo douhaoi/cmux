@@ -135,7 +135,7 @@ class WorkloadProfileTests(unittest.TestCase):
         self.assertIn('cmux_attach_validate_dev_tag "$tag"', script)
         self.assertIn('tag_slug="$(cmux_attach__slug "$tag")"', script)
         self.assertIn('cmux_attach_mac_bundle_id "$tag"', script)
-        self.assertIn('cmux DEV $tag_slug.app', script)
+        self.assertIn('LocalDeck DEV $tag_slug.app', script)
         self.assertIn('./scripts/reload.sh \\', script)
         self.assertIn('--tag "$tag"', script)
         self.assertIn('--derived-data "$derived"', script)
@@ -545,9 +545,9 @@ class WorkloadProfileTests(unittest.TestCase):
             products.mkdir(parents=True)
             xctestrun = products / "cmuxTests.xctestrun"
             xctestrun.write_text("manifest", encoding="utf-8")
-            app = products / "Debug" / "cmux DEV.app" / "Contents" / "MacOS"
+            app = products / "Debug" / "LocalDeck DEV.app" / "Contents" / "MacOS"
             app.mkdir(parents=True)
-            binary = app / "cmux DEV"
+            binary = app / "LocalDeck DEV"
             binary.write_bytes(b"one")
             spec = {
                 "runtime_inputs": [{
