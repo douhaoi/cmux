@@ -18,11 +18,14 @@ public struct CmuxConfigSemanticIssue: Equatable, Sendable {
 
 /// Offline semantic validation for cmux.json.
 ///
-/// The constraint vocabulary lives in web/data/cmux.schema.json and is embedded
+/// The constraint vocabulary lives in schemas/cmux.schema.json and is embedded
 /// into CmuxFoundation by scripts/generate-cmux-config-schema.py. Keep validation here
 /// generic: adding a setting constraint belongs in the schema, not in another
 /// command-specific lookup table.
 public struct CmuxConfigSemanticValidator {
+    /// The bundled schema used by validation and local editor completion.
+    public static var embeddedSchemaData: Data { CmuxEmbeddedConfigSchema.data }
+
     public let scope: CmuxConfigSemanticScope
 
     private let rootSchema: [String: Any]

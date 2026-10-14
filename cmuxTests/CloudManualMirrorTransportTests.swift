@@ -478,8 +478,8 @@ struct CloudManualMirrorTransportTests {
     /// which left the tree — and so every cloud terminal's surface — unresolvable.
     @Test
     func legacyWorkspaceTreeIsRequestedOverTheRawCommandBridge() throws {
-        let arguments = CloudTuiCommandLine.legacyListWorkspacesArguments(socketPath: "/tmp/cmux.sock")
-        #expect(arguments.prefix(5).elementsEqual(["--socket", "/tmp/cmux.sock", "--json", "raw", "command"]))
+        let arguments = CloudTuiCommandLine.legacyListWorkspacesArguments(socketPath: "/tmp/cmux-local.sock")
+        #expect(arguments.prefix(5).elementsEqual(["--socket", "/tmp/cmux-local.sock", "--json", "raw", "command"]))
         let requestIndex = try #require(arguments.firstIndex(of: "--request-json")) + 1
         let request = try #require(
             JSONSerialization.jsonObject(with: Data(arguments[requestIndex].utf8)) as? [String: Any]
@@ -569,11 +569,11 @@ struct CloudManualMirrorTransportTests {
     func generationAwareResolverUsesThePrivateCommandShape() throws {
         let arguments = try #require(
             CloudTuiCommandLine.resolveTerminalArguments(
-                socketPath: "/tmp/cmux.sock",
+                socketPath: "/tmp/cmux-local.sock",
                 terminalID: "term_0123456789abcdef0123456789abcdef"
             )
         )
-        #expect(arguments.prefix(5).elementsEqual(["--socket", "/tmp/cmux.sock", "--json", "raw", "command"]))
+        #expect(arguments.prefix(5).elementsEqual(["--socket", "/tmp/cmux-local.sock", "--json", "raw", "command"]))
         let requestIndex = try #require(arguments.firstIndex(of: "--request-json")) + 1
         let request = try #require(
             JSONSerialization.jsonObject(with: Data(arguments[requestIndex].utf8)) as? [String: Any]
@@ -587,7 +587,7 @@ struct CloudManualMirrorTransportTests {
     @Test
     func identifyCommandUsesTheSameRawCommandBridge() throws {
         let arguments = try #require(
-            CloudTuiCommandLine.identifyArguments(socketPath: "/tmp/cmux.sock")
+            CloudTuiCommandLine.identifyArguments(socketPath: "/tmp/cmux-local.sock")
         )
         let requestIndex = try #require(arguments.firstIndex(of: "--request-json")) + 1
         let request = try #require(

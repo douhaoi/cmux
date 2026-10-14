@@ -131,12 +131,12 @@ struct CLISocketPathResolver {
         case inaccessible(errnoCode: Int32)
     }
 
-    private static let stableSocketFileName = "cmux.sock"
-    static let legacyDefaultSocketPath = "/tmp/cmux.sock"
-    private static let fallbackSocketPath = "/tmp/cmux-debug.sock"
-    private static let nightlySocketPath = "/tmp/cmux-nightly.sock"
-    private static let rcSocketPath = "/tmp/cmux-rc.sock"
-    private static let stagingSocketPath = "/tmp/cmux-staging.sock"
+    private static let stableSocketFileName = "cmux-local.sock"
+    static let legacyDefaultSocketPath = "/tmp/cmux-local.sock"
+    private static let fallbackSocketPath = "/tmp/cmux-local-debug.sock"
+    private static let nightlySocketPath = "/tmp/cmux-local-nightly.sock"
+    private static let rcSocketPath = "/tmp/cmux-local-rc.sock"
+    private static let stagingSocketPath = "/tmp/cmux-local-staging.sock"
 
     private let environment: [String: String]
     private let bundleIdentifier: String?
@@ -219,12 +219,12 @@ struct CLISocketPathResolver {
 
     private static func userScopedStableSocketPath(currentUserID: uid_t = getuid()) -> String {
         stableSocketDirectoryURL()?
-            .appendingPathComponent("cmux-\(currentUserID).sock", isDirectory: false)
+            .appendingPathComponent("cmux-local-\(currentUserID).sock", isDirectory: false)
             .path ?? legacyUserScopedStableSocketPath(currentUserID: currentUserID)
     }
 
     private static func legacyUserScopedStableSocketPath(currentUserID: uid_t = getuid()) -> String {
-        "/tmp/cmux-\(currentUserID).sock"
+        "/tmp/cmux-local-\(currentUserID).sock"
     }
 
     static func isImplicitDefaultPath(
@@ -347,7 +347,7 @@ struct CLISocketPathResolver {
         Self.dedupe([
             resolvedStableDefaultSocketPath,
             Self.legacyDefaultSocketPath,
-            stateDirectory.appendingPathComponent("cmux-\(currentUserID).sock", isDirectory: false).path,
+            stateDirectory.appendingPathComponent("cmux-local-\(currentUserID).sock", isDirectory: false).path,
             Self.legacyUserScopedStableSocketPath(currentUserID: currentUserID),
         ])
     }

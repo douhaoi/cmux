@@ -254,39 +254,7 @@ extension ProUpgradePresenter {
     /// same dedicated workspace surface used for pricing, matching upgrade/pricing.
     @MainActor
     static func presentProWelcomeWeb() {
-        let url = decoratedAppWebURL(AuthEnvironment.appProWelcomeURL)
-        guard BrowserAvailabilitySettings.isEnabled() else {
-            NSWorkspace.shared.open(url)
-            return
-        }
-        if presentDedicatedProWelcomeWorkspace(url: url) {
-            return
-        }
-        presentBrowserSplit(url: url, transparentBackground: true)
-    }
-
-    @MainActor
-    private static func presentDedicatedProWelcomeWorkspace(url: URL) -> Bool {
-        guard let appDelegate = AppDelegate.shared else { return false }
-        if let workspaceId = ProWelcomeChecklistPresenter.workspaceReuseState.reusableWorkspaceID(
-            exists: { appDelegate.proUpgradeWorkspaceExists(workspaceId: $0) }
-        ) {
-            if appDelegate.focusProUpgradeWorkspace(workspaceId: workspaceId, url: url) {
-                return true
-            }
-            ProWelcomeChecklistPresenter.workspaceReuseState.clear()
-        }
-
-        let title = String(localized: "proWelcome.workspace.title", defaultValue: "Welcome to cmux Pro")
-        guard let workspace = appDelegate.performProUpgradeWorkspaceAction(
-            title: title,
-            url: url,
-            debugSource: "proWelcomeChecklist"
-        ) else {
-            return false
-        }
-        ProWelcomeChecklistPresenter.workspaceReuseState.recordCreatedWorkspace(id: workspace.id)
-        return true
+        // Hosted welcome pages are absent from the local product.
     }
 
     /// Builds an app web URL (pricing or Pro welcome) decorated with the current

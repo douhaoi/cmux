@@ -78,11 +78,11 @@ struct CmuxConfigSettingActionTests {
     }
 
     @Test func onlyGlobalSourcesMayRunSettingActions() {
-        let global = "/Users/me/.config/cmux/cmux.json"
+        let global = "/Users/me/.config/cmux-local/cmux.json"
         #expect(CmuxSettingActionTrust.allowsSettingAction(actionSourcePath: global, globalConfigPath: global))
         #expect(!CmuxSettingActionTrust.allowsSettingAction(actionSourcePath: nil, globalConfigPath: global))
         #expect(CmuxSettingActionTrust.allowsSettingAction(
-            actionSourcePath: "/Users/me/.config/cmux/../cmux/cmux.json",
+            actionSourcePath: "/Users/me/.config/cmux-local/../cmux/cmux.json",
             globalConfigPath: global
         ))
         #expect(!CmuxSettingActionTrust.allowsSettingAction(

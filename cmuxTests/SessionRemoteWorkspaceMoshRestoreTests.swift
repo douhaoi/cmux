@@ -190,7 +190,7 @@ struct SessionRemoteWorkspaceMoshRestoreTests {
             persistentDaemonSlot: "slot"
         )
 
-        let configuration = try #require(snapshot.workspaceConfiguration(localSocketPath: "/tmp/cmux.sock"))
+        let configuration = try #require(snapshot.workspaceConfiguration(localSocketPath: "/tmp/cmux-local.sock"))
 
         #expect(configuration.terminalTransport == .mosh)
         #expect(!configuration.preserveAfterTerminalExit)
@@ -198,7 +198,7 @@ struct SessionRemoteWorkspaceMoshRestoreTests {
         #expect(configuration.relayPort == 52_000)
         #expect(configuration.relayID?.isEmpty == false)
         #expect(configuration.relayToken?.isEmpty == false)
-        #expect(configuration.localSocketPath == "/tmp/cmux.sock")
+        #expect(configuration.localSocketPath == "/tmp/cmux-local.sock")
         #expect(configuration.terminalStartupCommand?.contains("52000.bootstrap.sh") == true)
         #expect(configuration.terminalStartupCommand?.contains("cmux_remote_bootstrap_b64") == true)
         let startupCommand = try #require(configuration.terminalStartupCommand)

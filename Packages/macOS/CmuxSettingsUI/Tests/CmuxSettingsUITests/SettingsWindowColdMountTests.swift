@@ -51,7 +51,7 @@ import Testing
         return Fixture(runtime: runtime, defaults: UserDefaults(suiteName: suiteName)!)
     }
 
-    static func makeMountModel(initial: SettingsSectionID = .account) -> SettingsSectionMountModel {
+    static func makeMountModel(initial: SettingsSectionID = .app) -> SettingsSectionMountModel {
         SettingsSectionMountModel(initial: initial, order: SettingsWindowRoot.mountOrder(cloudAvailable: false))
     }
 
@@ -110,8 +110,8 @@ import Testing
         let model = Self.makeMountModel()
         let window = Self.host(SettingsWindowRoot(runtime: fixture.runtime, mountModel: model), in: fixture)
         defer { window.orderOut(nil) }
-        let accountControls = Self.controlCount(in: window.contentView)
-        #expect(model.mounted == [.account])
+        let appControls = Self.controlCount(in: window.contentView)
+        #expect(model.mounted == [.app])
 
         NotificationCenter.default.post(
             name: SettingsWindowRoot.navigationRequestName,
@@ -126,12 +126,12 @@ import Testing
         // selected one is in the hierarchy, so the window never carries
         // the couple of hundred controls of the full settings tree.
         #expect(!model.isMounted(.workspaceColors))
-        #expect(shortcutControls != accountControls, "pane did not switch: \(shortcutControls) controls")
+        #expect(shortcutControls != appControls, "pane did not switch: \(shortcutControls) controls")
         #expect(shortcutControls < 100, "inactive sections are in the hierarchy: \(shortcutControls) controls")
 
         // Returning to a section mounted on an earlier visit rebuilds its
         // pane, so the scroll still waits for that content to appear.
-        for section in [SettingsSectionID.account, .keyboardShortcuts] {
+        for section in [SettingsSectionID.app, .keyboardShortcuts] {
             NotificationCenter.default.post(
                 name: SettingsWindowRoot.navigationRequestName,
                 object: nil,
@@ -184,7 +184,7 @@ import Testing
         if let anchor { userInfo["anchor"] = anchor }
         NotificationCenter.default.post(name: SettingsWindowRoot.navigationRequestName, object: nil, userInfo: userInfo)
 
-        await Self.wait(for: model) { model.pinnedScroll.map { $0.section != .account } ?? false }
+        await Self.wait(for: model) { model.pinnedScroll.map { $0.section != .app } ?? false }
         // Every one of them opens the Devices pane at its top.
         #expect(model.pinnedScroll?.section == .computers)
         #expect(model.pinnedScroll?.anchorID == SettingsDetailScrollPlacement.topAnchorID)
@@ -231,9 +231,9 @@ import Testing
 
     @Test func targetedOpenMountsTheTargetSectionFirst() {
         let fixture = Self.makeFixture()
-        let accountWindow = Self.host(SettingsWindowRoot(runtime: fixture.runtime, initialSection: .account), in: fixture)
+        let accountWindow = Self.host(SettingsWindowRoot(runtime: fixture.runtime, initialSection: .app), in: fixture)
         defer { accountWindow.orderOut(nil) }
-        let accountControls = Self.controlCount(in: accountWindow.contentView)
+        let appControls = Self.controlCount(in: accountWindow.contentView)
 
         // `browserImport` is an anchor inside the Browser section, whose
         // rows carry far more controls than the Account section.
@@ -241,7 +241,7 @@ import Testing
         defer { browserWindow.orderOut(nil) }
         let browserControls = Self.controlCount(in: browserWindow.contentView)
 
-        #expect(browserControls > accountControls + 10, "browser: \(browserControls), account: \(accountControls)")
+        #expect(browserControls > appControls + 10, "browser: \(browserControls), account: \(appControls)")
     }
 
     @Test func constrainedWindowKeepsHostedContentInsideViewport() {

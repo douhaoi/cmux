@@ -1,9 +1,10 @@
+import CmuxSettings
 import Foundation
 
 extension Workspace {
     /// Restores a valid Cloud binding, normalizing its optional remote workspace identity.
     nonisolated static func restoredCloudVMBinding(from snapshot: SessionCloudVMBindingSnapshot?) -> WorkspaceCloudVMBinding? {
-        guard let snapshot, let vmID = WorkspaceCloudVMBinding.normalizedVMID(snapshot.vmID) else { return nil }
+        guard LocalProduct().includesHostedServices, let snapshot, let vmID = WorkspaceCloudVMBinding.normalizedVMID(snapshot.vmID) else { return nil }
         let remote = snapshot.remoteWorkspaceID?.trimmingCharacters(in: .whitespacesAndNewlines)
         return WorkspaceCloudVMBinding(
             vmID: vmID, isBase: snapshot.isBase,

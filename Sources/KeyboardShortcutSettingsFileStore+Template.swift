@@ -4,16 +4,16 @@ import CmuxSettings
 import Foundation
 
 extension CmuxSettingsFileStore {
-    static func defaultTemplate() -> String {
+    static func defaultTemplate(schemaURL: String = schemaURLString) -> String {
         var lines: [String] = [
             "{",
-            "  \"$schema\": \"\(schemaURLString)\",",
+            "  \"$schema\": \"\(schemaURL)\",",
             "  \"schemaVersion\": \(currentSchemaVersion),",
             "",
             "  // This file uses JSON with comments (JSONC).",
             "  // Uncomment and edit any setting to make it file-managed.",
             "  // Remove a setting to fall back to the value saved in Settings.",
-            "  // cmux creates this template on launch when ~/.config/cmux/cmux.json is missing.",
+            "  // cmux creates this template on launch when ~/.config/cmux-local/cmux.json is missing.",
             "  // Legacy settings.json files are read only as fallback for keys not present here.",
             "",
         ]

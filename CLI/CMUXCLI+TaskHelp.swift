@@ -54,7 +54,7 @@ extension CMUXCLI {
             case .customize: return ["customize", "customise", "customization"]
             case .automation: return ["automation", "automate"]
             case .browser: return ["browser", "web"]
-            case .remote: return ["remote", "remotes", "cloud"]
+            case .remote: return ["remote", "ssh"]
             case .diagnostics: return ["diagnostics", "diagnostic", "advanced", "diagnostics-advanced"]
             }
         }
@@ -131,7 +131,10 @@ extension CMUXCLI {
         case .remote: block = remoteCommandsHelp
         case .diagnostics: block = diagnosticsCommandsHelp
         }
-        return block.components(separatedBy: "\n")
+        return block.components(separatedBy: "\n").filter { line in
+            let command = line.trimmingCharacters(in: .whitespaces).split(separator: " ").first.map(String.init) ?? ""
+            return !["auth", "login", "logout", "vm", "cloud", "feedback", "hive", "devices", "coderouter", "cr", "vpn", "iroh-diag"].contains(command)
+        }
     }
 
     func usage() -> String {
@@ -160,12 +163,11 @@ extension CMUXCLI {
 
         Agent Help:
           cmux guide | cmux --skill
-          cmux cloud guide | cmux cloud --skill
           Change cmux settings with `cmux docs settings` and `cmux settings path`; add Dock controls with `cmux docs dock`.
           Before editing, back up any existing cmux.json file to a timestamped .bak copy.
           Use printed curl commands to fetch the latest docs/schema; prefer Ghostty config for terminal behavior Ghostty already supports.
           Ghostty config lives at ~/.config/ghostty/config (terminal transparency, blur, font, theme, keybinds, etc.).
-          `cmux reload-config` reloads BOTH Ghostty config and ~/.config/cmux/cmux.json, then refreshes terminals in place. No app restart needed.
+          `cmux reload-config` reloads BOTH Ghostty config and ~/.config/cmux-local/cmux.json, then refreshes terminals in place. No app restart needed.
 
         \(String(localized: "cli.help.taskHelp.heading", defaultValue: "Task Help:"))
           cmux help <\(Self.taskHelpTopicNames)>
@@ -180,7 +182,7 @@ extension CMUXCLI {
           CMUX_TAB_ID         Optional alias used by `tab-action`/`rename-tab` as default --tab.
           CMUX_SURFACE_ID     Auto-set in cmux terminals. Used as default --surface.
           CMUX_SOCKET_PATH    Override the Unix socket path. Without this, the CLI defaults
-                              to ~/.local/state/cmux/cmux.sock and auto-discovers tagged/debug sockets.
+                              to ~/.local/state/cmux-local/cmux-local.sock and auto-discovers tagged/debug sockets.
         """
     }
 
@@ -216,9 +218,6 @@ extension CMUXCLI {
         hooks setup|uninstall [--agent <name>]
         hooks <agent> <install|uninstall|event> [options; opencode supports --project]
         hooks feed --source <agent> [--event <event>]
-        \(localizedCoderouterAliases())
-        \(localizedCoderouterCommands())
-        ai-accounts <list|upload|remove> [--team <id>] [--json]
         """
     }
 
@@ -298,12 +297,11 @@ extension CMUXCLI {
         settings [open [target]|path|docs|<target>]
         config <doctor|check|validate|path|paths|docs|documentation|reload>
         shortcuts
-        feedback [--email <email> --body <text> [--image <path> ...]]
         feed tui|clear
         themes [list|set|clear]
         import [<terminal>] [--dry-run] [--yes] [--path <file>] [--json]
         reload-config
-        right-sidebar <toggle|show|hide|focus|set|mode|files|find|vault|sessions|feed|dock|cloud|devices> [--workspace <id|ref|index>] [--window <id|ref|index>] [--no-focus]
+        right-sidebar <toggle|show|hide|focus|set|mode|files|find|vault|sessions|feed|dock> [--workspace <id|ref|index>] [--window <id|ref|index>] [--no-focus]
         sidebar <templates|try|new|validate|reload|select|open> [name] [options]
         help
         """
@@ -396,10 +394,6 @@ extension CMUXCLI {
 
     private var remoteCommandsHelp: String {
         return """
-        auth <status|login|logout|team>
-        login | logout                                      (aliases for auth login/logout)
-        vm <base|new|ls|domains|tree|self|status|stats|resize|network|agent-updates|rename|pause|resume|snapshot|fork|restore|rm|run|route|agent|dev|prompt|exec|push|pull|wait|shell|tui|desktop|open|workspace|terminal|tab|layout|env|ports|tools|handoff|promote-template|attach|ssh|ssh-info> [args...]    (alias: cloud)
-        remotes <list|add|remove> [--route <host:port>] [--tag <tag>] [--json]    (alias: remote)
         \(simulatorCommandUsageLine)
         \(iosCommandUsageLine)
         ssh <destination> [--transport <ssh|mosh>] [--name <title>] [--command <text>] [--port <n>] [--identity <path>] [-A|--forward-agent] [-a|--no-forward-agent] [--ssh-option <opt>] [--window <id|ref|index>] [--no-focus] [-- <remote-command-args>]
@@ -417,7 +411,6 @@ extension CMUXCLI {
     private var diagnosticsCommandsHelp: String {
         return """
         ping
-        iroh-diag
         version
         \(String(localized: "sudo.cli.global_usage.run", defaultValue: "sudo run [-r reason] [-t timeout] (-c 'command' | script.sh | -)"))
         \(String(localized: "sudo.cli.global_usage.pending", defaultValue: "sudo pending"))

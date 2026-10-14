@@ -1,7 +1,6 @@
 public import Foundation
 
-/// Write half of one server->client event lane. ``IrxStreamWriter`` is the
-/// production conformer; tests substitute in-memory lanes.
+/// Write half of a compatibility event lane.
 public protocol IrxEventLaneWriting: Sendable {
     func write(_ data: Data) async throws
     func setPriority(_ priority: Int32) async throws
@@ -9,16 +8,13 @@ public protocol IrxEventLaneWriting: Sendable {
     func reset(errorCode: UInt64) async
 }
 
-/// Read half of one server->client event lane. ``IrxStreamReader`` is the
-/// production conformer; tests substitute in-memory lanes.
+/// Read half of a compatibility event lane.
 public protocol IrxEventLaneReading: Sendable {
     /// Whatever bytes are available, or nil on EOF.
     func readRaw() async throws -> Data?
     func stop(errorCode: UInt64) async
 }
 
-extension IrxStreamWriter: IrxEventLaneWriting {}
-extension IrxStreamReader: IrxEventLaneReading {}
 
 /// Wire vocabulary for per-surface event lanes.
 ///

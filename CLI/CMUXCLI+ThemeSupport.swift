@@ -214,16 +214,16 @@ extension CMUXCLI {
     private func bundleIdentifierForThemeReloadSocketPath(_ socketPath: String) -> String? {
         let name = URL(fileURLWithPath: socketPath).lastPathComponent
         switch name {
-        case "cmux.sock":
+        case "cmux-local.sock":
             return Self.cmuxThemeOverrideBundleIdentifier
         case "cmux-debug.sock":
-            return "com.cmuxterm.app.debug"
+            return "com.cmuxterm.local.debug"
         case "cmux-nightly.sock":
-            return "com.cmuxterm.app.nightly"
+            return "com.cmuxterm.local.nightly"
         case "cmux-rc.sock":
-            return "com.cmuxterm.app.rc"
+            return "com.cmuxterm.local.rc"
         case "cmux-staging.sock":
-            return "com.cmuxterm.app.staging"
+            return "com.cmuxterm.local.staging"
         default:
             break
         }
@@ -233,16 +233,16 @@ extension CMUXCLI {
         }
 
         if let slug = themeReloadSocketSlug(name, prefix: "cmux-debug-", suffix: ".sock") {
-            return "com.cmuxterm.app.debug.\(slug)"
+            return "com.cmuxterm.local.debug.\(slug)"
         }
         if let slug = themeReloadSocketSlug(name, prefix: "cmux-nightly-", suffix: ".sock") {
-            return "com.cmuxterm.app.nightly.\(slug)"
+            return "com.cmuxterm.local.nightly.\(slug)"
         }
         if let slug = themeReloadSocketSlug(name, prefix: "cmux-rc-", suffix: ".sock") {
-            return "com.cmuxterm.app.rc.\(slug)"
+            return "com.cmuxterm.local.rc.\(slug)"
         }
         if let slug = themeReloadSocketSlug(name, prefix: "cmux-staging-", suffix: ".sock") {
-            return "com.cmuxterm.app.staging.\(slug)"
+            return "com.cmuxterm.local.staging.\(slug)"
         }
         return nil
     }

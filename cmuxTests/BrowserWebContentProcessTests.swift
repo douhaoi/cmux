@@ -1036,32 +1036,6 @@ struct BrowserWebContentProcessTests {
     }
 
     @Test
-    func browserAppSessionSignInRelayClosesAndReopensAdmissionAcrossTransitions() async {
-        let relay = BrowserAppSessionSignInRelay()
-        var transitionCount = 0
-        var resumeCount = 0
-
-        relay.sessionWillTransition()
-        await relay.signedIn()
-        #expect(transitionCount == 0)
-        #expect(resumeCount == 0)
-
-        relay.bind(
-            beginTransition: {
-                transitionCount += 1
-            },
-            resume: {
-                resumeCount += 1
-            }
-        )
-        relay.sessionWillTransition()
-        await relay.signedIn()
-
-        #expect(transitionCount == 1)
-        #expect(resumeCount == 1)
-    }
-
-    @Test
     func browserAppSessionHTTPClientRejectsRedirects() async throws {
         let delegate = BrowserAppSessionRedirectRejectingDelegate()
         let session = URLSession(configuration: .ephemeral)

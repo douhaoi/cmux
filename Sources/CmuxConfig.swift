@@ -1843,7 +1843,7 @@ final class CmuxConfigStore: ObservableObject {
 
     nonisolated static func defaultGlobalConfigPath() -> String {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
-        return (home as NSString).appendingPathComponent(".config/cmux/cmux.json")
+        return (home as NSString).appendingPathComponent(".config/cmux-local/cmux.json")
     }
 
     private struct ActionEntry {

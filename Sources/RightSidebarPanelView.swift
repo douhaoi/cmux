@@ -479,15 +479,7 @@ struct RightSidebarPanelView: View {
             case .dock:
                 dockPanel(windowAppearance: windowAppearance)
             case .machines:
-                MachinesPanelView(
-                    chromeBackgroundColor: windowAppearance.resolvedChromeBackgroundColor,
-                    machinePinStore: AppDelegate.shared?.cloudMachinePinStore,
-                    devicesModel: devicesModel,
-                    tabManager: tabManager,
-                    teamPickerPresentation: fileExplorerState.cloudTeamPickerPresentation,
-                    activationCoordinator: cloudActivationCoordinator,
-                    coderouterStore: tabManager.coderouterAccountStore
-                )
+                EmptyView()
             case .customSidebar:
                 customSidebarPanel
             }
@@ -496,7 +488,7 @@ struct RightSidebarPanelView: View {
         }
     }
 
-    /// Custom mode: mounts the selected `~/.config/cmux/sidebars/<name>.{js,swift,json}`
+    /// Custom mode: mounts the selected `~/.config/cmux-local/sidebars/<name>.{js,swift,json}`
     /// through the same surface as the left sidebar and panes (file-watched,
     /// hot-reloading, same data keys and `cmux(...)` actions).
     @ViewBuilder

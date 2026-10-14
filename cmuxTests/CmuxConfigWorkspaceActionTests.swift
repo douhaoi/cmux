@@ -223,7 +223,7 @@ struct CmuxConfigWorkspaceActionTests {
     }
 
     @Test func actionsAndLaunchersDiscoveryReportsEffectivePlacements() throws {
-        let configPath = "/Users/test/.config/cmux/cmux.json"
+        let configPath = "/Users/test/.config/cmux-local/cmux.json"
         let shortcut = try #require(StoredShortcut.parseConfig("cmd+shift+r"))
         let agent = try #require(CmuxResolvedConfigAction.fromDefinition(
             id: "review-agent",
@@ -274,7 +274,7 @@ struct CmuxConfigWorkspaceActionTests {
     }
 
     @Test func actionsDiscoveryDoesNotInferSurfacePlacementFromEqualPayloads() throws {
-        let configPath = "/Users/test/.config/cmux/cmux.json"
+        let configPath = "/Users/test/.config/cmux-local/cmux.json"
         let first = try #require(CmuxResolvedConfigAction.fromDefinition(
             id: "first",
             definition: CmuxConfigActionDefinition(

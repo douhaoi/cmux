@@ -135,7 +135,7 @@ struct DeviceNotificationSyncTests {
             memoryMb: nil, diskMb: nil, linkState: .connected, linkError: nil,
             cpuPercent: nil, memoryUsedMb: nil, diskUsedMb: nil, remoteWorkspaces: [workspace],
             presence: SurfaceDevicePresence(state: .online, lastSeenAt: nil, tag: instance.tag,
-                bundleID: "com.cmuxterm.app", accountTrust: .sameAccount)
+                bundleID: "com.cmuxterm.local", accountTrust: .sameAccount)
         )], resources: [resource], projections: [])
         let nodes = CloudTreeNodeBuilder.nodes(machines: [], snapshot: snapshot, localWorkspaces: [],
             unreadTerminalIDs: [machine.rawValue: [terminal]], includeLocalMachine: false, source: .devices)
@@ -158,7 +158,7 @@ struct DeviceNotificationSyncTests {
         let config = AuthConfig(stack: CMUXAuthConfig(projectId: "test", publishableClientKey: "test"),
             magicLinkCallbackURL: "http://127.0.0.1:1/auth/callback", apiBaseURL: "http://127.0.0.1:1")
         return AuthCoordinator(
-            client: StackAuthClient(config: config, tokenStore: .memory, noAutomaticPrefetch: true),
+            client: UnavailableAuthClient(),
             sessionCache: CMUXAuthSessionCache(keyValueStore: defaults, key: "session"),
             userCache: CMUXAuthIdentityStore(keyValueStore: defaults, key: "user"),
             teamSelection: CMUXAuthTeamSelectionStore(keyValueStore: defaults, key: "team"),

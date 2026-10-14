@@ -159,7 +159,7 @@ struct CodeRouterSocketPeerVerifier: Sendable {
 #if DEBUG
         return false
 #else
-        guard Bundle.main.bundleIdentifier?.hasPrefix("com.cmuxterm.app.debug.") == true else {
+        guard Bundle.main.bundleIdentifier?.hasPrefix("com.cmuxterm.local.debug.") == true else {
             return false
         }
         var requirement: SecRequirement?

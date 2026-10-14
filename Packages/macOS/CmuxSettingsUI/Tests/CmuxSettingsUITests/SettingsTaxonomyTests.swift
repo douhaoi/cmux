@@ -8,20 +8,20 @@ struct SettingsTaxonomyTests {
     @Test func everyNavigationLeafAppearsExactlyOnce() {
         let sections = SettingsTaxonomyGroup.sectionsInDisplayOrder
 
-        #expect(sections.count == SettingsSectionID.allCases.count)
+        #expect(sections.count == SettingsSectionID.allCases.filter { LocalProduct().includesSettingsSection($0.rawValue) }.count)
         #expect(Set(sections).count == sections.count)
-        #expect(Set(sections) == Set(SettingsSectionID.allCases))
+        #expect(Set(sections) == Set(SettingsSectionID.allCases.filter { LocalProduct().includesSettingsSection($0.rawValue) }))
     }
 
     /// Locks the intended concept-to-leaf mapping for the browse sidebar.
     @Test func groupsFollowTheBrowseTaxonomy() {
-        #expect(SettingsTaxonomyGroup.general.sections == [.account, .app, .themes, .sleepyMode])
+        #expect(SettingsTaxonomyGroup.general.sections == [.app, .themes, .sleepyMode])
         #expect(SettingsTaxonomyGroup.terminal.sections == [.terminal, .textBox])
         #expect(SettingsTaxonomyGroup.workspace.sections == [.workspaceColors])
         #expect(SettingsTaxonomyGroup.sidebarAndDock.sections == [.sidebarAppearance, .customSidebars])
         #expect(SettingsTaxonomyGroup.agentsAndAutomation.sections == [.automation, .computerUse])
         #expect(SettingsTaxonomyGroup.browserAndFiles.sections == [.browser, .browserImport])
-        #expect(SettingsTaxonomyGroup.remoteAndDevices.sections == [.mobile, .cloudMachines, .computers, .networking])
+        #expect(SettingsTaxonomyGroup.remoteAndDevices.sections == [])
         #expect(
             SettingsTaxonomyGroup.keyboardAndAdvanced.sections
                 == [.globalHotkey, .keyboardShortcuts, .betaFeatures, .settingsJSON, .reset]
@@ -36,7 +36,7 @@ struct SettingsTaxonomyTests {
 
         // Search keeps its original declaration order and stable IDs.
         // Taxonomy is only the empty-query browse presentation.
-        #expect(sectionEntries.map(\.id) == SettingsSectionID.allCases.map { "section:\($0.rawValue)" })
+        #expect(sectionEntries.map(\.id) == SettingsSectionID.allCases.filter { LocalProduct().includesSettingsSection($0.rawValue) }.map { "section:\($0.rawValue)" })
 
         for section in SettingsTaxonomyGroup.sectionsInDisplayOrder {
             let entryID = "section:\(section.rawValue)"

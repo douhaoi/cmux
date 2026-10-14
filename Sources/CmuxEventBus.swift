@@ -1,6 +1,6 @@
 import Foundation
 import os
-nonisolated private let cmuxEventBusLogger = Logger(subsystem: "com.cmuxterm.app", category: "events")
+nonisolated private let cmuxEventBusLogger = Logger(subsystem: "com.cmuxterm.local", category: "events")
 struct CmuxEventSubscriptionSnapshot {
     let subscription: CmuxEventSubscription
     let replay: [[String: Any]]

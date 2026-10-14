@@ -117,7 +117,7 @@ public struct SettingsSearchIndex: Sendable {
         let matcher = SettingsSearchMatcher()
         var built: [Entry] = []
 
-        for section in SettingsSectionID.allCases {
+        for section in SettingsSectionID.allCases where LocalProduct().includesSettingsSection(section.rawValue) {
             built.append(Entry(
                 id: "section:\(section.rawValue)",
                 kind: .section,
@@ -132,7 +132,7 @@ public struct SettingsSearchIndex: Sendable {
 
         var pathAnchors: [String: String] = [:]
 
-        for entry in curatedEntries {
+        for entry in curatedEntries where LocalProduct().includesSettingsSection(entry.section.rawValue) && !entry.paths.contains("app.sendAnonymousTelemetry") {
             let entryID = "setting:\(entry.section.rawValue):\(entry.id)"
             let searchPaths = entry.paths.isEmpty
                 ? matcher.dottedTokens(in: entry.synonyms)

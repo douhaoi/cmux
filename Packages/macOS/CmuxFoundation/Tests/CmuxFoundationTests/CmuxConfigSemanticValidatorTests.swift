@@ -22,12 +22,15 @@ struct CmuxConfigSemanticValidatorTests {
         }
     }
 
-    @Test("embedded schema is byte-for-byte web/data/cmux.schema.json")
+    @Test("embedded schema is byte-for-byte schemas/cmux.schema.json")
     func embeddedSchemaMatchesSource() throws {
         var root = URL(fileURLWithPath: #filePath)
         for _ in 0..<6 { root.deleteLastPathComponent() }
-        let source = try Data(contentsOf: root.appendingPathComponent("web/data/cmux.schema.json"))
+        let source = try Data(contentsOf: root.appendingPathComponent("schemas/cmux.schema.json"))
         #expect(CmuxEmbeddedConfigSchema.data == source)
+        #expect(CmuxConfigSemanticValidator.embeddedSchemaData == source)
+        let schema = try #require(JSONSerialization.jsonObject(with: source) as? [String: Any])
+        #expect(schema["$id"] as? String == "urn:cmux-local:config-schema:v1")
     }
 
     @Test("accepts valid settings and preserved config sections")

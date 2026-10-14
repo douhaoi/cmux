@@ -1,5 +1,4 @@
 import AppKit
-import CmuxFeedback
 import SwiftUI
 
 extension cmuxApp {
@@ -11,39 +10,9 @@ extension cmuxApp {
 
             Divider()
 
-            Button(String(localized: "cloud.diagnostics.menu", defaultValue: "Cloud Diagnostics…")) {
-                AppDelegate.shared?.showCloudDiagnostics()
-            }
-
-            splitCommandButton(title: String(localized: "sidebar.help.sendFeedback", defaultValue: "Send Feedback"), shortcut: menuShortcut(for: .sendFeedback)) {
-                presentFeedbackFromHelpMenu()
-            }
-
-            Button(String(localized: "command.checkForUpdates.title", defaultValue: "Check for Updates")) {
-                AppDelegate.shared?.checkForUpdates(nil)
-            }
-
-            Divider()
-
             helpResourceButton(.githubIssues)
             helpResourceButton(.discord)
-            Button(String(localized: "menu.help.upgradeToPro", defaultValue: "Upgrade to cmux Pro…")) {
-                ProUpgradePresenter.present(source: .helpMenu)
-            }
             #if DEBUG
-            Button(String(localized: "menu.help.previewNativePricing", defaultValue: "Preview Native Pro Pricing…")) {
-                ProUpgradePresenter.presentNativePricingPreview()
-            }
-            Button(String(localized: "debug.menu.cloudSidebarSpacingLab", defaultValue: "Cloud Sidebar Spacing Lab…")) {
-                AppDelegate.shared?.debugWindowsCoordinator.cloudSidebarDebugLabController.show()
-            }
-            cloudWelcomeDebugMenuItems
-            Button(String(localized: "menu.help.showProWelcomeChecklist", defaultValue: "Show Pro Welcome Checklist…")) {
-                ProWelcomeChecklistPresenter.present()
-            }
-            Button(String(localized: "menu.help.featureFlags", defaultValue: "Feature Flags…")) {
-                InternalFlagsPresenter.present()
-            }
             Button(
                 String(
                     localized: "debug.menu.sidebarFooterIconBalance",
@@ -109,14 +78,4 @@ extension cmuxApp {
         }
     }
 
-    private func presentFeedbackFromHelpMenu() {
-        if let targetWindow = NSApp.keyWindow ?? NSApp.mainWindow {
-            FeedbackComposerBridge().openComposer(in: targetWindow)
-            return
-        }
-
-        if let targetWindow = AppDelegate.shared?.showMainWindowFromMenuBar() {
-            FeedbackComposerBridge().openComposer(in: targetWindow)
-        }
-    }
 }

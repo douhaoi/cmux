@@ -3,70 +3,70 @@ import Testing
 
 @Test func markerFilesAreVariantAware() {
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app",
+        bundleIdentifier: "com.cmuxterm.local",
         environment: [:]
     ) == .stable)
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app.nightly",
+        bundleIdentifier: "com.cmuxterm.local.nightly",
         environment: [:]
     ) == .nightly(slug: nil))
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app.rc",
+        bundleIdentifier: "com.cmuxterm.local.rc",
         environment: [:]
     ) == .rc(slug: nil))
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app.rc.my-feature",
+        bundleIdentifier: "com.cmuxterm.local.rc.my-feature",
         environment: [:]
     ) == .rc(slug: "my-feature"))
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app.debug.agent",
+        bundleIdentifier: "com.cmuxterm.local.debug.agent",
         environment: [:]
     ) == .dev(slug: "agent"))
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app.debug",
+        bundleIdentifier: "com.cmuxterm.local.debug",
         environment: ["CMUX_TAG": "Issue 3542"]
     ) == .dev(slug: "issue-3542"))
     #expect(SocketPathMarkerFiles.variant(
-        bundleIdentifier: "com.cmuxterm.app.debug",
+        bundleIdentifier: "com.cmuxterm.local.debug",
         environment: ["CMUX_TAG": "café"]
     ) == .dev(slug: "caf"))
 }
 
 @Test func defaultSocketPathsStayVariantScoped() {
     #expect(SocketPathMarkerFiles.defaultSocketPath(
-        bundleIdentifier: "com.cmuxterm.app",
+        bundleIdentifier: "com.cmuxterm.local",
         environment: [:],
         isDebugBuild: false,
         stableSocketPath: "/stable/cmux.sock"
     ) == "/stable/cmux.sock")
     #expect(SocketPathMarkerFiles.defaultSocketPath(
-        bundleIdentifier: "com.cmuxterm.app.nightly",
+        bundleIdentifier: "com.cmuxterm.local.nightly",
         environment: [:],
         isDebugBuild: false,
         stableSocketPath: "/stable/cmux.sock"
-    ) == "/tmp/cmux-nightly.sock")
+    ) == "/tmp/cmux-local-nightly.sock")
     #expect(SocketPathMarkerFiles.defaultSocketPath(
-        bundleIdentifier: "com.cmuxterm.app.rc",
+        bundleIdentifier: "com.cmuxterm.local.rc",
         environment: [:],
         isDebugBuild: false,
         stableSocketPath: "/stable/cmux.sock"
-    ) == "/tmp/cmux-rc.sock")
+    ) == "/tmp/cmux-local-rc.sock")
     #expect(SocketPathMarkerFiles.defaultSocketPath(
-        bundleIdentifier: "com.cmuxterm.app.rc.candidate1",
+        bundleIdentifier: "com.cmuxterm.local.rc.candidate1",
         environment: [:],
         isDebugBuild: false,
         stableSocketPath: "/stable/cmux.sock"
-    ) == "/tmp/cmux-rc-candidate1.sock")
+    ) == "/tmp/cmux-local-rc-candidate1.sock")
     #expect(SocketPathMarkerFiles.defaultSocketPath(
-        bundleIdentifier: "com.cmuxterm.app.staging.my-feature",
+        bundleIdentifier: "com.cmuxterm.local.staging.my-feature",
         environment: [:],
         isDebugBuild: false,
         stableSocketPath: "/stable/cmux.sock"
-    ) == "/tmp/cmux-staging-my-feature.sock")
+    ) == "/tmp/cmux-local-staging-my-feature.sock")
     #expect(SocketPathMarkerFiles.defaultSocketPath(
-        bundleIdentifier: "com.cmuxterm.app.debug",
+        bundleIdentifier: "com.cmuxterm.local.debug",
         environment: ["CMUX_TAG": "Issue 3542"],
         isDebugBuild: false,
         stableSocketPath: "/stable/cmux.sock"
-    ) == "/tmp/cmux-debug-issue-3542.sock")
+    ) == "/tmp/cmux-local-debug-issue-3542.sock")
 }

@@ -5,7 +5,6 @@ import AppKit
 import CmuxRemoteSession
 import CmuxCore
 import CmuxAuthRuntime
-import CmuxFeedback
 import CmuxBrowser
 import CmuxControlSocket
 import CmuxFoundation
@@ -1824,8 +1823,6 @@ class TerminalController {
             return v2Ok(id: request.id, result: v2AuthStatusPayload(timedOut: false))
         case _ where Self.authTeamSocketMethods.contains(request.method):
             return v2AuthTeamResponse(request)
-        case "feedback.submit":
-            return v2Result(id: request.id, v2FeedbackSubmit(params: request.params))
         case "feed.push":
             return v2Result(
                 id: request.id,
@@ -3336,6 +3333,14 @@ class TerminalController {
     /// the calling thread; only the command body crosses to the main actor,
     /// via a single `v2MainSync` hop.
     private nonisolated func processParsedV2Command(_ request: ControlRequest) -> String {
+        guard LocalProduct().includesSocketMethod(request.method) else {
+            return Self.v2Encoder.error(
+                id: request.id,
+                code: "not_supported",
+                message: String(localized: "localProduct.serviceUnavailable", defaultValue: "This service is not included in the local edition.")
+            )
+        }
+
         if let focusError = Self.focusSuppressionResponse(
             method: request.method,
             id: request.id.map(\.foundationObject),
@@ -6639,54 +6644,6 @@ class TerminalController {
             includeScrollback: includeScrollback,
             lineLimit: lineLimit
         )
-    }
-
-    private nonisolated func v2FeedbackSubmit(params: [String: Any]) -> V2CallResult {
-        guard let email = params["email"] as? String else {
-            return .err(code: "invalid_params", message: "Missing email", data: ["field": "email"])
-        }
-        guard let body = params["body"] as? String else {
-            return .err(code: "invalid_params", message: "Missing body", data: ["field": "body"])
-        }
-        let imagePaths = params["image_paths"] as? [String] ?? []
-
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: V2CallResult = .err(code: "internal_error", message: "Feedback submission failed", data: nil)
-
-        Task {
-            let resolved: V2CallResult
-            do {
-                let attachmentCount = try await FeedbackComposerBridge().submit(
-                    email: email,
-                    message: body,
-                    imagePaths: imagePaths
-                )
-                resolved = .ok([
-                    "submitted": true,
-                    "attachment_count": attachmentCount,
-                ])
-            } catch let error as FeedbackComposerBridgeError {
-                let code: String
-                switch error {
-                case .invalidEmail, .emptyMessage, .messageTooLong, .tooManyImages, .invalidImagePath:
-                    code = "invalid_params"
-                case .submissionFailed:
-                    code = "request_failed"
-                }
-                resolved = .err(code: code, message: error.localizedDescription, data: nil)
-            } catch {
-                resolved = .err(code: "internal_error", message: error.localizedDescription, data: nil)
-            }
-
-            result = resolved
-            semaphore.signal()
-        }
-
-        if semaphore.wait(timeout: .now() + 35) == .timedOut {
-            return .err(code: "timeout", message: "Feedback submission timed out", data: nil)
-        }
-
-        return result
     }
 
     // MARK: - V2 Feed (workstream) handlers
@@ -15637,19 +15594,10 @@ class TerminalController {
             result = v2MobileNotificationFeedMarkUnread(params: request.params)
         case "notification.feed.mark_all_read":
             result = v2MobileNotificationFeedMarkAllRead(params: request.params)
-        case "dogfood.feedback.submit":
-            result = await v2MobileDogfoodFeedbackSubmit(params: request.params)
         case "mobile.sync.fetch":
             result = v2MobileSyncFetch(params: request.params)
-        case "phone_push.settings.update":
-            result = v2MobilePhonePushSettingsUpdate(params: request.params)
-        case "phone_push.status.get":
-            // The payload is intentionally content-free. This authenticated
-            // request supplies the same-account token that the client's paired
-            // host-status exchange reuses for the private readiness block.
-            result = .ok(["ok": true])
-        case "phone_push.test":
-            result = v2MobilePhonePushTest()
+        case "phone_push.settings.update", "phone_push.status.get", "phone_push.test":
+            result = .err(code: "unavailable", message: String(localized: "localProduct.serviceUnavailable", defaultValue: "This service is not included in the local edition."), data: nil)
         case "caffeine.status":
             result = v2CaffeineStatus()
         case "caffeine.set":
@@ -15684,62 +15632,6 @@ class TerminalController {
         }
         workspaceObject["host_status"] = hostStatusObject
         return .ok(workspaceObject)
-    }
-
-    /// Privileged agent feedback sink (the Mac↔phone feedback loop).
-    ///
-    /// Reads `{ text, terminal_text, build_stamp, diagnostic_blob_base64 }` off
-    /// the wire and hands them to ``DogfoodFeedbackService`` (in the
-    /// `CmuxFeedback` package), which caps the fields, rejects an oversized
-    /// base64 blob without decoding, and writes a self-contained bundle
-    /// directory under `~/.cache/cmux-dogfood-feedback/<ISO8601>_<shortid>/`
-    /// (a `bundle.json` manifest plus the decoded `diagnostic.log`) off the main
-    /// actor. This method owns only the trust-boundary privilege check and the
-    /// wire mapping; the validation, allocation caps, and filesystem I/O live in
-    /// the service.
-    ///
-    /// It is protected by the same-account Stack-auth authorization the rest of
-    /// the mobile data plane enforces, so it never accepts an unauthenticated
-    /// caller. The phone only ever routes here for `@manaflow.ai` users on an
-    /// active connection, so this exists in Release builds too (the team can
-    /// dogfood beta/prod), and only a Mac that runs the watcher acts on it.
-    func v2MobileDogfoodFeedbackSubmit(params: [String: Any]) async -> V2CallResult {
-        // Privilege check at the trust boundary: the mobile data plane only
-        // accepts same-account connections, so the caller is this Mac's own Stack
-        // account. The service re-enforces the @manaflow.ai gate, but we resolve
-        // the authenticated email here because it requires the main-actor
-        // `MobileHostService`. (The phone also gates the route on `@manaflow.ai`
-        // + `dogfood.v1`, but the Mac is the real boundary.)
-        let localEmail = await MobileHostService.shared.currentAuthenticatedLocalUserEmail()
-        let submission = DogfoodFeedbackSubmission(
-            text: v2RawString(params, "text") ?? "",
-            terminalText: v2RawString(params, "terminal_text") ?? "",
-            buildStamp: v2RawString(params, "build_stamp") ?? "",
-            diagnosticBlobBase64: v2RawString(params, "diagnostic_blob_base64") ?? ""
-        )
-        let outcome = await DogfoodFeedbackService().submit(submission, authenticatedEmail: localEmail)
-        switch outcome {
-        case let .written(bundlePath, diagnosticLogBytes):
-            return .ok([
-                "ok": true,
-                "bundle_path": bundlePath,
-                "diagnostic_log_bytes": diagnosticLogBytes,
-            ])
-        case .unauthorized:
-            return .err(
-                code: "unauthorized",
-                message: "Feedback agent sink is restricted to privileged accounts",
-                data: nil
-            )
-        case let .invalidParams(reason):
-            return .err(code: "invalid_params", message: reason, data: nil)
-        case .internalError:
-            return .err(
-                code: "internal_error",
-                message: "Failed to persist dogfood feedback bundle",
-                data: nil
-            )
-        }
     }
 
     /// Publish a `terminal.set_font` event to connected iOS device(s) so the
@@ -16086,24 +15978,6 @@ class TerminalController {
     }
 
     func v2MobileTerminalReplay(params: [String: Any]) -> V2CallResult {
-        let traceID = v2String(params, "trace_id")
-            .flatMap(DiagnosticTerminalTraceID.init(stringValue:))
-        let traceStartedAt = DispatchTime.now().uptimeNanoseconds
-        func recordTrace(_ event: String) {
-            guard let traceID else { return }
-            let elapsed = (DispatchTime.now().uptimeNanoseconds - traceStartedAt) / 1_000_000
-            MobileHostIrxRuntime.journal.record(
-                "terminal-trace",
-                event,
-                [
-                    "trace_id": traceID.stringValue,
-                    "operation": "replay",
-                    "elapsed_ms": String(elapsed),
-                ]
-            )
-        }
-        recordTrace("host_received")
-        defer { recordTrace("host_response_ready") }
         if let error = mobileWorkspaceIDValidationError(params: params) {
             return error
         }

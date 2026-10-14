@@ -4,7 +4,7 @@ import CmuxFoundation
 import SwiftUI
 
 private let vaultCheckpointTimelineLogger = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "com.cmuxterm.app",
+    subsystem: Bundle.main.bundleIdentifier ?? "com.cmuxterm.local",
     category: "VaultCheckpointTimeline"
 )
 

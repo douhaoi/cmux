@@ -2,17 +2,17 @@ public import Foundation
 
 public enum SocketPathMarkerFiles {
     /// The stable release bundle identifier used for machine-wide discovery.
-    public static let stableBundleIdentifier = "com.cmuxterm.app"
+    public static let stableBundleIdentifier = "com.cmuxterm.local"
     public static let stableMarkerFileName = "last-socket-path"
-    public static let stableTmpPath = "/tmp/cmux-last-socket-path"
-    public static let nightlyBundleIdentifier = "com.cmuxterm.app.nightly"
-    public static let rcBundleIdentifier = "com.cmuxterm.app.rc"
-    public static let stagingBundleIdentifier = "com.cmuxterm.app.staging"
-    public static let defaultBaseDebugBundleIdentifier = "com.cmuxterm.app.debug"
-    public static let defaultDebugSocketPath = "/tmp/cmux-debug.sock"
-    public static let defaultNightlySocketPath = "/tmp/cmux-nightly.sock"
-    public static let defaultRCSocketPath = "/tmp/cmux-rc.sock"
-    public static let defaultStagingSocketPath = "/tmp/cmux-staging.sock"
+    public static let stableTmpPath = "/tmp/cmux-local-last-socket-path"
+    public static let nightlyBundleIdentifier = "com.cmuxterm.local.nightly"
+    public static let rcBundleIdentifier = "com.cmuxterm.local.rc"
+    public static let stagingBundleIdentifier = "com.cmuxterm.local.staging"
+    public static let defaultBaseDebugBundleIdentifier = "com.cmuxterm.local.debug"
+    public static let defaultDebugSocketPath = "/tmp/cmux-local-debug.sock"
+    public static let defaultNightlySocketPath = "/tmp/cmux-local-nightly.sock"
+    public static let defaultRCSocketPath = "/tmp/cmux-local-rc.sock"
+    public static let defaultStagingSocketPath = "/tmp/cmux-local-staging.sock"
 
     public static func markerFileURL(
         fileName: String = stableMarkerFileName,
@@ -103,22 +103,22 @@ public enum SocketPathMarkerFiles {
             return isDebugBuild ? debugSocketPath : stableSocketPath
         case .nightly(let slug):
             if let slug {
-                return "/tmp/cmux-nightly-\(slug).sock"
+                return "/tmp/cmux-local-nightly-\(slug).sock"
             }
             return nightlySocketPath
         case .rc(let slug):
             if let slug {
-                return "/tmp/cmux-rc-\(slug).sock"
+                return "/tmp/cmux-local-rc-\(slug).sock"
             }
             return rcSocketPath
         case .staging(let slug):
             if let slug {
-                return "/tmp/cmux-staging-\(slug).sock"
+                return "/tmp/cmux-local-staging-\(slug).sock"
             }
             return stagingSocketPath
         case .dev(let slug):
             if let slug {
-                return "/tmp/cmux-debug-\(slug).sock"
+                return "/tmp/cmux-local-debug-\(slug).sock"
             }
             return debugSocketPath
         }

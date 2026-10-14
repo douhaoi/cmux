@@ -5198,55 +5198,55 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No setting preset named '%@'. Add it under settingPresets in ~/.config/cmux/cmux.json."
+            "value": "No setting preset named '%@'. Add it under settingPresets in ~/.config/cmux-local/cmux.json."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Es gibt keine Einstellungsvorlage namens '%@'. Füge sie unter settingPresets in ~/.config/cmux/cmux.json hinzu."
+            "value": "Es gibt keine Einstellungsvorlage namens '%@'. Füge sie unter settingPresets in ~/.config/cmux-local/cmux.json hinzu."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun préréglage nommé '%@'. Ajoutez-le sous settingPresets dans ~/.config/cmux/cmux.json."
+            "value": "Aucun préréglage nommé '%@'. Ajoutez-le sous settingPresets dans ~/.config/cmux-local/cmux.json."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا يوجد إعداد مسبق باسم '%@'. أضفه ضمن settingPresets في ~/.config/cmux/cmux.json."
+            "value": "لا يوجد إعداد مسبق باسم '%@'. أضفه ضمن settingPresets في ~/.config/cmux-local/cmux.json."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No hay ningún preajuste llamado '%@'. Añádelo en settingPresets en ~/.config/cmux/cmux.json."
+            "value": "No hay ningún preajuste llamado '%@'. Añádelo en settingPresets en ~/.config/cmux-local/cmux.json."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有名為 '%@' 的設定預設組。請在 ~/.config/cmux/cmux.json 的 settingPresets 下新增。"
+            "value": "沒有名為 '%@' 的設定預設組。請在 ~/.config/cmux-local/cmux.json 的 settingPresets 下新增。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有名为 '%@' 的设置预设。请在 ~/.config/cmux/cmux.json 的 settingPresets 下添加。"
+            "value": "没有名为 '%@' 的设置预设。请在 ~/.config/cmux-local/cmux.json 的 settingPresets 下添加。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "'%@'(이)라는 설정 프리셋이 없습니다. ~/.config/cmux/cmux.json의 settingPresets 아래에 추가하세요."
+            "value": "'%@'(이)라는 설정 프리셋이 없습니다. ~/.config/cmux-local/cmux.json의 settingPresets 아래에 추가하세요."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "'%@' という名前の設定プリセットはありません。~/.config/cmux/cmux.json の settingPresets に追加してください。"
+            "value": "'%@' という名前の設定プリセットはありません。~/.config/cmux-local/cmux.json の settingPresets に追加してください。"
           }
         }
       }

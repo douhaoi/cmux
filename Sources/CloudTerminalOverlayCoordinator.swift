@@ -5,7 +5,7 @@ import CmuxTerminal
 import os
 
 private let cloudTerminalPresentationLogger = Logger(
-    subsystem: "com.cmuxterm.app", category: "CloudTerminalPresentation"
+    subsystem: "com.cmuxterm.local", category: "CloudTerminalPresentation"
 )
 
 /// Owns one status card across the representable anchor and the native portal.

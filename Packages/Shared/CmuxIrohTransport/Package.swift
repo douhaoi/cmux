@@ -16,17 +16,12 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../CMUXMobileCore"),
-        .package(
-            url: "https://github.com/manaflow-ai/iroh-ffi.git",
-            exact: "1.2.0-cmux.1.ios17"
-        ),
     ],
     targets: [
         .target(
             name: "CmuxIrohTransport",
             dependencies: [
                 "CMUXMobileCore",
-                .product(name: "IrohLib", package: "iroh-ffi"),
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v6),
@@ -42,7 +37,6 @@ let package = Package(
             dependencies: [
                 "CmuxIrohTransport",
                 "CMUXMobileCore",
-                .product(name: "IrohLib", package: "iroh-ffi"),
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v6),

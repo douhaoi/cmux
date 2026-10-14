@@ -4,25 +4,28 @@ import CmuxFoundation
 import CmuxSettings
 import Foundation
 import os
-nonisolated private let cmuxSettingsFileStoreLogger = Logger(subsystem: "com.cmuxterm.app", category: "SettingsStore")
+nonisolated private let cmuxSettingsFileStoreLogger = Logger(subsystem: "com.cmuxterm.local", category: "SettingsStore")
 
 final class CmuxSettingsFileStore {
     static let currentSchemaVersion = 1
-    static let schemaURLString = "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json"
+    static var schemaURLString: String {
+        URL(fileURLWithPath: defaultPrimaryPath).deletingLastPathComponent()
+            .appendingPathComponent("cmux.schema.json").absoluteString
+    }
     private static let legacySchemaURLString = "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux-settings.schema.json"
-    private static let releaseBundleIdentifier = "com.cmuxterm.app"
+    private static let releaseBundleIdentifier = "com.cmuxterm.local"
     private static let backupsDefaultsKey = "cmux.settingsFile.backups.v1"
     private static let importedManagedDefaultsDefaultsKey = "cmux.settingsFile.importedManagedDefaults.v1"
     fileprivate static let socketPasswordBackupIdentifier = "automation.socketPassword"
 
     static var defaultPrimaryPath: String {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
-        return (home as NSString).appendingPathComponent(".config/cmux/cmux.json")
+        return (home as NSString).appendingPathComponent(".config/cmux-local/cmux.json")
     }
 
     static var defaultFallbackPath: String? {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
-        return (home as NSString).appendingPathComponent(".config/cmux/settings.json")
+        return (home as NSString).appendingPathComponent(".config/cmux-local/settings.json")
     }
 
     static var defaultApplicationSupportFallbackPath: String? {
@@ -239,8 +242,6 @@ final class CmuxSettingsFileStore {
     }
 
     private func bootstrapPrimaryTemplateIfNeeded() {
-        guard !fileManager.fileExists(atPath: primaryPath) else { return }
-
         let fileURL = URL(fileURLWithPath: primaryPath)
         let directoryURL = fileURL.deletingLastPathComponent()
 
@@ -250,7 +251,13 @@ final class CmuxSettingsFileStore {
                 withIntermediateDirectories: true,
                 attributes: [.posixPermissions: 0o755]
             )
-            let template = legacySettingsDataForBootstrap() ?? Data(Self.defaultTemplate().utf8)
+            let schemaURL = directoryURL.appendingPathComponent("cmux.schema.json")
+            let schema = CmuxConfigSemanticValidator.embeddedSchemaData
+            if fileManager.contents(atPath: schemaURL.path) != schema {
+                try schema.write(to: schemaURL, options: [.atomic])
+            }
+            guard !fileManager.fileExists(atPath: primaryPath) else { return }
+            let template = legacySettingsDataForBootstrap() ?? Data(Self.defaultTemplate(schemaURL: schemaURL.absoluteString).utf8)
             let contents = Self.materializeBootstrapSocketPolicy(
                 in: template,
                 imported: importedManagedDefaults[SocketControlSettings.appStorageKey],

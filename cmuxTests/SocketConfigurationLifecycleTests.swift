@@ -441,7 +441,7 @@ extension SocketACLReloadRegressionTests {
             CmuxStateDirectory.legacyApplicationSupportURL(fileManager: fileManager)
         )
         let markerPaths = SocketPathMarkerStore(
-            bundleIdentifier: "com.cmuxterm.app",
+            bundleIdentifier: "com.cmuxterm.local",
             environment: [:],
             stateDirectory: currentDirectory,
             legacyDirectory: legacyDirectory,

@@ -16,6 +16,6 @@ enum TelemetrySettings {
     /// launch like the opt-in itself, so a profile pushed mid-session applies
     /// at the next launch; Settings shows the managed state immediately.
     static func resolveEnabled(userOptIn: Bool, policy: ManagedDevicePolicy) -> Bool {
-        userOptIn && !policy.isEnforced(.disableTelemetry)
+        LocalProduct().includesBackgroundServices && userOptIn && !policy.isEnforced(.disableTelemetry)
     }
 }

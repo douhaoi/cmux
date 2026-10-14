@@ -1,5 +1,18 @@
 import Foundation
-public import StackAuth
+
+/// Persistence operations retained for decoding and retiring historical sessions.
+public protocol TokenStoreProtocol: AnyObject, Sendable {
+    /// Reads the saved access token without performing a network refresh.
+    func getStoredAccessToken() async -> String?
+    /// Reads the saved refresh token without performing a network refresh.
+    func getStoredRefreshToken() async -> String?
+    /// Stores a token pair atomically.
+    func setTokens(accessToken: String?, refreshToken: String?) async
+    /// Removes both saved tokens.
+    func clearTokens() async
+    /// Replaces the pair only if the saved refresh token still matches.
+    func compareAndSet(compareRefreshToken: String, newRefreshToken: String?, newAccessToken: String?) async
+}
 
 /// The token-store seam for hosts that seed tokens out-of-band: StackAuth's
 /// `TokenStoreProtocol` plus the seeding/snapshot operations the macOS

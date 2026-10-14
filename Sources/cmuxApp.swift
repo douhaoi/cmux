@@ -8,8 +8,6 @@ import CmuxSettings
 import CmuxSettingsUI
 import CmuxWorkspaces
 import CmuxTestSupport
-import CmuxUpdater
-import CmuxUpdaterUI
 import SwiftUI
 import Observation
 import Darwin
@@ -23,7 +21,6 @@ struct cmuxApp: App {
     private let computerUseRuntimeService: ComputerUseRuntimeService
 
     /// App-owned auth graph injected into the delegate and auth consumers.
-    private let authComposition: MacAuthComposition
     /// Composition-root owner for the config-backed automation bridge.
     private let automationEngine: AutomationEngine
     private let browserDataImportCoordinator: BrowserDataImportCoordinator
@@ -97,12 +94,10 @@ struct cmuxApp: App {
             saveSecret: { try socketPasswordStore.savePassword($0) },
             backupTimestamp: secretMigrationTimestamp
         )
-        let authComposition = MacAuthComposition()
         let browserDataImportCoordinator = BrowserDataImportCoordinator()
         let notificationStore = TerminalNotificationStore.shared
         let closedItemHistoryStore = ClosedItemHistoryStore.shared
         let sidebarState = SidebarState()
-        self.authComposition = authComposition
         self.browserDataImportCoordinator = browserDataImportCoordinator
 
         // If invoked with CLI-style arguments (e.g. `cmux hooks setup`), exec the
@@ -186,14 +181,11 @@ struct cmuxApp: App {
         // Reconcile saved language preference before any UI loads
         LanguageSettingsStore(defaults: .standard, domainName: ProcessDefaultsDomain.name).reconcileLanguageOverrideAtLaunch()
         StartupBreadcrumbLog.append("app.init.language.applied")
-        let devices = MacDevicesComposition(defaults: .standard, catalog: settingsCatalog)
-        let devicesRegistry = devices.registry
-        let computersService = devices.computers
+        let defaultsStore = UserDefaultsSettingsStore(defaults: .standard, migrating: settingsCatalog.all)
         let hostSettingsActions = HostSettingsActions(
             configFileURL: configFileURL,
             computerUseRuntimeService: computerUseRuntimeService,
             browserDataImportCoordinator: browserDataImportCoordinator,
-            computersActions: devices.settingsActions,
             runComputerUseOnboardingAction: { startingPoint in
                 AppDelegate.shared?.computerUseUXCoordinator.presentOnboardingFromSettings(
                     startingAt: startingPoint
@@ -202,11 +194,11 @@ struct cmuxApp: App {
         )
         self.settingsRuntime = SettingsRuntime(
             catalog: settingsCatalog,
-            userDefaultsStore: devices.defaultsStore,
+            userDefaultsStore: defaultsStore,
             jsonStore: JSONConfigStore(fileURL: configFileURL),
             secretStore: secretStore,
             errorLog: SettingsErrorLog(),
-            accountFlow: authComposition.accountFlow,
+            accountFlow: nil,
             hostActions: hostSettingsActions,
             shortcutDefaultResolver: Self.makeShortcutDefaultResolver()
         )
@@ -228,11 +220,9 @@ struct cmuxApp: App {
         KeyboardShortcutSettings.settingsFileStore.applyDeferredManagedDefaultSideEffects()
         StartupBreadcrumbLog.append("app.init.keyboardShortcuts.sideEffectsApplied")
         StartupBreadcrumbLog.append("app.init.tabManager.begin")
-        let (cloudMachinePinStore, cloudWorkspaceCoordinator) = Self.makeCloudWorkspaceComposition(auth: authComposition)
         let tabManager = TabManager(
             workspaceCustomizationStore: workspaceCustomizationStore,
-            nativeSSHConnectionBroker: TerminalController.shared.nativeSSHConnectionBroker,
-            cloudWorkspaceSelection: cloudWorkspaceCoordinator.makeSelectionState()
+            nativeSSHConnectionBroker: TerminalController.shared.nativeSSHConnectionBroker
         )
         let historyMenuCoordinator = HistoryMenuCoordinator(
             closedItemHistoryStore: closedItemHistoryStore,
@@ -306,26 +296,15 @@ struct cmuxApp: App {
 
         // UI tests need AppDelegate wiring even if SwiftUI appearance callbacks are skipped.
         StartupBreadcrumbLog.append("app.init.delegate.configure.begin")
-        let cloudWorkspaceOperationController = CloudWorkspaceOperationController(
-            isAvailable: { cloudWorkspaceCoordinator.isAvailable }
-        )
         appDelegate.configure(
             tabManager: tabManager,
             notificationStore: notificationStore,
             sidebarState: sidebarState,
             settingsRuntime: settingsRuntime,
-            auth: authComposition,
-            cloudMachinePinStore: cloudMachinePinStore,
-            cloudWorkspaceCoordinator: cloudWorkspaceCoordinator,
-            cloudWorkspaceOperationController: cloudWorkspaceOperationController,
-            newMachineSheetPresenter: NewMachineSheetPresenter.shared,
             automationEngine: automationEngine,
             browserDataImportCoordinator: browserDataImportCoordinator,
-            computerUseRuntimeService: computerUseRuntimeService,
-            devicesRegistry: devicesRegistry,
-            computersService: computersService
+            computerUseRuntimeService: computerUseRuntimeService
         )
-        hostSettingsActions.cloudActivationCoordinator = appDelegate.cloudActivationCoordinator
         historyMenuCoordinator.refreshIfNeeded()
         StartupBreadcrumbLog.append("app.init.delegate.configured")
     }
@@ -500,7 +479,7 @@ struct cmuxApp: App {
                 .onAppear {
 #if DEBUG
                     if ProcessInfo.processInfo.environment["CMUX_UI_TEST_MODE"] == "1" {
-                        AppDelegate.shared?.updateLog.append("ui test: cmuxApp onAppear")
+
                     }
 #endif
                     bootstrapMainWindowScene()
@@ -559,10 +538,7 @@ struct cmuxApp: App {
                 Button(String(localized: "menu.app.about", defaultValue: "About cmux")) {
                     showAboutPanel()
                 }
-                Button(String(localized: "menu.app.checkForUpdates", defaultValue: "Check for Updates…")) {
-                    appDelegate.checkForUpdates(nil)
-                }
-                InstallUpdateMenuItem(model: appDelegate.updateViewModel, actions: appDelegate)
+
             }
 
             CommandGroup(replacing: .appTermination) {
@@ -571,32 +547,7 @@ struct cmuxApp: App {
                 }
             }
 
-#if DEBUG
-            CommandMenu("Update Pill") {
-                Button("Show Update Pill") {
-                    appDelegate.showUpdatePill(nil)
-                }
-                Button("Show Long Nightly Pill") {
-                    appDelegate.showUpdatePillLongNightly(nil)
-                }
-                Button("Show Loading State") {
-                    appDelegate.showUpdatePillLoading(nil)
-                }
-                Menu("Show Update Error…") {
-                    ForEach(DebugUpdateErrorScenario.allCases, id: \.self) { scenario in
-                        Button(scenario.menuTitle) {
-                            appDelegate.updateViewModel.debugShowUpdateError(scenario)
-                        }
-                    }
-                }
-                Button("Hide Update Pill") {
-                    appDelegate.hideUpdatePill(nil)
-                }
-                Button("Automatic Update Pill") {
-                    appDelegate.clearUpdatePillOverride(nil)
-                }
-            }
-#endif
+
 
             CommandMenu(String(localized: "menu.notifications.title", defaultValue: "Notifications")) {
                 let snapshot = notificationMenuSnapshot
@@ -657,7 +608,7 @@ struct cmuxApp: App {
                     appDelegate.openDebugScrollbackTab(nil)
                 }
 
-                IrohAndAgentSessionDebugMenuButtons(
+                AgentAndNotificationDebugMenuButtons(
                     openReact: { appDelegate.openDebugAgentSessionReact(nil) },
                     openSolid: { appDelegate.openDebugAgentSessionSolid(nil) }
                 )
@@ -865,18 +816,12 @@ struct cmuxApp: App {
 
                 Divider()
 
-                Button(String(localized: "menu.updateLogs.copyUpdateLogs", defaultValue: "Copy Update Logs")) {
-                    appDelegate.copyUpdateLogs(nil)
-                }
                 Button(String(localized: "menu.updateLogs.copyFocusLogs", defaultValue: "Copy Focus Logs")) {
                     appDelegate.copyFocusLogs(nil)
                 }
 
                 Divider()
 
-                Button("Trigger Sentry Test Crash") {
-                    appDelegate.triggerSentryTestCrash(nil)
-                }
             }
 #endif
 
@@ -4991,7 +4936,7 @@ enum AppIconLaunchState {
 enum AppIconSettings {
     static let modeKey = "appIconMode"
     static let defaultMode: AppIconMode = .automatic
-    private static let dockTileIconDidChangeNotification = Notification.Name("com.cmuxterm.appIconDidChange")
+    private static let dockTileIconDidChangeNotification = Notification.Name("com.cmuxterm.localIconDidChange")
     private static var liveEnvironmentProvider: () -> Environment = { .live() }
 
     private static func isRunningUnderXCTest(_ env: [String: String] = ProcessInfo.processInfo.environment) -> Bool {

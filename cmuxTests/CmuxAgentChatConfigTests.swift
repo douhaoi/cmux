@@ -104,7 +104,7 @@ struct CmuxAgentChatConfigTests {
 
     @Test func resolveLocalURLOnlyDoesNotInheritGlobalStartCommand() {
         let localPath = "/repo/cmux.json"
-        let globalPath = "/Users/me/.config/cmux/cmux.json"
+        let globalPath = "/Users/me/.config/cmux-local/cmux.json"
         let resolved = CmuxAgentChatConfiguration.resolved(
             local: CmuxAgentChatConfigDefinition(url: "http://127.0.0.1:9010"),
             global: CmuxAgentChatConfigDefinition(
@@ -126,7 +126,7 @@ struct CmuxAgentChatConfigTests {
 
     @Test func resolveLocalSidecarOnlyFieldsUseGlobalServerConfig() throws {
         let localPath = "/repo/cmux.json"
-        let globalPath = "/Users/me/.config/cmux/cmux.json"
+        let globalPath = "/Users/me/.config/cmux-local/cmux.json"
         let localConfig = try decode("""
         {
           "agentChat": {
@@ -162,7 +162,7 @@ struct CmuxAgentChatConfigTests {
                 startCommand: "cmux-chat --port 9000"
             ),
             localSourcePath: localPath,
-            globalSourcePath: "/Users/me/.config/cmux/cmux.json"
+            globalSourcePath: "/Users/me/.config/cmux-local/cmux.json"
         )
 
         #expect(resolved.url.absoluteString == CmuxAgentChatConfiguration.defaultURLString)
@@ -174,7 +174,7 @@ struct CmuxAgentChatConfigTests {
     }
 
     @Test func resolveNoLocalUsesGlobalBlock() {
-        let globalPath = "/Users/me/.config/cmux/cmux.json"
+        let globalPath = "/Users/me/.config/cmux-local/cmux.json"
         let resolved = CmuxAgentChatConfiguration.resolved(
             local: nil,
             global: CmuxAgentChatConfigDefinition(

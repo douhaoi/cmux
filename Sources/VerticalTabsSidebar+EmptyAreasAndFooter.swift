@@ -3,7 +3,6 @@ import CmuxAppKitSupportUI
 import CmuxFoundation
 import CmuxSidebar
 import CmuxSidebarProviderKit
-import CmuxUpdater
 import CmuxWorkspaces
 import SwiftUI
 
@@ -93,7 +92,7 @@ enum SidebarFooterPresentationPolicy {
         isProActive: Bool,
         isProStatusKnown: Bool = true
     ) -> Bool {
-        isProStatusKnown && !isProActive
+        false
     }
 }
 
@@ -277,51 +276,6 @@ struct SidebarAccountAvatar: View {
 
 }
 
-struct SidebarMobileConnectButton: View {
-    @EnvironmentObject private var tabManager: TabManager
-    private let title = String(localized: "command.mobileConnect.title", defaultValue: "Open Mobile Pairing")
-#if DEBUG
-    @AppStorage(SidebarFooterMobileIconDebugSettings.sizeKey)
-    private var debugIconSize = SidebarFooterMobileIconDebugSettings.defaultSize
-#endif
-
-    private var iconSize: CGFloat {
-#if DEBUG
-        CGFloat(debugIconSize)
-#else
-        SidebarFooterButtonMetrics.mobileIconSize
-#endif
-    }
-
-    var body: some View {
-        // Hidden under a managed remote-control disable: pairing cannot open
-        // (chokepoint in performMobileConnectWorkspaceAction), so showing the
-        // button would be a dead affordance.
-        if MobileRemoteControlPolicy.isEnabled {
-            Button {
-                _ = AppDelegate.shared?.performMobileConnectWorkspaceAction(
-                    tabManager: tabManager,
-                    debugSource: "sidebar.mobileConnect"
-                )
-            } label: {
-                CmuxSystemSymbolImage(systemName: "iphone", pointSize: iconSize, weight: .medium, tint: .secondary)
-                    .frame(
-                        width: SidebarFooterButtonMetrics.buttonSize,
-                        height: SidebarFooterButtonMetrics.buttonSize
-                    )
-            }
-            .buttonStyle(SidebarFooterIconButtonStyle())
-            .frame(
-                width: SidebarFooterButtonMetrics.buttonSize,
-                height: SidebarFooterButtonMetrics.buttonSize
-            )
-            .safeHelp(title)
-            .hintableAccessibilityLabel(title)
-            .accessibilityIdentifier("SidebarMobileConnectButton")
-        }
-    }
-}
-
 private struct SidebarFooterIconButtonStyleBody: View {
     let configuration: SidebarFooterIconButtonStyle.Configuration
 
@@ -363,7 +317,6 @@ private struct SidebarFooterIconButtonStyleBody: View {
 
 #if DEBUG
 struct SidebarDevFooter: View {
-    var updateViewModel: UpdateStateModel
     @ObservedObject var fileExplorerState: FileExplorerState
     let modifierKeyMonitor: WindowScopedShortcutHintModifierMonitor
     let onSendFeedback: () -> Void
@@ -372,7 +325,7 @@ struct SidebarDevFooter: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SidebarFooterButtons(updateViewModel: updateViewModel, fileExplorerState: fileExplorerState, modifierKeyMonitor: modifierKeyMonitor, onSendFeedback: onSendFeedback)
+            SidebarFooterButtons(fileExplorerState: fileExplorerState, modifierKeyMonitor: modifierKeyMonitor, onSendFeedback: onSendFeedback)
             if showSidebarDevBuildBanner {
                 Text(String(localized: "debug.devBuildBanner.title", defaultValue: "THIS IS A DEV BUILD"))
                     .cmuxFont(size: 11, weight: .semibold)

@@ -1578,6 +1578,7 @@ extension Workspace {
         restoresDeviceProjection: Bool = false
     ) -> UUID? {
         guard !isRetiredFromOwningTabManager else { return nil }
+        guard LocalProduct().includesHostedServices || (cloudProjectionRecord?.resource.machine.isLocal != false && !restoresDeviceProjection && snapshot.browser?.cloudResource == nil && snapshot.coderouterGuide == nil) else { return nil }
         var snapshot = Self.repairedLegacyHermesSessionPanelSnapshot(snapshot, workspaceId: snapshotWorkspaceId ?? id)
         if let resource = cloudProjectionRecord?.resource, !resource.machine.isLocal { snapshot.browser?.cloudResource = resource }
         guard acceptsRestoredPanel(snapshot, projection: cloudProjectionRecord) else { return nil }
@@ -7331,6 +7332,7 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
         // command palette, menus, forks, session restore, and automation at
         // once. Nothing is retained or dialed before the refusal.
         guard !managedDevicePolicy.isEnforced(.disableRemoteConnections) else { return false }
+        guard LocalProduct().includesHostedServices || configuration.managedCloudVMID == nil else { return false }
         if let managedCloudVMID = configuration.managedCloudVMID,
            !managedCloudVMID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
            !CloudMachinesFeature.offMainIsEnabled() {

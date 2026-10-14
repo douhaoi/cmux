@@ -6,12 +6,11 @@ import CmuxWorkspaces
 import CmuxSettings
 import CmuxSettingsUI
 import CmuxSwiftRenderUI
-import CmuxUpdater
 import CmuxFoundation
 import Foundation
 import OSLog
 import SwiftUI
-nonisolated private let hostSettingsLogger = Logger(subsystem: "com.cmuxterm.app", category: "Settings")
+nonisolated private let hostSettingsLogger = Logger(subsystem: "com.cmuxterm.local", category: "Settings")
 /// Routes Settings actions to app-owned services, keeping the package independent.
 @MainActor
 final class HostSettingsActions: SettingsHostActions {
@@ -134,7 +133,6 @@ final class HostSettingsActions: SettingsHostActions {
         LanguageSettingsStore(defaults: .standard, domainName: ProcessDefaultsDomain.name).applyLanguageOverride(.system)
         PaneChromeSettings.notifyDidChange()
         TerminalAdaptiveDefaultThemeSettings.notifyDidChange()
-        PhonePushClient.shared.reloadConfigurationFromDefaults()
         AppDelegate.shared?.reconcileSocketListenerConfiguration(source: "settings.reset_all")
     }
 
@@ -758,76 +756,23 @@ final class HostSettingsActions: SettingsHostActions {
     }
 
     func mobilePhonePushSettings() -> MobilePhonePushSettingsSnapshot {
-        Self.mobilePhonePushSettingsSnapshot(
-            from: PhonePushClient.shared.configuration()
+        MobilePhonePushSettingsSnapshot(
+            forwardingEnabled: false, mode: .always, hideContent: true
         )
     }
 
     func mobilePhonePushSettingsUpdates() -> AsyncStream<MobilePhonePushSettingsSnapshot> {
-        AsyncStream { continuation in
-            let (signals, signalContinuation) = AsyncStream<Void>.makeStream(
-                bufferingPolicy: .bufferingNewest(1)
-            )
-            let observer = MobileHostStatusObserverToken(
-                NotificationCenter.default.addObserver(
-                    forName: PhonePushClient.settingsDidChangeNotification,
-                    object: nil,
-                    queue: nil
-                ) { _ in
-                    signalContinuation.yield(())
-                }
-            )
-            let drainTask = Task { @MainActor in
-                continuation.yield(mobilePhonePushSettings())
-                for await _ in signals {
-                    if Task.isCancelled { break }
-                    continuation.yield(mobilePhonePushSettings())
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in
-                drainTask.cancel()
-                signalContinuation.finish()
-                observer.remove()
-            }
+        let snapshot = mobilePhonePushSettings()
+        return AsyncStream { continuation in
+            continuation.yield(snapshot)
+            continuation.finish()
         }
     }
 
     func updateMobilePhonePushSettings(
         _ mutation: MobilePhonePushSettingsMutation
     ) -> MobilePhonePushSettingsSnapshot {
-        let configuration: PhonePushConfiguration
-        switch mutation {
-        case let .forwardingEnabled(enabled):
-            configuration = PhonePushClient.shared.updateSettings(
-                forwardingEnabled: enabled
-            )
-        case let .mode(mode):
-            let hostMode: PhoneForwardingMode = switch mode {
-            case .onlyWhenAway: .onlyWhenAway
-            case .always: .always
-            }
-            configuration = PhonePushClient.shared.updateSettings(mode: hostMode)
-        case let .hideContent(hidden):
-            configuration = PhonePushClient.shared.updateSettings(
-                hideContent: hidden
-            )
-        }
-        return Self.mobilePhonePushSettingsSnapshot(from: configuration)
-    }
-
-    private static func mobilePhonePushSettingsSnapshot(
-        from configuration: PhonePushConfiguration
-    ) -> MobilePhonePushSettingsSnapshot {
-        let mode: MobilePhonePushSettingsSnapshot.Mode = switch configuration.mode {
-        case .onlyWhenAway: .onlyWhenAway
-        case .always: .always
-        }
-        return MobilePhonePushSettingsSnapshot(
-            forwardingEnabled: configuration.forwardingEnabled,
-            mode: mode,
-            hideContent: configuration.hideContent
-        )
+        mobilePhonePushSettings()
     }
 
     private func existingConfigWindow() -> NSWindow? {
@@ -971,10 +916,7 @@ final class HostSettingsActions: SettingsHostActions {
     }
 
     func irohSettingsController() -> (any CmxIrohSettingsControlling)? {
-        // Exactly one runtime owns the transport slot (gated in
-        // MobileHostService.configure); Settings must read the same one, or
-        // the Networking section reports the dormant stack's stale state.
-        return MobileHostIrxRuntime.shared
+        nil
     }
 
     /// Maps the host's ``MobileHostServiceStatus`` into the settings package's

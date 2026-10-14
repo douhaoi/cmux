@@ -10529,11 +10529,11 @@ extension CLINotifyProcessIntegrationRegressionTests {
         )
         XCTAssertTrue(result.stdout.contains("CMUX_WORKSPACE_ID=\(launchWorkspace)"), result.stdout)
         XCTAssertTrue(
-            result.stdout.contains("TMUX=/tmp/cmux-debug/\(launchWorkspace),\(launchWindow),395573847701825025"),
+            result.stdout.contains("TMUX=/tmp/cmux-local-debug/\(launchWorkspace),\(launchWindow),395573847701825025"),
             "fake tmux session/window identity must come from the launch surface; stdout:\n\(result.stdout)"
         )
         XCTAssertFalse(
-            result.stdout.contains("TMUX=/tmp/cmux-debug/\(focusedWorkspace),\(focusedWindow),"),
+            result.stdout.contains("TMUX=/tmp/cmux-local-debug/\(focusedWorkspace),\(focusedWindow),"),
             "fake tmux identity must not follow global focus; stdout:\n\(result.stdout)"
         )
         XCTAssertTrue(

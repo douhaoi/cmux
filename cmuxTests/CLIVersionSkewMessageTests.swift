@@ -37,7 +37,7 @@ struct CLIVersionSkewMessageTests {
     ) -> String? {
         CLIVersionSkew.message(
             method: "workspace.create",
-            socketPath: "/tmp/cmux.sock",
+            socketPath: "/tmp/cmux-local.sock",
             cliVersion: "cmux 0.65.0 (108)",
             cliShortVersion: cliShortVersion,
             cliBuild: cliBuild,
@@ -135,7 +135,7 @@ struct CLIVersionSkewMessageTests {
     func multiLineOriginalIsJoined() throws {
         let text = try #require(CLIVersionSkew.message(
             method: "workspace.create",
-            socketPath: "/tmp/cmux.sock",
+            socketPath: "/tmp/cmux-local.sock",
             cliVersion: "cmux 0.65.0 (108)",
             cliShortVersion: "0.65.0",
             cliPath: nil,
@@ -150,7 +150,7 @@ struct CLIVersionSkewMessageTests {
     func originalErrorIsSanitized() throws {
         let text = try #require(CLIVersionSkew.message(
             method: "workspace.create",
-            socketPath: "/tmp/cmux.sock",
+            socketPath: "/tmp/cmux-local.sock",
             cliVersion: "cmux 0.65.0 (108)",
             cliShortVersion: "0.65.0",
             cliPath: nil,

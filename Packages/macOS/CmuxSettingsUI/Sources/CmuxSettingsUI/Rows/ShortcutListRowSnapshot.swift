@@ -1,7 +1,7 @@
 import CmuxFoundation
 import CmuxSettings
 
-struct ShortcutListRowSnapshot: Equatable {
+struct ShortcutListRowSnapshot: Equatable, Sendable {
     let action: ShortcutAction
     let isLast: Bool
     let title: String

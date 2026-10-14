@@ -65,7 +65,7 @@ enum BundledCLITestSupport {
     /// variables (socket pins, surface/workspace ids, tags) are dropped; and implicit
     /// socket discovery is confined to `home`'s state directory. On a machine where
     /// the user (or a CI runner account) has a live cmux, the CLI would otherwise
-    /// follow `/tmp/cmux-last-socket-path` to that app's socket.
+    /// follow `/tmp/cmux-local-last-socket-path` to that app's socket.
     static func hermeticCLIEnvironment(
         home: URL,
         base: [String: String] = ProcessInfo.processInfo.environment

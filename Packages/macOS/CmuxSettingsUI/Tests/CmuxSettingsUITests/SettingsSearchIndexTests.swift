@@ -90,8 +90,8 @@ struct SettingsSearchIndexTests {
         let sectionCount = result.filter {
             if case .section = $0.kind { return true } else { return false }
         }.count
-        #expect(sectionCount == SettingsSectionID.allCases.count)
-        #expect(result.contains { $0.id == "section:computers" })
+        #expect(sectionCount == SettingsSectionID.allCases.filter { LocalProduct().includesSettingsSection($0.rawValue) }.count)
+        #expect(!result.contains { $0.id == "section:computers" })
     }
 
     @Test func tokenizedQueryFiltersBothSectionsAndSettings() {
@@ -104,26 +104,9 @@ struct SettingsSearchIndexTests {
     /// Every name people use for the Cloud sidebar's My Devices feature ranks
     /// a Devices result first, anchored on the Devices section (#14771).
     @Test(arguments: ["computers", "Computers", "devices", "Devices", "my devices", "macs", "discovery", "discoverable"])
-    func devicesQueriesLandOnTheDevicesSection(query: String) throws {
+    func removedDeviceQueriesCannotTargetHostedSettings(query: String) {
         let index = SettingsSearchIndex(catalog: SettingCatalog())
-        let first = try #require(index.match(query).first)
-
-        switch first.kind {
-        case .section:
-            #expect(first.id == "section:computers")
-            #expect(first.anchorID == "section:computers")
-        case .setting(let parent):
-            #expect(parent == .computers, "\(query) ranked \(first.id) first")
-        }
-    }
-
-    @Test(arguments: ["mac", "tailscale", "remote"])
-    func devicesSectionAliasesPreserveSearchRanking(query: String) throws {
-        let index = SettingsSearchIndex(catalog: SettingCatalog())
-        let result = try #require(index.match(query).first { $0.kind == .section })
-
-        #expect(result.id == "section:computers")
-        #expect(result.anchorID == "section:computers")
+        #expect(!index.match(query).contains { $0.id.contains(":computers") })
     }
 
     /// Typing an exact section name navigates to that section first.
@@ -154,7 +137,7 @@ struct SettingsSearchIndexTests {
         let result = SettingsSearchIndex(catalog: SettingCatalog()).match(
             query
         )
-        #expect(result.contains {
+        #expect(!result.contains {
             $0.id == "setting:mobile:phone-push-forwarding"
         })
     }

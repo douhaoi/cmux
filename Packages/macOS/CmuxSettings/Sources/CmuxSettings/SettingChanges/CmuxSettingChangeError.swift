@@ -53,7 +53,7 @@ public enum CmuxSettingChangeError: LocalizedError, Sendable, Equatable {
         case .unknownPreset(let name):
             return localization.format(
                 "config.settingChange.unknownPreset",
-                defaultValue: "No setting preset named '%@'. Add it under settingPresets in ~/.config/cmux/cmux.json.",
+                defaultValue: "No setting preset named '%@'. Add it under settingPresets in ~/.config/cmux-local/cmux.json.",
                 name
             )
         case .invalidPreset(let name):

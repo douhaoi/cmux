@@ -1724,7 +1724,7 @@ struct ComputerUseUXTests {
             socketRootDirectoryURL: URL(fileURLWithPath: "/tmp"),
             userIdentifier: 501,
             environment: [:],
-            bundleIdentifier: "com.cmuxterm.app",
+            bundleIdentifier: "com.cmuxterm.local",
             authenticationToken: "production-token"
         )
         let staging = ComputerUseRuntimePaths(
@@ -1732,12 +1732,12 @@ struct ComputerUseUXTests {
             socketRootDirectoryURL: URL(fileURLWithPath: "/tmp"),
             userIdentifier: 501,
             environment: [:],
-            bundleIdentifier: "com.cmuxterm.app.staging",
+            bundleIdentifier: "com.cmuxterm.local.staging",
             authenticationToken: "staging-token"
         )
 
-        #expect(production.scope == "com.cmuxterm.app")
-        #expect(staging.scope == "com.cmuxterm.app.staging")
+        #expect(production.scope == "com.cmuxterm.local")
+        #expect(staging.scope == "com.cmuxterm.local.staging")
         #expect(production.daemonSocketURL != staging.daemonSocketURL)
         #expect(production.installedHelperAppURL != staging.installedHelperAppURL)
     }
@@ -2451,7 +2451,7 @@ struct ComputerUseUXTests {
         let repositoryRoot = SwiftTestingAssertions.sourceURL()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let schemaURL = repositoryRoot.appendingPathComponent("web/data/cmux.schema.json")
+        let schemaURL = repositoryRoot.appendingPathComponent("schemas/cmux.schema.json")
         let object = try #require(
             try JSONSerialization.jsonObject(with: Data(contentsOf: schemaURL)) as? [String: Any]
         )

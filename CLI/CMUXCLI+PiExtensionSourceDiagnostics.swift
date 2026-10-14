@@ -111,7 +111,7 @@ async function runPiHookDiagnosticWrite(operation: () => Promise<void>): Promise
 function piHookDiagnosticPath(
   environment: Record<string, string | undefined> = process.env,
   lastDebugLogPathFile = "/tmp/cmux-last-debug-log-path",
-  fallbackLogPath = "/tmp/cmux-debug.log",
+  fallbackLogPath = "/tmp/cmux-local-debug.log",
 ): string {
   const explicit = firstString(environment.CMUX_DEBUG_LOG);
   if (explicit) return expandedPiHookLogPath(explicit, environment.HOME);
@@ -157,7 +157,7 @@ async function appendPiHookDiagnostic(
   payload: Record<string, unknown>,
   environment: Record<string, string | undefined> = process.env,
   lastDebugLogPathFile = "/tmp/cmux-last-debug-log-path",
-  fallbackLogPath = "/tmp/cmux-debug.log",
+  fallbackLogPath = "/tmp/cmux-local-debug.log",
 ): Promise<void> {
   let line: string;
   try {

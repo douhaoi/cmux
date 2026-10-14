@@ -11,7 +11,7 @@ import UserNotifications
 // facade remains a small, stable seam for the rest of the app and tests.
 
 nonisolated private let notificationSoundLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "notification-sound"
 )
 

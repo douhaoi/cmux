@@ -1,5 +1,4 @@
 import Foundation
-import StackAuth
 
 /// The one-line failure detail a sign-in error screen shows and copies.
 ///
@@ -12,16 +11,7 @@ extension AuthError {
         if let authError = error as? AuthError {
             return authError.failureDetail
         }
-        if let stackError = error as? any StackAuthErrorProtocol {
-            var parts = [stackError.code.uppercased()]
-            if let status = stackError.details?["httpStatus"] as? Int {
-                parts.append("HTTP \(status)")
-            }
-            if let requestID = stackError.details?["requestId"] as? String, !requestID.isEmpty {
-                parts.append("Request ID \(requestID)")
-            }
-            return parts.joined(separator: " · ")
-        }
+
         if let urlError = error as? URLError {
             return "URL_ERROR \(urlError.code.rawValue)"
         }

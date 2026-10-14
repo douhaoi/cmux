@@ -9,7 +9,6 @@ import CryptoKit
 import Foundation
 @preconcurrency import Network
 import OSLog
-import StackAuth
 import os
 
 enum MobileHostConnectionAuthorizationContext: Equatable, Sendable {
@@ -374,10 +373,7 @@ enum MobileHostPublicStatusCache {
     static func result(
         includeIdentity: Bool = false,
         deviceID authorizedDeviceID: String? = nil,
-        additionalCapabilities: Set<String> = [],
-        phonePushAdmission: PhonePushAdmission = .unknown,
-        phonePushQueuePersistenceStatus: PhonePushQueuePersistenceStatus =
-            .unknown
+        additionalCapabilities: Set<String> = []
     ) -> MobileHostRPCResult {
         lock.lock()
         let cachedRoutes = mergedRoutesLocked()
@@ -399,9 +395,7 @@ enum MobileHostPublicStatusCache {
         return .ok(MobileHostService.identityStatusPayload(
             routes: cachedRoutes,
             deviceID: deviceID,
-            additionalCapabilities: additionalCapabilities,
-            phonePushAdmission: phonePushAdmission,
-            phonePushQueuePersistenceStatus: phonePushQueuePersistenceStatus
+            additionalCapabilities: additionalCapabilities
         ))
     }
 

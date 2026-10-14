@@ -458,7 +458,7 @@ final class CmuxExtensionProcessTermination: @unchecked Sendable {
 
 enum CmuxExtensionWorktreePrototype {
     private static let logger = Logger(
-        subsystem: "com.cmuxterm.app",
+        subsystem: "com.cmuxterm.local",
         category: "ExtensionWorktree"
     )
 

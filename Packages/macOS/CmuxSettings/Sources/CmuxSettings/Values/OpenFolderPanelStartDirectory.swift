@@ -2,7 +2,7 @@ import Foundation
 import os
 
 nonisolated private let openFolderPanelStartDirectoryLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "OpenFolderPanel"
 )
 

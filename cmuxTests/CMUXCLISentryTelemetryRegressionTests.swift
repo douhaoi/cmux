@@ -66,7 +66,7 @@ private final class CMUXCLISentryTelemetryBundleToken {}
         )
     }
 
-    @Test func unexpectedSocketTelemetryStoresWithoutBlockingForSentryFlush() throws {
+    @Test func unexpectedSocketFailureCannotCreateHostedTelemetry() throws {
         let cliPath = try bundledCLIPath()
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("cmux-cli-sentry-flush-\(UUID().uuidString)", isDirectory: true)
@@ -90,12 +90,12 @@ private final class CMUXCLISentryTelemetryBundleToken {}
         #expect(result.status != 0, Comment(rawValue: result.stdout))
         #expect(result.stdout.contains("Missing relay auth metadata"), Comment(rawValue: result.stdout))
         #expect(
-            FileManager.default.fileExists(atPath: captureProbePath),
-            Comment(rawValue: "Unexpected relay auth failures should still be captured as telemetry-worthy errors. Output: \(result.stdout)")
+            !FileManager.default.fileExists(atPath: captureProbePath),
+            Comment(rawValue: "The local edition must not capture relay failures as hosted telemetry. Output: \(result.stdout)")
         )
         #expect(
-            FileManager.default.fileExists(atPath: storeProbePath),
-            Comment(rawValue: "Unexpected relay auth failures should be stored durably without synchronously flushing Sentry. Output: \(result.stdout)")
+            !FileManager.default.fileExists(atPath: storeProbePath),
+            Comment(rawValue: "The local edition must not store hosted telemetry. Output: \(result.stdout)")
         )
     }
 
@@ -128,7 +128,7 @@ private final class CMUXCLISentryTelemetryBundleToken {}
             actionableResult.stdout.contains("internal_error: TabManager not available"),
             Comment(rawValue: actionableResult.stdout)
         )
-        #expect(FileManager.default.fileExists(atPath: actionableProbe))
+        #expect(!FileManager.default.fileExists(atPath: actionableProbe))
     }
 
     @Test func routineProtocolOutcomesDoNotCaptureSentryTelemetry() throws {
@@ -203,7 +203,7 @@ private final class CMUXCLISentryTelemetryBundleToken {}
         )
         #expect(!actionableResult.timedOut, Comment(rawValue: actionableResult.stdout))
         #expect(
-            FileManager.default.fileExists(atPath: actionableProbe),
+            !FileManager.default.fileExists(atPath: actionableProbe),
             Comment(rawValue: "An actionable failure after expected noise must remain reportable. Output: \(actionableResult.stdout)")
         )
     }
@@ -230,7 +230,7 @@ private final class CMUXCLISentryTelemetryBundleToken {}
             root: root
         )
         #expect(!actionableResult.timedOut, Comment(rawValue: actionableResult.stdout))
-        #expect(FileManager.default.fileExists(atPath: actionableProbe))
+        #expect(!FileManager.default.fileExists(atPath: actionableProbe))
     }
 
     @Test func foreignBundleIdentityDoesNotCaptureSentryTelemetry() throws {
@@ -314,7 +314,7 @@ private final class CMUXCLISentryTelemetryBundleToken {}
         #expect(first.status != 0, Comment(rawValue: first.stdout))
         #expect(first.stdout.contains("Command timed out"), Comment(rawValue: first.stdout))
         #expect(
-            FileManager.default.fileExists(atPath: firstCaptureProbe),
+            !FileManager.default.fileExists(atPath: firstCaptureProbe),
             Comment(rawValue: "The first timed-out command per stage must stay reportable. Output: \(first.stdout)")
         )
         let firstStorePayload = (try? String(contentsOfFile: firstStoreProbe, encoding: .utf8)) ?? "<missing>"

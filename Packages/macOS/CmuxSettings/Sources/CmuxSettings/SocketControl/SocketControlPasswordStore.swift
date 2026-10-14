@@ -22,7 +22,7 @@ public struct SocketControlPasswordStore: Sendable {
 
     private static let keychainMigrationDefaultsKey = "socketControlPasswordMigrationVersion"
     private static let keychainMigrationVersion = 1
-    private static let legacyKeychainService = "com.cmuxterm.app.socket-control"
+    private static let legacyKeychainService = "com.cmuxterm.local.socket-control"
     private static let legacyKeychainAccount = "local-socket-password"
 
     private let environment: [String: String]
@@ -295,7 +295,7 @@ public struct SocketControlPasswordStore: Sendable {
     }
 
     /// Migrates the socket password out of the legacy Application Support location
-    /// (`~/Library/Application Support/cmux/socket-control-password`) into the
+    /// (`~/Library/Application Support/cmux-local/socket-control-password`) into the
     /// current ``CmuxStateDirectory`` location, once.
     ///
     /// The app — which owns its Application Support data and can read it without a
@@ -332,7 +332,7 @@ public struct SocketControlPasswordStore: Sendable {
 #if canImport(Security)
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrService: "com.cmuxterm.app.socket-control",
+            kSecAttrService: "com.cmuxterm.local.socket-control",
             kSecAttrAccount: "local-socket-password",
             kSecReturnData: true,
             kSecMatchLimit: kSecMatchLimitOne,
@@ -353,7 +353,7 @@ public struct SocketControlPasswordStore: Sendable {
 #if canImport(Security)
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrService: "com.cmuxterm.app.socket-control",
+            kSecAttrService: "com.cmuxterm.local.socket-control",
             kSecAttrAccount: "local-socket-password",
         ]
         let status = SecItemDelete(query as CFDictionary)

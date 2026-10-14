@@ -14,5 +14,5 @@ extension CmuxFeatureFlags {
         defaultWhenUnavailable: CmuxFeatureFlags.cloudMachinesDefault
     )
 
-    var isCloudMachinesEnabled: Bool { effectiveValue(for: Self.cloudMachinesFlag) }
+    var isCloudMachinesEnabled: Bool { false }
 }

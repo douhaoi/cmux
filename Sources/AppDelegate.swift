@@ -19,9 +19,7 @@ import CmuxSettings
 import CmuxSettingsUI
 import CmuxSudoBroker
 import CmuxSudoBrokerUI
-import CmuxUpdater
 import CmuxWorkspaces
-import CmuxUpdaterUI
 import SwiftUI
 import Bonsplit
 import CMUXAgentLaunch
@@ -29,19 +27,17 @@ import CoreServices
 import CoreGraphics
 import UserNotifications
 import CMUXMobileCore
-import Sentry
 import WebKit
 import Combine
 import ObjectiveC.runtime
 import Darwin
 import CmuxFoundation
-import CmuxSentryReporting
 import CmuxSidebar
 import CmuxGit
 import os
 
 private nonisolated let sudoApprovalLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "SudoApproval"
 )
 
@@ -617,9 +613,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     /// (breadcrumbs, structured logs, throttled failure events with the ring
     /// export attached). Created after `SentrySDK.start`; delivery no-ops when
     /// the SDK is off.
-    private var transportSentryReporter: TransportSentryReporter?
     private let cmuxThemePreviewReloadScheduler = MainActorDeferredActionScheduler()
-    private let connectivityInvalidationSubscriberCoordinator = ConnectivityInvalidationSubscriberCoordinator()
     let workspacePresenceController = WorkspacePresenceController()
     private let sudoApprovalCoordinator: SudoApprovalCoordinator?
 
@@ -846,7 +840,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     /// Explicit Cloud machine pins and stable fleet order, built by the composition root.
     private(set) var cloudMachinePinStore: CloudMachinePinStore?
     /// "Introducing cmux cloud", shown once from the first main window.
-    private(set) lazy var cloudWelcomeWindowController = CloudWelcomeWindowController()
     private(set) lazy var cloudActivationCoordinator = CloudActivationCoordinator(prepare: { try await CmuxTuiSurfaceProviderRegistry.shared.prepareForActivation() }, cleanup: { await CmuxTuiSurfaceProviderRegistry.shared.cancelActivationPreparation() })
     var cloudWorkspaceCoordinator: CloudWorkspaceCoordinator?
     var cloudWorkspaceOperationController: CloudWorkspaceOperationController?
@@ -970,7 +963,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private var browserAddressBarFocusObserver: NSObjectProtocol?
     private var browserAddressBarBlurObserver: NSObjectProtocol?
     private var browserWebViewFirstResponderObserver: NSObjectProtocol?
-    let updateLog = UpdateLogStore()
     let focusLog = FocusLogStore()
     /// Process-wide identity of the workspace currently being sidebar-dragged in
     /// any window. Owned here (the composition root) and injected into every
@@ -984,15 +976,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     let sidebarDragStateRegistry = SidebarDragStateRegistry()
     var debugFocusedTerminalKeyRepairObserverForTesting: ((NSWindow, NSEvent, NSResponder?) -> Void)?
     #endif
-    private lazy var updateController = UpdateController(
-        log: updateLog,
-        // `DisableAutoUpdate` (MDM): the updater never starts and manual checks
-        // are suppressed while forced; `managedAutoUpdateAllowsCheck()` explains.
-        isDisabledByPolicy: { ManagedDevicePolicy().isEnforced(.disableAutoUpdate) }
-    )
     private let titlebarControlsLayoutModel = TitlebarControlsLayoutModel()
-    private lazy var titlebarAccessoryController = UpdateTitlebarAccessoryController(
-        updateLog: updateLog,
+    private lazy var titlebarAccessoryController = TitlebarAccessoryController(
         settingsRuntime: settingsRuntime,
         layoutModel: titlebarControlsLayoutModel
     )
@@ -1304,13 +1289,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     /// their target workspaces.
     var pendingStartupNavigationURLRequests: [CmuxNavigationURLRequest] = []
     private let sessionPersistenceQueue = DispatchQueue(
-        label: "com.cmuxterm.app.sessionPersistence",
+        label: "com.cmuxterm.local.sessionPersistence",
         qos: .utility
     )
     /// Crash-safe scrollback checkpoints; see `SessionScrollbackCheckpoint.swift`.
     var sessionScrollbackCheckpointCoordinator: SessionScrollbackCheckpointCoordinator?
     let sessionScrollbackCheckpointQueue = DispatchQueue(
-        label: "com.cmuxterm.app.sessionScrollbackCheckpoint",
+        label: "com.cmuxterm.local.sessionScrollbackCheckpoint",
         qos: .utility
     )
     /// Holds back primary snapshot writes from a launch that restored less
@@ -1372,7 +1357,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     /// `BrowserPanel` wraps responder-churning devtools work in `withBypass(_:)`.
     nonisolated let browserFirstResponderBypass = BrowserFirstResponderBypass()
     private nonisolated static let launchServicesRegistrationQueue = DispatchQueue(
-        label: "com.cmuxterm.app.launchServicesRegistration",
+        label: "com.cmuxterm.local.launchServicesRegistration",
         qos: .utility
     )
     private nonisolated static func enqueueLaunchServicesRegistrationWork(_ work: @escaping @Sendable () -> Void) {
@@ -1414,8 +1399,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private var activeQuitConfirmationAlertPresenter: QuitConfirmationAlertPresenter?
     private var activeQuitConfirmationOwnsTerminateRequest = false
     private var didInstallLifecycleSnapshotObservers = false
-    static let screenChangeReconcileNotification = Notification.Name("com.cmuxterm.app.screenChangeReconcile")
-    static let displayReconfigurationNotification = Notification.Name("com.cmuxterm.app.displayReconfiguration")
+    static let screenChangeReconcileNotification = Notification.Name("com.cmuxterm.local.screenChangeReconcile")
+    static let displayReconfigurationNotification = Notification.Name("com.cmuxterm.local.displayReconfiguration")
     static let screenChangeReconcileRetryLimit = 3
     var windowConfigFrames: [UUID: SessionConfigFrameRing] = [:]
     var lastAppliedConfigurationSignature: String?
@@ -1434,9 +1419,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     let commandPaletteWindowStore = CommandPaletteWindowStore()
     private let mainThreadHangWatchdog: MainThreadHangWatchdog
 
-    var updateViewModel: UpdateStateModel {
-        updateController.model
-    }
 
 #if DEBUG
     private func pointerString(_ object: AnyObject?) -> String {
@@ -1522,7 +1504,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             in: .userDomainMask
         ).first?
             .appendingPathComponent("Logs", isDirectory: true)
-            .appendingPathComponent("cmux", isDirectory: true)
+            .appendingPathComponent("cmux-local", isDirectory: true)
             .appendingPathComponent("hangs", isDirectory: true)
         let captureStore = hangDirectory.map {
             MainThreadHangCaptureStore(
@@ -1604,7 +1586,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             AuthDebugLog().log("auth.callback did not complete sign-in")
             return false
         }
-        await NativePricingPlanRefresh.refreshForProWelcomeChecklist()
         return true
     }
 
@@ -1708,7 +1689,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         SurfaceCatalog.shared.focusProjection = { projection in
             SurfacePaneFactory.focus(panelID: projection.panelID, in: projection.workspaceID)
         }
-        CmuxTuiSurfaceProviderRegistry.shared.start(catalog: .shared)
+        if LocalProduct().includesHostedServices { CmuxTuiSurfaceProviderRegistry.shared.start(catalog: .shared) }
         let env = ProcessInfo.processInfo.environment
         let telemetryEnabled = TelemetrySettings.enabledForCurrentLaunch
         let sentryStartupPolicy = MacSentryStartupPolicy(
@@ -1749,7 +1730,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             AgentMessageCenter.warmStoreOffMain()
         }
 
-        claimAuthCallbackURLSchemes()
         StartupBreadcrumbLog.append("appDelegate.didFinish.authSchemes.claimed")
 
         // Install the Feed (workstream) store. Separate from the transport
@@ -1834,93 +1814,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         }
 #endif
 
-        if sentryStartupPolicy.shouldStart {
-            // Pre-warm locale before Sentry to avoid a startup data race.
-            // Locale initialization (os.locale.ensureLocale / NSLocale._preferredLanguages)
-            // on the main thread can race with Sentry's background init thread
-            // calling posix.getenv, causing a SIGSEGV ~134ms after launch.
-            // Forcing locale access here before SentrySDK.start eliminates the race.
-            // Related to: #836
-            _ = Locale.current
-            _ = NSLocale.preferredLanguages
-
-            StartupBreadcrumbLog.append("appDelegate.didFinish.sentry.begin")
-            SentrySDK.start { options in
-                options.dsn = "https://ecba1ec90ecaee02a102fba931b6d2b3@o4507547940749312.ingest.us.sentry.io/4510796264636416"
-                #if DEBUG
-                options.environment = "development"
-                options.debug = true
-                #else
-                options.environment = "production"
-                options.debug = false
-                #endif
-                options.sendDefaultPii = false
-
-                // Performance tracing is disabled. The auto-instrumented root
-                // `SentryTransaction.trace` serializes its `data` / `tags` /
-                // `description` into the payload *after* `beforeSend` runs, and
-                // the root tracer is not reachable through the public Sentry API,
-                // so those fields cannot be scrubbed. Disabling transactions
-                // removes that un-scrubbable egress path while keeping crash,
-                // error, and app-hang reporting (which are independent of the
-                // trace sample rate). cmux does not consume these performance
-                // traces today.
-                options.tracesSampleRate = 0.0
-                // Keep app-hang tracking enabled, but avoid reporting short main-thread stalls
-                // as hangs in normal user interaction flows.
-                options.appHangTimeoutInterval = 8.0
-                // Attach stack traces to all events
-                options.attachStacktrace = true
-                // Avoid recursively capturing failed requests from Sentry's own ingestion endpoint.
-                options.enableCaptureFailedRequests = false
-                // Report Objective-C exceptions that reach NSApplication's
-                // reportException: hook with their reason and throw stack. The
-                // matching executor-corruption path reaches this hook before
-                // AppKit terminates the process. Some macOS 26+ drawing paths
-                // call the class-level _crashOnException: method directly and
-                // remain outside Sentry Cocoa 9.3.0's hook; a future SDK upgrade
-                // can cover those paths too.
-                options.enableUncaughtNSExceptionReporting = true
-                // Structured logs power the transport diagnostics bridge
-                // (TransportSentryReporter on the host diagnostic ring below).
-                options.enableLogs = true
-                // Redact file paths, emails, and secrets from every outgoing
-                // event, breadcrumb, structured log, and (belt-and-suspenders,
-                // if tracing is ever re-enabled) child performance span before
-                // it leaves the device.
-                let scrubber = SentryEventScrubber()
-                options.beforeSend = { event in scrubber.scrub(event) }
-                options.beforeBreadcrumb = { breadcrumb in scrubber.scrub(breadcrumb) }
-                options.beforeSendSpan = { span in scrubber.scrub(span) }
-                options.beforeSendLog = { log in scrubber.scrub(log) }
-            }
-            // Bridge the Mac host's transport diagnostic ring into Sentry:
-            // every retained event becomes a breadcrumb + budget-limited log
-            // line, and gated failures become events carrying the ring export.
-            // The tap delivers on the ring's drain task, off the main thread.
-            let transportReporter = TransportSentryReporter(
-                role: .macHost,
-                exportRing: { await MobileHostDiagnostics.log.export() }
-            )
-            transportSentryReporter = transportReporter
-            MobileHostDiagnostics.log.setEventTap { event in
-                transportReporter.ingest(event)
-            }
-            StartupBreadcrumbLog.append("appDelegate.didFinish.sentry.complete")
-        }
-
-        if telemetryEnabled && !isRunningUnderXCTest {
-            StartupBreadcrumbLog.append("appDelegate.didFinish.posthog.begin")
-            PostHogAnalytics.shared.startIfNeeded()
-            StartupBreadcrumbLog.append("appDelegate.didFinish.posthog.complete")
-        }
-        // `DisableTelemetry` (MDM) also stops the remote feature-flag fetch: it
-        // carries the same anonymous install id, and flags then use their
-        // built-in defaults.
-        if !isRunningUnderXCTest, !ManagedDevicePolicy().isEnforced(.disableTelemetry) {
-            CmuxFeatureFlags.shared.start()
-        }
-
         let forceDuplicateLaunchObserver = env["CMUX_UI_TEST_ENABLE_DUPLICATE_LAUNCH_OBSERVER"] == "1"
 
         // UI tests frequently time out waiting for the main window if we do heavyweight
@@ -1952,8 +1845,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             configureUserNotifications()
             installMenuBarVisibilityObserver()
             syncApplicationPresentationPreferences()
-            updateController.actionDelegate = self
-            updateController.startUpdaterIfNeeded()
         }
         titlebarAccessoryController.start()
         windowDecorationsController.start()
@@ -1986,25 +1877,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         scheduleInitialMainWindowBootstrap(debugSource: "didFinishLaunching")
         StartupBreadcrumbLog.append("appDelegate.didFinish.complete")
 #if DEBUG
-        UpdateTestSupport(model: updateController.model, log: updateLog).applyIfNeeded()
-        if env["CMUX_UI_TEST_MODE"] == "1" {
-            let trigger = env["CMUX_UI_TEST_TRIGGER_UPDATE_CHECK"] ?? "<nil>"
-            let feed = env["CMUX_UI_TEST_FEED_URL"] ?? "<nil>"
-            updateLog.append("ui test env: trigger=\(trigger) feed=\(feed)")
-        }
-        if env["CMUX_UI_TEST_TRIGGER_UPDATE_CHECK"] == "1" {
-            updateLog.append("ui test trigger update check detected")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
-                guard let self else { return }
-                let windowIds = NSApp.windows.map { $0.identifier?.rawValue ?? "<nil>" }
-                updateLog.append("ui test windows: count=\(NSApp.windows.count) ids=\(windowIds.joined(separator: ","))")
-                if UpdateTestSupport(model: self.updateController.model, log: updateLog).performMockFeedCheckIfNeeded() {
-                    return
-                }
-                self.checkForUpdates(nil)
-            }
-        }
-
         // In UI tests, `WindowGroup` occasionally fails to materialize a window quickly on the VM.
         // If there are no windows shortly after launch, force-create one so XCUITest can proceed.
         if isRunningUnderXCTest {
@@ -2166,8 +2038,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         if TelemetrySettings.enabledForCurrentLaunch && !isRunningUnderXCTestCached {
             PostHogAnalytics.shared.trackActive(reason: "didBecomeActive")
         }
-        // A Mac that slept through the reply nudge picks parked replies up here.
-        PhoneReplyInboxCoordinator.shared.sweepSoon(reason: "app-activation")
         // Reconcile pairing on wake so an opted-in Mac resumes and an opted-out
         // Mac tears down any work that was in flight before sleep.
         MobileHostService.shared.syncToSettings()
@@ -2581,8 +2451,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         remoteTmuxController.detachAll()
         // Best-effort presence goodbye; unclean exits are covered by the
         // service's missed-heartbeat timeout.
-        PresenceHeartbeatClient.shared.appWillTerminate()
-        connectivityInvalidationSubscriberCoordinator.appWillTerminate()
         closeAllWebInspectorsBeforeAppTeardown()
         sessionAutosaveCoordinator.stop()
         CloudVMActionLauncher.shared.terminateAll()
@@ -2638,16 +2506,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         notificationStore: TerminalNotificationStore,
         sidebarState: SidebarState,
         settingsRuntime: SettingsRuntime,
-        auth: MacAuthComposition,
-        cloudMachinePinStore: CloudMachinePinStore,
-        cloudWorkspaceCoordinator: CloudWorkspaceCoordinator,
-        cloudWorkspaceOperationController: CloudWorkspaceOperationController,
-        newMachineSheetPresenter: any NewMachineSheetPresenting,
+        auth: MacAuthComposition? = nil,
+        cloudMachinePinStore: CloudMachinePinStore? = nil,
+        cloudWorkspaceCoordinator: CloudWorkspaceCoordinator? = nil,
+        cloudWorkspaceOperationController: CloudWorkspaceOperationController? = nil,
+        newMachineSheetPresenter: (any NewMachineSheetPresenting)? = nil,
         automationEngine: AutomationEngine,
         browserDataImportCoordinator: BrowserDataImportCoordinator,
         computerUseRuntimeService: ComputerUseRuntimeService,
-        devicesRegistry: DeviceSurfaceProviderRegistry? = nil,
-        computersService: HiveComputersService? = nil
+        devicesRegistry: DeviceSurfaceProviderRegistry? = nil
     ) {
         captureSessionLaunchStateIfNeeded()
         self.tabManager = tabManager
@@ -2663,119 +2530,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         self.settingsRuntime = settingsRuntime
         self.notificationStore = notificationStore
         self.sidebarState = sidebarState
-        self.auth = auth
-        self.cloudMachinePinStore = cloudMachinePinStore
-        self.cloudWorkspaceCoordinator = cloudWorkspaceCoordinator
-        self.cloudWorkspaceOperationController = cloudWorkspaceOperationController
-        self.deviceWorkspaceCreationCoordinator = makeDeviceWorkspaceCreationCoordinator(
-            operations: cloudWorkspaceOperationController, catalog: .shared
-        )
-        self.newMachineSheetPresenter = newMachineSheetPresenter
         self.browserDataImportCoordinator = browserDataImportCoordinator
         self.computerUseRuntimeService = computerUseRuntimeService
-        let cloudUploader = CloudTelemetryUploader(
-            auth: auth.coordinator, baseURL: CloudTelemetryUploader.telemetryBaseURL, client: .current()
-        )
-        let cloudOperations = CloudOperationRecorder(uploader: cloudUploader, identity: { [weak coordinator = auth.coordinator] in
-            coordinator?.authenticatedSessionIdentity
-        })
-        self.cloudOperations = cloudOperations
-        let cloudTunnel = makeCloudTunnelCoordinator()
-        cloudTunnelCoordinator = cloudTunnel
-        CmuxTuiSurfaceProviderRegistry.shared.portAccess.coordinator = cloudTunnel
-        let cloudReads = VMClient.bootstrap(
-            auth: auth.coordinator,
-            checkpointRenames: SurfaceCatalog.shared.cloudRenameCoordinator,
-            operations: cloudOperations,
-            telemetry: .live(),
-            isCloudEnabled: { CloudMachinesFeature.offMainIsEnabled() }, isCloudAvailable: { CloudMachinesFeature.offMainIsAvailable() }
-        )
-        TerminalController.shared.cloudTunnel = cloudTunnel
-        // Warms the New Machine sheet's plan and network catalog per signed-in
-        // account so Cmd+Shift+Y never waits on the network.
-        NewMachineSheetDataCache.bootstrap(auth: auth.coordinator)
-        RemotesClient.bootstrap(auth: auth.coordinator)
-        TeamsClient.bootstrap(auth: auth.coordinator)
-        AIAccountsClient.bootstrap(auth: auth.coordinator)
-        CoderouterClient.bootstrap(auth: auth.coordinator)
-        MachineUsageClient.bootstrap(auth: auth.coordinator, operations: cloudOperations, readRequests: cloudReads)
-        PhonePushClient.shared.configure(auth: auth.coordinator)
-        MobileHostService.shared.configure(auth: auth.coordinator)
-        caffeineController.onStateChange = { [weak self] enabled in
-            self?.menuBarExtraController?.refreshForDebugControls()
-            MobileHostService.emitEvent(
-                topic: "caffeine.status.changed",
-                payload: ["enabled": enabled]
-            )
-        }
-        DeviceRegistryClient.shared.configure(auth: auth.coordinator)
-        self.devicesRegistry = devicesRegistry
-        if let devicesRegistry, let computersService {
-            computersService.configure(auth: auth.coordinator)
-            devicesRegistry.configure(auth: auth.coordinator, catalog: .shared, authorization: computersService)
-        }
-        configureWorkspacePresence(auth: auth.coordinator)
-        PhoneReplyInboxClient.shared.configure(auth: auth.coordinator)
-        PhoneReplyInboxCoordinator.shared.configure(client: PhoneReplyInboxClient.shared)
-        // Relayed phone replies share the direct RPC paste-and-submit path,
-        // including named Return-key submission and partial-success semantics.
-        PhoneReplyInboxCoordinator.shared.injectTerminalInput = { [weak self] params, retargetsToLiveSurfaceOwner in
-            guard let self else { return .permanentlyUndeliverable }
-            let controller = TerminalController.shared
-            // The inbox payload always carries a stable surface id. Resolve it
-            // before entering the generic mobile RPC so a launch-time workspace
-            // claim cannot route the reply to a stale manager.
-            guard let routedParams = self.phoneReplyTerminalInputParams(
-                params,
-                retargetsToLiveSurfaceOwner: retargetsToLiveSurfaceOwner
-            ) else {
-                // A valid surface can be temporarily absent while a window,
-                // Dock, or remote-tmux projection is being rebuilt. The inbox
-                // has a server-side TTL, so keep that bounded retry alive;
-                // malformed payloads are the only immediate permanent case.
-                let hasValidSurfaceID = controller.v2UUID(params, "surface_id") != nil
-                let hasWorkspaceID = controller.v2HasNonNullParam(params, "workspace_id")
-                let hasValidWorkspaceID = controller.v2UUID(params, "workspace_id") != nil
-                if !retargetsToLiveSurfaceOwner, !hasWorkspaceID {
-                    return .permanentlyUndeliverable
-                }
-                guard hasValidSurfaceID,
-                      (!hasWorkspaceID || hasValidWorkspaceID) else {
-                    return .permanentlyUndeliverable
-                }
-                return .retryable
-            }
-            switch await controller.v2MobileTerminalPaste(params: routedParams) {
-            case .ok:
-                // `terminal.paste` applies the text before it attempts the
-                // named key. A false `submitted` flag is therefore a partial
-                // success, not a safe invitation to replay the whole reply:
-                // doing so would duplicate text in the agent prompt. The
-                // accepted paste is the durable delivery boundary; the user
-                // can press Return manually if the key was rejected.
-                return .delivered
-            case .err(let code, _, _):
-                if code == "input_queue_full" || code == "surface_unavailable" {
-                    return .retryable
-                }
-                guard code == "not_found" else {
-                    return .permanentlyUndeliverable
-                }
-                // A surface can be absent while startup/session restoration is
-                // still rebuilding its workspace. Once that pass has finished,
-                // a stable-surface lookup miss is authoritative and the parked
-                // reply must be acknowledged instead of retrying until TTL.
-                let restorationPending = !self.didAttemptStartupSessionRestore
-                    || self.isApplyingSessionRestore
-                return restorationPending ? .retryable : .permanentlyUndeliverable
-            }
-        }
-        connectivityInvalidationSubscriberCoordinator.configure(auth: auth.coordinator)
-        // DEV-only: auto-publish this Mac's attach route to the signed-in user's
-        // pairedMacs backup so a fresh dev iOS build restores it (no manual host
-        // entry). No-op on Release / when the flag is off.
-        MacPairedMacBackupPublisher.shared.configure(auth: auth.coordinator)
-        TerminalController.shared.attachAuth(coordinator: auth.coordinator, accountFlow: auth.accountFlow)
+        // This distribution constructs no account, cloud, phone or device graph.
         TerminalController.shared.attachBrowserDataImportCoordinator(browserDataImportCoordinator)
         TerminalController.shared.attachCaffeineController(caffeineController)
         TerminalController.shared.agentChatTranscriptService = agentChatTranscriptService
@@ -2784,12 +2541,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         if !isRunningUnderXCTest(ProcessInfo.processInfo.environment) {
             TerminalController.shared.startSimulatorMutationRecovery()
         }
-        auth.start()
-        ensureMobileWorkspaceListObserver(for: tabManager)
-        MobileTerminalRenderObserver.shared.start()
         agentChatTranscriptService.start()
         SidebarAgentUsageCoordinator { [weak self] id in self?.tabManagerFor(tabId: id)?.workspacesById[id]?.sidebarMetadata }.start()
-        installMobileHostSettingsObserver()
         installManagedPolicyEnforcement()
         scheduleGhosttyCrashBreadcrumbIfNeeded(notificationStore: notificationStore)
         startPaneMemoryGuardrailIfNeeded()
@@ -2825,7 +2578,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             }
         }
         // Best-effort one-time migration: a value previously stored in the
-        // legacy ~/.config/cmux/dev-window-display file moves into the shared
+        // legacy ~/.config/cmux-local/dev-window-display file moves into the shared
         // cmux.json (app.devWindowDisplay) so an existing dev-display default
         // keeps working. No-op when already set or the legacy file is absent.
         Task { await DevWindowDisplayDefault.migrateLegacyFileIfNeeded(runtime: settingsRuntime) }
@@ -5641,32 +5394,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         )
 #endif
         ensureSocketListenerIfEnabled(tabManager: tabManager, source: "mainWindow.register")
-        ensureMobileWorkspaceListObserver(for: tabManager)
         notifyMainWindowContextsDidChange()
         if window.isKeyWindow {
             setActiveMainWindow(window)
         }
 
         attemptStartupSessionRestoreAndSaveIfNeeded(primaryWindow: window)
-        presentCloudWelcomeIfNeeded(over: window)
     }
 
-    /// In release builds, once per Mac after the first main window is up. Tests
-    /// never see it; debug builds can open it from Help when needed.
-    private func presentCloudWelcomeIfNeeded(over window: NSWindow) {
-#if DEBUG
-        // Keep the first-run welcome available from Help while iterating on the
-        // app, but do not interrupt every development launch with it.
-        return
-#else
-        let env = ProcessInfo.processInfo.environment
-        guard !isRunningUnderXCTestCached, !isRunningUnderXCTest(env), env["CMUX_UI_TEST_MODE"] != "1" else { return }
-        // Next turn of the main loop, so the window is on screen to place it over.
-        DispatchQueue.main.async { [weak self, weak window] in
-            self?.cloudWelcomeWindowController.presentIfNeeded(over: window)
-        }
-#endif
-    }
 
 #if DEBUG
     func sessionSnapshotForTesting(includeScrollback: Bool = false) -> AppSessionSnapshot? {
@@ -7867,7 +7602,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             }
             if let name {
                 guard CmuxExtensionSidebarSelection.customSidebarFileURL(forName: name) != nil else {
-                    return .failure(String(localized: "rightSidebar.remote.error.customSidebarNotFound", defaultValue: "ERROR: No custom sidebar named '\(name)' in ~/.config/cmux/sidebars"))
+                    return .failure(String(localized: "rightSidebar.remote.error.customSidebarNotFound", defaultValue: "ERROR: No custom sidebar named '\(name)' in ~/.config/cmux-local/sidebars"))
                 }
                 state.selectCustomSidebar(name: name)
             }
@@ -10722,7 +10457,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 #endif
 
         let root = ContentView(
-            updateViewModel: updateViewModel,
             windowId: windowId,
             titlebarControlsLayoutModel: titlebarControlsLayoutModel,
             devicesModel: devicesRegistry.map { DevicesPanelViewModel(registry: $0, windowID: windowId) }
@@ -10937,18 +10671,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         return windowId
     }
 
-    @objc func checkForUpdates(_ sender: Any?) {
-        guard managedAutoUpdateAllowsCheck() else { return }
-        updateController.model.setOverrideState(nil)
-        updateController.checkForUpdates()
-    }
-
-    func checkForUpdatesInCustomUI() {
-        guard managedAutoUpdateAllowsCheck() else { return }
-        updateController.model.setOverrideState(nil)
-        updateController.checkForUpdatesInCustomUI()
-    }
-
     func openWelcomeWorkspace() {
         guard let context = preferredMainWindowContextForWorkspaceCreation(event: nil, debugSource: "welcome") else {
             return
@@ -10976,16 +10698,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 UserDefaults.standard.set(true, forKey: AccountCatalogSection().welcomeShown.userDefaultsKey)
             }
         })
-    }
-
-    @objc func applyUpdateIfAvailable(_ sender: Any?) {
-        updateController.model.setOverrideState(nil)
-        updateController.attemptUpdate() // re-resolve to the latest version at install time (#6366)
-    }
-
-    @objc func attemptUpdate(_ sender: Any?) {
-        updateController.model.setOverrideState(nil)
-        updateController.attemptUpdate()
     }
 
     func isCmuxCLIInstalledInPATH() -> Bool {
@@ -11111,9 +10823,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             },
             onToggleSleepyMode: {
                 SleepyModeController.shared.toggle()
-            },
-            onCheckForUpdates: { [weak self] in
-                self?.checkForUpdates(nil)
             },
             onOpenPreferences: { [weak self] in
                 self?.openPreferencesWindow(debugSource: "menuBarExtra")
@@ -11407,46 +11116,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         }
     }
 
-    #if DEBUG
-    @objc func showUpdatePill(_ sender: Any?) {
-        updateViewModel.debugOverrideText = nil
-        updateController.model.setOverrideState(.installing(.init(isAutoUpdate: true, retryTerminatingApplication: {}, dismiss: {})))
-    }
-
-    @objc func showUpdatePillLongNightly(_ sender: Any?) {
-        updateViewModel.debugOverrideText = "Update Available: 0.32.0-nightly+20260216.abc1234"
-        updateController.model.setOverrideState(.notFound(.init(acknowledgement: {})))
-    }
-
-    @objc func showUpdatePillLoading(_ sender: Any?) {
-        updateViewModel.debugOverrideText = nil
-        updateController.model.setOverrideState(.checking(.init(cancel: {})))
-    }
-
-    @objc func hideUpdatePill(_ sender: Any?) {
-        updateViewModel.debugOverrideText = nil
-        updateController.model.setOverrideState(.idle)
-    }
-
-    @objc func clearUpdatePillOverride(_ sender: Any?) {
-        updateViewModel.debugOverrideText = nil
-        updateController.model.setOverrideState(nil)
-    }
-#endif
-
-    @objc func copyUpdateLogs(_ sender: Any?) {
-        let logText = updateLog.snapshot()
-        let payload: String
-        if logText.isEmpty {
-            payload = "No update logs captured.\nLog file: \(updateLog.logPath())"
-        } else {
-            payload = logText + "\nLog file: \(updateLog.logPath())"
-        }
-        GhosttyApp.terminalPasteboard.writeString(
-            payload,
-            to: .general
-        )
-    }
     @objc func copyFocusLogs(_ sender: Any?) {
         let logText = focusLog.snapshot()
         let payload: String
@@ -12454,8 +12123,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     }
 
     @objc func triggerSentryTestCrash(_ sender: Any?) {
-        guard SentrySDK.isEnabled else { return }
-        SentrySDK.crash()
+        return
     }
 #endif
 
@@ -15811,17 +15479,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 "\(debugShortcutRouteSnapshot(event: event))"
             )
 #endif
-            return true
-        }
-
-        if matchConfiguredShortcut(event: event, action: .sendFeedback) {
-            guard let targetContext = preferredMainWindowContextForShortcuts(event: event),
-                  let targetWindow = targetContext.window ?? windowForMainWindowId(targetContext.windowId) else {
-                return false
-            }
-            setActiveMainWindow(targetWindow)
-            bringToFront(targetWindow)
-            NotificationCenter.default.post(name: .feedbackComposerRequested, object: targetWindow)
             return true
         }
 
@@ -20854,40 +20511,6 @@ private extension NSWindow {
         return hitWebView === webView
     }
 
-}
-
-// MARK: - CmuxUpdater seams
-
-/// Conforms the composition root to updater host actions, retry, and relaunch seams.
-/// `checkForUpdatesInCustomUI()` is satisfied by the main `AppDelegate` declaration.
-extension AppDelegate: UpdateActionDelegate, UpdateActionsHost {
-    func updaterRequestsRetryCheckForUpdates() {
-        checkForUpdates(nil)
-    }
-
-    func updaterWillRelaunchApplication() {
-        isRelaunchingForUpdate = true
-        persistSessionForUpdateRelaunch()
-        NSApp.invalidateRestorableState()
-        for window in NSApp.windows {
-            window.invalidateRestorableState()
-        }
-    }
-
-    func attemptUpdate() {
-        attemptUpdate(nil)
-    }
-
-    func copyUpdateDetails(_ text: String) -> Bool {
-        GhosttyApp.terminalPasteboard.writeString(
-            text,
-            to: .general
-        )
-    }
-
-    var updateLogPath: String {
-        updateLog.logPath()
-    }
 }
 
 // MARK: - CmuxAppKitSupportUI seam conformance

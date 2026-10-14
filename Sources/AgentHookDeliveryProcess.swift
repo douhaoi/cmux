@@ -3,7 +3,7 @@ import Foundation
 import OSLog
 
 nonisolated private let agentHookDeliveryProcessLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "AgentHookDelivery"
 )
 
@@ -243,7 +243,7 @@ struct AgentHookDeliveryProcess: Sendable {
         let appScope = Self.safePathComponent(
             ambientEnvironment["CMUX_BUNDLE_ID"]
                 ?? Bundle.main.bundleIdentifier
-                ?? "com.cmuxterm.app"
+                ?? "com.cmuxterm.local"
         )
         let routeScope = Self.safePathComponent(
             event.environment["CMUX_WORKSPACE_ID"]

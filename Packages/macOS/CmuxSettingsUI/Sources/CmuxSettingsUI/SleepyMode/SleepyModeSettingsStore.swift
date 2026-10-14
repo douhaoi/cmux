@@ -88,7 +88,9 @@ public final class SleepyModeSettingsStore {
             object: defaults,
             queue: .main
         ) { [weak self] _ in
-            self?.reloadFromDefaults()
+            Task { @MainActor [weak self] in
+                self?.reloadFromDefaults()
+            }
         }
     }
 

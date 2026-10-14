@@ -867,23 +867,6 @@ public struct AppSection: View {
             }
             SettingsCardDivider()
 
-            // Telemetry
-            SettingsCardRow(
-                configurationReview: .json("app.sendAnonymousTelemetry"),
-                String(localized: "settings.app.telemetry", defaultValue: "Send anonymous telemetry"),
-                subtitle: telemetryManagedByPolicy
-                    ? String(localized: "settings.managedByOrganization", defaultValue: "Managed by your organization")
-                    : (telemetryAtAppear != nil && telemetry.current != telemetryAtAppear)
-                        ? String(localized: "settings.app.telemetry.subtitleChanged", defaultValue: "Change takes effect on next launch.")
-                        : String(localized: "settings.app.telemetry.subtitle", defaultValue: "Share anonymized crash and usage data to help improve cmux.")
-            ) {
-                Toggle("", isOn: Binding(get: { telemetry.current && !telemetryManagedByPolicy }, set: { telemetry.set($0) }))
-                    .labelsHidden()
-                    .controlSize(.small)
-                    .disabled(telemetryManagedByPolicy)
-            }
-            SettingsCardDivider()
-
             // Warn Before Quit
             SettingsCardRow(
                 configurationReview: .json("app.confirmQuit", "app.warnBeforeQuit"),

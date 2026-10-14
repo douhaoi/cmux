@@ -273,16 +273,7 @@ struct RightSidebarToolPanelView: View {
                     .frame(width: 0, height: 0)
             )
         case .machines:
-            if isVisibleInUI, RightSidebarMode.machines.isAvailable() {
-                MachinesPanelView(
-                    chromeBackgroundColor: resolvedChromeBackgroundColor,
-                    machinePinStore: AppDelegate.shared?.cloudMachinePinStore,
-                    tabManager: tabManager,
-                    activationCoordinator: AppDelegate.shared?.cloudActivationCoordinator
-                        ?? CloudActivationCoordinator.unconfigured(),
-                    coderouterStore: panel.coderouterStore
-                )
-            }
+                EmptyView()
         case .feed, .dock, .customSidebar:
             EmptyView()
         }

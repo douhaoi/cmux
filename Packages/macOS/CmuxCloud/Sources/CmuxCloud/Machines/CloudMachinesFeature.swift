@@ -15,7 +15,7 @@ public enum CloudMachinesFeature: Sendable {
 
     /// Whether Cloud can be discovered on this Mac.
     public nonisolated static func isAvailable(policy: ManagedDevicePolicy) -> Bool {
-        !policy.isEnforced(.disableCloud)
+        LocalProduct().includesHostedServices && !policy.isEnforced(.disableCloud)
     }
 
     /// Whether Cloud work is enabled after local first-use activation.

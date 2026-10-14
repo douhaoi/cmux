@@ -119,10 +119,17 @@ struct ShortcutListStableLazyView: View {
     private struct ShortcutListRows: View, Equatable {
         let entries: [ShortcutListRowEntry]
         let revision: Int
+        nonisolated let snapshots: [ShortcutListRowSnapshot]
+
+        init(entries: [ShortcutListRowEntry], revision: Int) {
+            self.entries = entries
+            self.revision = revision
+            self.snapshots = entries.map(\.snapshot)
+        }
 
         /// Compares only immutable row state so unchanged lazy rows stay mounted.
         nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.entries.map(\.snapshot) == rhs.entries.map(\.snapshot)
+            lhs.snapshots == rhs.snapshots
                 && lhs.revision == rhs.revision
         }
 

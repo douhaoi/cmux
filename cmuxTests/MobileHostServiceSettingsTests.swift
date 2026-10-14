@@ -23,7 +23,7 @@ struct MobileHostServiceSettingsTests {
         defaults.set(incoming, forKey: DevicesCatalogSection().incomingAccessEnabled.userDefaultsKey)
         #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: .dev))
         defaults.set(true, forKey: MobileHostService.listeningEnabledDefaultsKey)
-        #expect(MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: .dev))
+        #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: .dev))
     }
 
     @Test(arguments: [BuildFlavor.dev, .nightly, .stable])
@@ -33,11 +33,11 @@ struct MobileHostServiceSettingsTests {
         defer { defaults.removePersistentDomain(forName: suiteName) }
         #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
         defaults.set(true, forKey: "cmuxMobilePairingHostEnabled")
-        #expect(MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
+        #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
         defaults.set(false, forKey: "cmuxMobilePairingHostEnabled")
         #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
         defaults.set(true, forKey: MobileHostService.listeningEnabledDefaultsKey)
-        #expect(MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
+        #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
         defaults.set(true, forKey: "cmuxMobilePairingHostEnabled")
         defaults.set(false, forKey: MobileHostService.listeningEnabledDefaultsKey)
         #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: buildFlavor))
@@ -129,210 +129,26 @@ struct MobileHostMacScopedMutationAuthorizationTests {
 @Suite(.serialized, .timeLimit(.minutes(1)))
 @MainActor
 struct MobileHostV2LifecycleTests {
-    private func withDefaults(_ body: (UserDefaults) async throws -> Void) async throws {
+    @Test(arguments: [BuildFlavor.dev, .nightly, .stable])
+    func savedPhonePreferencesCannotStartALocalListener(flavor: BuildFlavor) async throws {
         let name = "MobileHostV2LifecycleTests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
-        try await body(defaults)
-    }
-
-    private func waitForSubscription(_ runtime: MobileHostRuntimeProbe) async throws {
-        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
-        while runtime.subscriberCount == 0, ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(5))
-        }
-        try #require(runtime.subscriberCount > 0)
-    }
-
-    @Test func savingPortLeavesTheCurrentEndpointRunning() async throws {
-        try await withDefaults { defaults in
-            let runtime = MobileHostRuntimeProbe(state: .init(phase: .ready, boundPort: 58465, preferredPort: 58465))
-            let service = MobileHostService(defaults: defaults, runtime: runtime)
-            #expect(await service.applyConfiguredPort(60001) == .savedForLater)
-            #expect(MobileHostService.configuredPort(defaults: defaults) == 60001)
-            let status = service.statusSnapshot()
-            #expect(status.isRunning)
-            #expect(status.port == 58465)
-            #expect(status.pendingPortChange)
-            #expect(!status.usesEphemeralFallback)
-            #expect(runtime.startCount == 0)
-            #expect(runtime.stopCount == 0)
-            #expect(await service.applyConfiguredPort(58465) == .applied(58465))
-            #expect(!service.statusSnapshot().pendingPortChange)
-        }
-    }
-
-    @Test func disabledAndInvalidPortEditsCannotStartNetworking() async throws {
-        try await withDefaults { defaults in
-            let runtime = MobileHostRuntimeProbe(allowed: false)
-            let service = MobileHostService(defaults: defaults, runtime: runtime)
-            #expect(await service.applyConfiguredPort(60001) == .savedForLater)
-            #expect(await service.applyConfiguredPort(0) == .invalid)
-            #expect(MobileHostService.configuredPort(defaults: defaults) == 60001)
-            #expect(!service.statusSnapshot().isRunning)
-            #expect(runtime.startCount == 0)
-            #expect(runtime.stopCount == 0)
-        }
-    }
-
-    @Test func readinessWaitsForTheActualIROHReadyEvent() async throws {
-        try await withDefaults { defaults in
-            let runtime = MobileHostRuntimeProbe()
-            let service = MobileHostService(defaults: defaults, runtime: runtime)
-            let waiting = Task { await service.ensureListeningAndReady() }
-            try await waitForSubscription(runtime)
-            #expect(!service.statusSnapshot().isRunning)
-            runtime.emit(.init(phase: .ready, boundPort: 60002, preferredPort: 58465))
-            let status = await waiting.value
-            #expect(status.isRunning)
-            #expect(status.port == 60002)
-            #expect(status.usesEphemeralFallback)
-            #expect(runtime.startCount == 1)
-        }
-    }
-
-    @Test func cancellingOrTimingOutReadinessDoesNotStopTheListenerOwner() async throws {
-        try await withDefaults { defaults in
-            let runtime = MobileHostRuntimeProbe()
-            let service = MobileHostService(defaults: defaults, runtime: runtime)
-            let waiting = Task { await service.ensureListeningAndReady() }
-            try await waitForSubscription(runtime)
-            waiting.cancel()
-            #expect(await waiting.value.isRunning == false)
-            #expect(runtime.stopCount == 0)
-            #expect(await service.ensureListeningAndReady(timeout: .milliseconds(10)).isRunning == false)
-            #expect(runtime.stopCount == 0)
-        }
-    }
-
-    @Test func disabledPolicyHidesAnOldReadySnapshotImmediately() async throws {
-        try await withDefaults { defaults in
-            let runtime = MobileHostRuntimeProbe(allowed: false,
-                state: .init(phase: .ready, boundPort: 58465, preferredPort: 58465))
-            let service = MobileHostService(defaults: defaults, runtime: runtime)
-            let status = service.statusSnapshot()
-            #expect(!status.isRunning)
-            #expect(status.port == nil)
-            #expect(status.routes.isEmpty)
-            #expect(!status.pendingPortChange)
-        }
-    }
-}
-
-@MainActor
-private final class MobileHostRuntimeProbe: MobileHostPairingRuntime {
-    var isNetworkingAllowed: Bool
-    var listenerState: MobileHostListenerState
-    private(set) var startCount = 0
-    private(set) var stopCount = 0
-    private var subscribers: [UUID: AsyncStream<MobileHostListenerState>.Continuation] = [:]
-    var subscriberCount: Int { subscribers.count }
-
-    init(allowed: Bool = true, state: MobileHostListenerState = .init()) {
-        isNetworkingAllowed = allowed
-        listenerState = state
-    }
-
-    func configure(auth: AuthCoordinator) {}
-    func applyManagedNetworkingPolicy() async {
-        startCount += 1
-        if isNetworkingAllowed, listenerState.phase == .stopped { emit(.init(phase: .starting)) }
-    }
-    func prepareForStop() { emit(.init()) }
-    func stopHost() async { stopCount += 1; emit(.init()) }
-    func foreground() async {}
-    func emit(_ state: MobileHostListenerState) {
-        listenerState = state
-        for subscriber in subscribers.values { subscriber.yield(state) }
-    }
-    func listenerStateUpdates() -> AsyncStream<MobileHostListenerState> {
-        let id = UUID()
-        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
-            subscribers[id] = continuation
-            continuation.yield(listenerState)
-            continuation.onTermination = { @Sendable [weak self] _ in
-                Task { @MainActor in self?.subscribers.removeValue(forKey: id) }
-            }
-        }
-    }
-}
-
-@Suite(.timeLimit(.minutes(1)))
-@MainActor
-struct MobilePairingAuthDeadlineRecoveryTests {
-    @Test("Team loading can finish after the pairing deadline", arguments: [false, true], [false, true])
-    func teamScopeRecoversAfterDeadline(duringBootstrap: Bool, closeBeforeRecovery: Bool) async throws {
-        let suite = "MobilePairingAuthDeadlineRecoveryTests.\(UUID())"
-        let defaults = try #require(UserDefaults(suiteName: suite))
-        defer { defaults.removePersistentDomain(forName: suite) }
-        let session = CMUXAuthSessionCache(keyValueStore: defaults, key: "session")
-        session.setHasTokens(true)
-        let user = CMUXAuthIdentityStore(keyValueStore: defaults, key: "user")
-        try user.save(MobilePairingRecoveryAuthClient.user)
-        let client = MobilePairingRecoveryAuthClient()
-        let auth = AuthCoordinator(
-            client: client,
-            sessionCache: session,
-            userCache: user,
-            teamSelection: CMUXAuthTeamSelectionStore(keyValueStore: defaults, key: "team"),
-            anchor: AuthPresentationContextProvider(),
-            config: AuthConfig(
-                stack: CMUXAuthConfig(projectId: "fixture", publishableClientKey: "fixture"),
-                magicLinkCallbackURL: "http://127.0.0.1:1/callback", apiBaseURL: "http://127.0.0.1:1"
-            ),
-            launch: AuthLaunchOptions(
-                clearAuthRequested: false, mockDataEnabled: false,
-                environment: [:], includesDevAuth: false
-            ),
-            clock: SidebarTestManualClock()
-        )
-        if !duringBootstrap { await client.failTeams(true) }
-        auth.start()
-        if !duringBootstrap {
-            await auth.awaitBootstrapped()
-            await client.failTeams(false)
-        }
-        let runtime = MobileHostRuntimeProbe(state: .init(
-            phase: .ready, boundPort: 58465, preferredPort: 58465,
-            hasAuthenticatedRegistration: true
-        ))
-        let clock = SidebarTestManualClock()
-        let model = MobilePairingModel(
-            host: MobileHostService(defaults: defaults, runtime: runtime),
-            coordinator: auth,
-            isListeningEnabled: { true },
-            preparationClock: clock,
-            preparationTimeout: .seconds(30)
-        )
-        defer { model.stopObserving() }
-        let refresh = Task { await model.refresh() }
-        await client.waitForTeamRequest(duringBootstrap ? 1 : 2)
-        await clock.waitUntilSleeping()
-        let deadline = try #require(model.preparationTimeoutTask)
-        clock.advance(by: .seconds(30))
-        await deadline.value
-        guard case .failed = model.state else {
-            Issue.record("The deadline should expose recovery while team loading is pending")
-            await client.completeTeamRequest()
-            await refresh.value
-            return
-        }
-        let failed = model.state
-        if closeBeforeRecovery { model.stopObserving() }
-        await client.completeTeamRequest()
-        await refresh.value
-        #expect(auth.authenticatedTeamScope != nil)
-        if closeBeforeRecovery {
-            #expect(model.state == failed)
-            #expect(runtime.startCount == 0)
-        } else {
-            guard case .ready = model.state else {
-                Issue.record("A team that loads after the deadline must recover the open pairing sheet")
-                await auth.signOut()
-                return
-            }
-            #expect(runtime.startCount == 1)
-        }
-        await auth.signOut()
+        defaults.set(true, forKey: MobileHostService.listeningEnabledDefaultsKey)
+        defaults.set(true, forKey: "cmuxMobilePairingHostEnabled")
+        #expect(!MobileHostService.isListeningEnabled(defaults: defaults, buildFlavor: flavor))
+        let service = MobileHostService(defaults: defaults)
+        service.start()
+        service.syncToSettings()
+        let status = await service.ensureListeningAndReady()
+        #expect(!status.isRunning)
+        #expect(!status.isPairingReady)
+        #expect(status.port == nil)
+        #expect(status.routes.isEmpty)
+        #expect(status.localSocketAddresses.isEmpty)
+        #expect(status.activeConnectionCount == 0)
+        #expect(await service.applyConfiguredPort(60001) == .savedForLater)
+        #expect(await service.applyConfiguredPort(0) == .invalid)
+        #expect(!service.statusSnapshot().isRunning)
     }
 }

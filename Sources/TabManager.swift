@@ -27,7 +27,7 @@ import CmuxTerminal
 // The old Tab class is replaced by Workspace
 typealias Tab = Workspace
 
-private let tabManagerLogger = Logger(subsystem: "com.cmuxterm.app", category: "TabManager")
+private let tabManagerLogger = Logger(subsystem: "com.cmuxterm.local", category: "TabManager")
 
 enum WorkspaceOrderChangeNotificationKey {
     static let movedWorkspaceIds = "movedWorkspaceIds"
@@ -6969,7 +6969,7 @@ extension TabManager {
         cloudDisabledByPolicy: Bool = ManagedDevicePolicy().isEnforced(.disableCloud)
     ) -> ([SessionWorkspaceSnapshot], Int?) where S.Element == SessionWorkspaceSnapshot {
         let snapshots = Array(snapshots)
-        if cloudDisabledByPolicy {
+        if cloudDisabledByPolicy || !LocalProduct().includesHostedServices {
             var indexMap: [Int: Int] = [:]
             var filtered: [SessionWorkspaceSnapshot] = []
             for (index, snapshot) in snapshots.enumerated()
@@ -7351,7 +7351,6 @@ extension Notification.Name {
     static let agentInboxReplyFieldFocusChanged = Notification.Name("cmux.agentInboxReplyFieldFocusChanged")
     static let commandPaletteRenameInputInteractionRequested = Notification.Name("cmux.commandPaletteRenameInputInteractionRequested")
     static let commandPaletteRenameInputDeleteBackwardRequested = Notification.Name("cmux.commandPaletteRenameInputDeleteBackwardRequested")
-    static let feedbackComposerRequested = Notification.Name("cmux.feedbackComposerRequested")
     static let agentInboxRequested = Notification.Name("cmux.agentInboxRequested")
     static let ghosttyDidSetTitle = Notification.Name("ghosttyDidSetTitle")
     static let ghosttyDidFocusTab = Notification.Name("ghosttyDidFocusTab")

@@ -2,7 +2,7 @@ import Foundation
 import os
 
 nonisolated private let terminalUploadCommandRuleLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "TerminalUploadCommand"
 )
 

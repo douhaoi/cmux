@@ -2,36 +2,18 @@ import CMUXMobileCore
 import CmuxSettings
 import Foundation
 import Observation
-import PostHog
 import os
 
-/// PostHog-backed runtime feature flags for the macOS app (PostHog project
-/// 244066, same public key analytics uses). Values are cached in memory and
-/// refreshed when the SDK reports a flag payload, so gated UI can be toggled
-/// from the PostHog dashboard without shipping a build.
-///
-/// Resolution semantics (flags must never break the app):
-/// - A remote value is authoritative when present, so rollout and kill-switch
-///   changes cannot be masked by a stale local override. The legacy Cloud
-///   definition is kept only for tagged debug tooling and is not in `allFlags`.
-/// - Without a remote value, a permitted override applies, then the explicit
-///   per-flag default.
-/// - Until a payload arrives, the last remote value survives restarts. A flag
-///   that has never loaded keeps its safe default.
-/// - Request and payload failures preserve the complete cached snapshot. A
-///   successfully parsed payload replaces it, so omitted flags return to their
-///   local override or default.
-///
-/// Registry contract (enforced by scripts/lint-feature-flags.py in CI): each
-/// flag declares key / owner / reviewBy / defaultWhenUnavailable in the FLAG
-/// comment above its property, and its key literal appears nowhere else.
+/// Local feature defaults and persisted user overrides for the desktop fork.
+/// Cached rollout payloads, injected remote providers and launch environment
+/// cannot activate a remote control plane or a retired hosted capability.
 @MainActor
 @Observable
 final class CmuxFeatureFlags {
     static let shared = CmuxFeatureFlags(publishesOffMainSnapshot: true)
 
     private static let mobileConnectButtonDefault = false
-    private static let sidebarAccountButtonDefault = true
+    private static let sidebarAccountButtonDefault = false
 
     private static let agentChatUIDefault = false
     #if DEBUG
@@ -48,7 +30,7 @@ final class CmuxFeatureFlags {
     private nonisolated static let mobileTaskComposerDefault = true
     private static let goPlanDefault = false
     private static let agentInboxQuickViewDefault = false
-    nonisolated static let cloudMachinesDefault = true
+    nonisolated static let cloudMachinesDefault = false
     private nonisolated static let conversationSidebarDefault = false
 
     private static let overrideKeyPrefix = "cmux.flags.override."
@@ -352,7 +334,7 @@ final class CmuxFeatureFlags {
     }()
 
     var isMobileConnectButtonEnabled: Bool {
-        effectiveValue(for: Self.mobileConnectButtonFlag)
+        false
     }
 
     var isAgentChatUIEnabled: Bool {
@@ -360,7 +342,7 @@ final class CmuxFeatureFlags {
     }
 
     var isSidebarAccountButtonEnabled: Bool {
-        effectiveValue(for: Self.sidebarAccountButtonFlag)
+        false
     }
 
     var isSidebarWorkspaceAgentSpinnerEnabled: Bool {
@@ -381,19 +363,19 @@ final class CmuxFeatureFlags {
     }
 
     var isMobileWorkspaceChangesEnabled: Bool {
-        effectiveValue(for: Self.mobileWorkspaceChangesFlag)
+        false
     }
 
     var isMobileTerminalFilesChipEnabled: Bool {
-        effectiveValue(for: Self.mobileTerminalFilesChipFlag)
+        false
     }
 
     var isMobileTaskComposerEnabled: Bool {
-        effectiveValue(for: Self.mobileTaskComposerFlag)
+        false
     }
 
     var isGoPlanEnabled: Bool {
-        effectiveValue(for: Self.goPlanFlag)
+        false
     }
 
     var isAgentInboxQuickViewEnabled: Bool {
@@ -401,7 +383,7 @@ final class CmuxFeatureFlags {
     }
 
     var isWindowHintsEnabled: Bool {
-        effectiveValue(for: Self.windowHintsFlag) || ClickByHintPreview.isOptedIn()
+        effectiveValue(for: Self.windowHintsFlag) || BetaFeaturesCatalogSection().windowHints.value(in: .standard)
     }
 
     var isConversationSidebarAvailable: Bool {
@@ -447,7 +429,7 @@ final class CmuxFeatureFlags {
     private let pinsFlagsToLocalValues: Bool
 
     nonisolated static var pinsFlagsToLocalValuesForCurrentLaunch: Bool {
-        ProcessInfo.processInfo.environment["CMUX_UI_TEST_MODE"] == "1"
+        true
     }
     private var resolutionsByKey: [String: CmuxFeatureFlagResolution] = [:]
 
@@ -455,44 +437,17 @@ final class CmuxFeatureFlags {
         defaults: UserDefaults = .standard,
         overrideCapability: CmuxFeatureFlagOverrideCapability = .init(),
         telemetryEnabled: Bool = TelemetrySettings.enabledForCurrentLaunch,
-        remoteFlagValueProvider: @escaping (String) -> Any? = { PostHogSDK.shared.getFeatureFlag($0) },
+        remoteFlagValueProvider: @escaping (String) -> Any? = { _ in nil },
         remoteFlagLoader: (@Sendable () async -> [String: Bool]?)? = nil,
         publishesOffMainSnapshot: Bool = false,
-        pinsFlagsToLocalValues: Bool = CmuxFeatureFlags.pinsFlagsToLocalValuesForCurrentLaunch
+        pinsFlagsToLocalValues: Bool = true
     ) {
         self.defaults = defaults
         self.overrideCapability = overrideCapability
         self.publishesOffMainSnapshot = publishesOffMainSnapshot
-        self.pinsFlagsToLocalValues = pinsFlagsToLocalValues
-        self.remoteFlagValueProvider = remoteFlagValueProvider
-        // Cloud's local value is now a first-use activation marker, so it must
-        // survive tagged debug artifact reloads just like any other persisted
-        // product state. The explicit dogfood marker may still opt a fresh
-        // debug artifact in; only the temporary remote override is reset when
-        // a tagged artifact is reopened.
-        if overrideCapability.enablesCloudDogfood {
-            defaults.set(true, forKey: BetaFeaturesCatalogSection().cloudMachines.userDefaultsKey)
-            defaults.set(true, forKey: Self.overrideDefaultsKey(for: Self.cloudMachinesFlag.key))
-        } else if overrideCapability.isTaggedDebugArtifact {
-            defaults.removeObject(forKey: Self.overrideDefaultsKey(for: Self.cloudMachinesFlag.key))
-            if overrideCapability.hasCloudDogfoodMarker {
-                defaults.set(false, forKey: Self.overrideDefaultsKey(for: Self.cloudMachinesFlag.key))
-            }
-        }
-        if let remoteFlagLoader {
-            self.remoteFlagLoader = remoteFlagLoader
-        } else {
-            let target = Self.releaseControlTarget(
-                telemetryEnabled: telemetryEnabled,
-                defaults: defaults
-            )
-            self.remoteFlagLoader = {
-                await CmuxFeatureFlags.loadPostHogControlPlaneFlags(
-                    distinctID: target.distinctID,
-                    personProperties: target.personProperties
-                )
-            }
-        }
+        self.pinsFlagsToLocalValues = true
+        self.remoteFlagValueProvider = { _ in nil }
+        self.remoteFlagLoader = { nil }
         localOverridesByKey = Self.allFlags.reduce(into: [:]) { values, definition in
             if let value = Self.storedOverrideValue(for: definition.key, defaults: defaults) {
                 values[definition.key] = value
@@ -503,16 +458,7 @@ final class CmuxFeatureFlags {
         if let value = Self.storedOverrideValue(for: Self.cloudMachinesFlag.key, defaults: defaults) {
             localOverridesByKey[Self.cloudMachinesFlag.key] = value
         }
-        remoteValuesByKey = pinsFlagsToLocalValues
-            ? [:]
-            : Self.allFlags.reduce(into: [:]) { values, definition in
-                if let value = Self.storedBoolValue(
-                    forKey: Self.remoteCacheKey(for: definition.key),
-                    defaults: defaults
-                ) {
-                    values[definition.key] = value
-                }
-            }
+        remoteValuesByKey = [:]
         recomputeEffectiveValues()
     }
 
@@ -520,13 +466,7 @@ final class CmuxFeatureFlags {
     /// uses a separate anonymous installation identity only when telemetry is
     /// enabled. Opted-out launches use one product-wide ID without targeting
     /// properties, preserving a non-identifying emergency kill switch.
-    func start() {
-        guard refreshTimer == nil else { return }
-        refreshRemoteFlags()
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.refreshRemoteFlags() }
-        }
-    }
+    func start() {}
 
     private func refreshRemoteFlags() {
         guard !pinsFlagsToLocalValues else { return }
@@ -561,15 +501,7 @@ final class CmuxFeatureFlags {
         defaults: UserDefaults = .standard,
         bundle: Bundle = .main
     ) -> URLRequest? {
-        let target = releaseControlTarget(
-            telemetryEnabled: telemetryEnabled,
-            defaults: defaults,
-            bundle: bundle
-        )
-        return postHogControlPlaneRequest(
-            distinctID: target.distinctID,
-            personProperties: target.personProperties
-        )
+        nil
     }
 
     private static func releaseControlTarget(
@@ -630,56 +562,7 @@ final class CmuxFeatureFlags {
     nonisolated private static func postHogControlPlaneRequest(
         distinctID: String,
         personProperties: [String: String]
-    ) -> URLRequest? {
-        guard let url = URL(string: "https://cmux.com/api/client-config") else { return nil }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.timeoutInterval = 10
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let context: [String: Any] = personProperties.isEmpty
-            ? [:]
-            : ["personProperties": personProperties]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: [
-            "distinctId": distinctID,
-            "context": context,
-        ])
-        return request
-    }
-
-    nonisolated private static func loadPostHogControlPlaneFlags(
-        distinctID: String,
-        personProperties: [String: String]
-    ) async -> [String: Bool]? {
-        guard (try? await releaseControlRetryAfterGate.wait()) != nil else { return nil }
-        guard let request = postHogControlPlaneRequest(
-            distinctID: distinctID,
-            personProperties: personProperties
-        ) else { return nil }
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 10
-        configuration.timeoutIntervalForResource = 15
-        let session = URLSession(configuration: configuration)
-        defer { session.invalidateAndCancel() }
-        guard let (bytes, response) = try? await session.bytes(for: request),
-              let http = response as? HTTPURLResponse else { return nil }
-        if http.statusCode == 429 {
-            let seconds = CmxRetryAfterPolicy().seconds(
-                from: http,
-                defaultSeconds: CmxRetryAfterPolicy().defaultRateLimitSeconds
-            ) ?? CmxRetryAfterPolicy().defaultRateLimitSeconds
-            await releaseControlRetryAfterGate.extend(by: seconds)
-            return nil
-        }
-        guard (200..<300).contains(http.statusCode),
-              response.expectedContentLength < 0
-                || response.expectedContentLength <= maximumPostHogControlPlaneResponseBytes,
-              let data = try? await boundedPostHogControlPlaneData(
-                  from: bytes,
-                  maximumByteCount: maximumPostHogControlPlaneResponseBytes
-              )
-        else { return nil }
-        return postHogControlPlaneFlagValues(from: data)
-    }
+    ) -> URLRequest? { nil }
 
     nonisolated static func boundedPostHogControlPlaneData<Bytes: AsyncSequence>(
         from bytes: Bytes,

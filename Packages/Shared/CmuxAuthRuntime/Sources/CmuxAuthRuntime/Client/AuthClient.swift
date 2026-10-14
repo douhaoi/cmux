@@ -4,9 +4,9 @@ import Foundation
 /// The auth backend seam the ``AuthCoordinator`` drives.
 ///
 /// Abstracts every Stack Auth operation the coordinator needs so it can be
-/// tested with an in-memory fake. The production conformer is
-/// ``StackAuthClient``, which wraps `StackClientApp`. Construct it once at the
-/// app composition root with injected config and inject it as `any AuthClient`.
+/// tested with an injected client. Local desktop builds do not construct an
+/// account graph; ``UnavailableAuthClient`` supplies a fail-closed seam when
+/// a compatibility consumer requires one.
 public protocol AuthClient: Sendable {
     /// The current Stack access token, or `nil` when there is no live session.
     func accessToken() async -> String?

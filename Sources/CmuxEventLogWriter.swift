@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-nonisolated private let cmuxEventLogLogger = Logger(subsystem: "com.cmuxterm.app", category: "event-log")
+nonisolated private let cmuxEventLogLogger = Logger(subsystem: "com.cmuxterm.local", category: "event-log")
 
 // Sendable safety: pending state is protected by `lock`; file IO and
 // `openLogHandle` are confined to `queue`.

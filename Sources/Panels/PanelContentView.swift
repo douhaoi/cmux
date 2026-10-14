@@ -5,7 +5,6 @@ import Foundation
 import Bonsplit
 import AppKit
 import CmuxAppKitSupportUI
-import CmuxFeedback
 
 /// View that renders the appropriate panel view based on panel type
 struct PanelContentView: View {
@@ -202,13 +201,6 @@ struct PanelContentView: View {
                     onRequestPanelFocus: onRequestPanelFocus
                 )
             }
-        case .coderouterGuide:
-            if panel is CoderouterGuidePanel {
-                CoderouterGuidePanelView(
-                    isFocused: isFocused,
-                    onRequestPanelFocus: onRequestPanelFocus
-                )
-            }
         case .notifications:
             if panel is NotificationsPanel {
                 NotificationsPage(
@@ -223,29 +215,9 @@ struct PanelContentView: View {
                 CloudVMLoadingPanelView(panel: loadingPanel)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        case .mobilePairing:
-            if panel is MobilePairingPanel {
-                MobilePairingPanelView(
-                    appearance: appearance,
-                    onRequestPanelFocus: onRequestPanelFocus
-                )
-            }
-        case .accountSignIn:
-            if let accountSignInPanel = panel as? AccountSignInPanel {
-                AccountSignInPanelView(
-                    panel: accountSignInPanel,
-                    appearance: appearance,
-                    onRequestPanelFocus: onRequestPanelFocus
-                )
-            }
-        case .cloudVPNSetup:
-            if let cloudVPNSetupPanel = panel as? CloudVPNSetupPanel {
-                CloudVPNSetupPanelView(
-                    model: cloudVPNSetupPanel.model,
-                    appearance: appearance,
-                    onRequestPanelFocus: onRequestPanelFocus
-                )
-            }
+        case .coderouterGuide, .mobilePairing, .accountSignIn, .cloudVPNSetup:
+            Text(String(localized: "localProduct.serviceUnavailable", defaultValue: "This service is not included in the local edition."))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
         }
     }

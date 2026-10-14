@@ -9,7 +9,6 @@ import CryptoKit
 import Foundation
 @preconcurrency import Network
 import OSLog
-import StackAuth
 import os
 
 enum MobileHostAuthorizationError: Error {
@@ -114,18 +113,7 @@ actor MobileHostStackAuthVerifier {
     }
 
     private func fetchAndCacheRemoteUserID(cacheKey: String, accessToken: String) async throws -> String? {
-        let stack = Self.makeStackClient(accessToken: accessToken)
-        guard let user = try await Self.withVerificationTimeout({
-            try await stack.getUser(or: .throw)
-        }) else {
-            throw MobileHostAuthorizationError.invalidStackUser
-        }
-        let remoteUserID = await user.id
-        cache[cacheKey] = CacheEntry(
-            userID: remoteUserID,
-            expiresAt: Date().addingTimeInterval(Self.cacheTTLSeconds)
-        )
-        return remoteUserID
+        throw MobileHostAuthorizationError.invalidStackUser
     }
 
     private func scheduleRefreshAhead(cacheKey: String, accessToken: String) {
@@ -140,15 +128,7 @@ actor MobileHostStackAuthVerifier {
         _ = try? await fetchAndCacheRemoteUserID(cacheKey: cacheKey, accessToken: accessToken)
     }
 
-    private static func makeStackClient(accessToken: String) -> StackClientApp {
-        StackClientApp(
-            projectId: AuthEnvironment.stackProjectID,
-            publishableClientKey: AuthEnvironment.stackPublishableClientKey,
-            baseUrl: AuthEnvironment.stackBaseURL.absoluteString,
-            tokenStore: .custom(MobileHostAccessTokenStore(accessToken: accessToken)),
-            noAutomaticPrefetch: true
-        )
-    }
+
 
     private static func cacheKey(for accessToken: String) -> String {
         // Pure-Swift byte-to-hex (no String(format:)) — this runs for every

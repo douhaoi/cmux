@@ -5,7 +5,7 @@ import Foundation
 import os
 
 nonisolated private let notificationSoundStagerLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "notification-sound"
 )
 

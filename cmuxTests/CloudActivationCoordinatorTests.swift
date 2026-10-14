@@ -21,7 +21,7 @@ struct CloudActivationCoordinatorTests {
         defer { defaults.removePersistentDomain(forName: suite) }
         defaults.set(true, forKey: CloudActivationCoordinator.activationKey)
         let capability = CmuxFeatureFlagOverrideCapability(
-            bundleIdentifier: "com.cmuxterm.app.debug",
+            bundleIdentifier: "com.cmuxterm.local.debug",
             isDebugBuild: true
         )
         _ = CmuxFeatureFlags(

@@ -1,6 +1,15 @@
 import Foundation
 
 extension CMUXCLI {
+    /// Replaces terminal control characters in external display labels.
+    static func sanitizeForTerminal(_ value: String) -> String {
+        String(value.unicodeScalars.map { scalar in
+            (scalar.properties.generalCategory == .control || scalar.properties.generalCategory == .format)
+                ? Character("\u{FFFD}")
+                : Character(scalar)
+        })
+    }
+
     func printSimulatorAgentResult(
         _ payload: [String: Any],
         output: SimulatorAgentOutput,

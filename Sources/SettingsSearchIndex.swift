@@ -1,9 +1,10 @@
+import CmuxSettings
 import SwiftUI
 
 enum SettingsSearchIndex {
-    static let defaultSelectionID = sectionID(for: .account)
+    static let defaultSelectionID = sectionID(for: .app)
 
-    private static let sectionEntries: [SettingsSearchEntry] = SettingsNavigationTarget.allCases.map { target in
+    private static let sectionEntries: [SettingsSearchEntry] = SettingsNavigationTarget.allCases.filter { LocalProduct().includesSettingsSection($0.rawValue) }.map { target in
         SettingsSearchEntry(
             id: sectionID(for: target),
             kind: .section,
@@ -16,8 +17,6 @@ enum SettingsSearchIndex {
     }
 
     private static let settingEntries: [SettingsSearchEntry] = [
-        setting(.account, "account", String(localized: "settings.section.account", defaultValue: "Account"), "sign in login team sync user profile"),
-        setting(.account, "pro", String(localized: "settings.account.pro.title", defaultValue: "cmux Pro"), "pro upgrade subscription billing plan pricing cloud"),
         setting(.app, "language", String(localized: "settings.app.language", defaultValue: "Language"), "locale translation japanese english restart"),
         setting(.themes, "appearance", String(localized: "settings.app.appearance", defaultValue: "Appearance"), "theme light dark system"),
         setting(.themes, "accent-color", String(localized: "settings.app.accentColor", defaultValue: "Accent Color"), "accent highlight tint blue system"),
@@ -65,7 +64,6 @@ enum SettingsSearchIndex {
             )
         ),
         setting(.app, "notification-command", String(localized: "settings.notifications.command", defaultValue: "Notification Command"), "shell command environment variables"),
-        setting(.app, "telemetry", String(localized: "settings.app.telemetry", defaultValue: "Send anonymous telemetry"), "analytics crash usage"),
         setting(.app, "default-terminal", String(localized: "settings.app.defaultTerminal", defaultValue: "Default Terminal"), "ssh links command tool unix executable launch services handler registration system default"),
         setting(.app, "warn-before-quit", String(localized: "settings.app.warnBeforeQuit", defaultValue: "Warn Before Quit"), "cmd q confirmation confirmQuit"),
         setting(.app, "warn-before-closing-tab", String(localized: "settings.app.warnBeforeClosingTab", defaultValue: "Warn Before Closing Tab"), "cmd w close tab confirmation"),
@@ -242,7 +240,7 @@ enum SettingsSearchIndex {
         setting(.reset, "reset-all", String(localized: "settings.reset.resetAll", defaultValue: "Reset All Settings"), "restore defaults")
     ] + terminalScrollSpeedSettingEntries
 
-    private static let allEntries = sectionEntries + settingEntries
+    private static let allEntries = (sectionEntries + settingEntries).filter { LocalProduct().includesSettingsSection($0.target.rawValue) }
     private static let entriesByID: [String: SettingsSearchEntry] = Dictionary(
         uniqueKeysWithValues: allEntries.map { ($0.id, $0) }
     )

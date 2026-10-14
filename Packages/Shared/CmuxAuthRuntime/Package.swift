@@ -17,7 +17,6 @@ let package = Package(
     dependencies: [
         .package(path: "../CMUXAuthCore"),
         .package(path: "../CMUXMobileCore"),
-        .package(path: "../../../vendor/stack-auth-swift-sdk-prerelease"),
     ],
     targets: [
         .target(
@@ -25,7 +24,6 @@ let package = Package(
             dependencies: [
                 "CMUXAuthCore",
                 "CMUXMobileCore",
-                .product(name: "StackAuth", package: "stack-auth-swift-sdk-prerelease"),
             ],
             swiftSettings: [
                 .define("CMUX_DEV_AUTH", .when(configuration: .debug)),
@@ -38,7 +36,6 @@ let package = Package(
             name: "CmuxAuthRuntimeTests",
             dependencies: [
                 "CmuxAuthRuntime",
-                .product(name: "StackAuth", package: "stack-auth-swift-sdk-prerelease"),
             ],
             swiftSettings: [
                 .define("CMUX_DEV_AUTH", .when(configuration: .debug)),

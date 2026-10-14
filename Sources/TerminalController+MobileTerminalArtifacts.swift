@@ -29,29 +29,6 @@ extension TerminalController {
         params: [String: Any],
         executionContext: MobileHostRPCExecutionContext? = nil
     ) async -> V2CallResult {
-        let operation: DiagnosticTerminalTraceOperation? = switch method {
-        case "mobile.terminal.artifact.scan": .artifactScan
-        case "mobile.terminal.artifact.list": .artifactList
-        default: nil
-        }
-        let traceID = v2String(params, "trace_id")
-            .flatMap(DiagnosticTerminalTraceID.init(stringValue:))
-        let traceStartedAt = DispatchTime.now().uptimeNanoseconds
-        func recordTrace(_ event: String) {
-            guard let operation, let traceID else { return }
-            let elapsed = (DispatchTime.now().uptimeNanoseconds - traceStartedAt) / 1_000_000
-            MobileHostIrxRuntime.journal.record(
-                "terminal-trace",
-                event,
-                [
-                    "trace_id": traceID.stringValue,
-                    "operation": String(describing: operation),
-                    "elapsed_ms": String(elapsed),
-                ]
-            )
-        }
-        recordTrace("host_received")
-        defer { recordTrace("host_response_ready") }
         switch method {
         case "mobile.terminal.artifact.scan":
             return await v2MobileTerminalArtifactScan(params: params)
@@ -72,9 +49,6 @@ extension TerminalController {
     }
 
     func v2MobileTerminalArtifactScan(params: [String: Any]) async -> V2CallResult {
-        defer {
-            recordMobileTerminalArtifactCaptureFinished(params: params, operation: .artifactScan)
-        }
         let visibleOnly = v2Bool(params, "visible_only") ?? false
         let countOnly = v2Bool(params, "count_only") ?? false
         let includeDirectories = v2Bool(params, "include_directories") ?? false
@@ -282,9 +256,6 @@ extension TerminalController {
     }
 
     func v2MobileTerminalArtifactList(params: [String: Any]) async -> V2CallResult {
-        defer {
-            recordMobileTerminalArtifactCaptureFinished(params: params, operation: .artifactList)
-        }
         let resolution = await mobileTerminalArtifactContext(params: params, requiresPath: true)
         guard case .success(let context) = resolution else {
             return resolution.failureResult
@@ -304,22 +275,6 @@ extension TerminalController {
         } catch {
             return mobileArtifactReadFailure(.readFailed, path: context.requestedPath)
         }
-    }
-
-    private func recordMobileTerminalArtifactCaptureFinished(
-        params: [String: Any],
-        operation: DiagnosticTerminalTraceOperation
-    ) {
-        guard let traceID = v2String(params, "trace_id")
-            .flatMap(DiagnosticTerminalTraceID.init(stringValue:)) else { return }
-        MobileHostIrxRuntime.journal.record(
-            "terminal-trace",
-            "host_capture_finished",
-            [
-                "trace_id": traceID.stringValue,
-                "operation": String(describing: operation),
-            ]
-        )
     }
 
     private func mobileTerminalArtifactContext(

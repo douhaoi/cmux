@@ -267,6 +267,13 @@ extension TerminalController {
     private nonisolated func socketWorkerV2ResponseAsync(
         _ request: ControlRequest
     ) async throws -> String? {
+        guard LocalProduct().includesSocketMethod(request.method) else {
+            return Self.v2Encoder.error(
+                id: request.id,
+                code: "not_supported",
+                message: String(localized: "localProduct.serviceUnavailable", defaultValue: "This service is not included in the local edition.")
+            )
+        }
         if Self.authTeamSocketMethods.contains(request.method) {
             return try await v2AuthTeamResponseAsync(request)
         }

@@ -3,7 +3,6 @@ import AppKit
 import CmuxAppKitSupportUI
 import CmuxCommandPalette
 import CmuxCore
-import CmuxFeedback
 import CmuxFoundation
 import CmuxAgentJournal
 import CmuxNotifications
@@ -23,8 +22,6 @@ import CmuxSurfaceCatalogModel
 import CmuxSidebarRemoteRender
 import CmuxSwiftRender
 import CmuxSwiftRenderUI
-import CmuxUpdater
-import CmuxUpdaterUI
 import ImageIO
 import Observation
 import SwiftUI
@@ -883,8 +880,6 @@ struct ContentView: View {
         case agentLauncherActivation(AgentSessionProviderID)
         case forkableAgentAvailability(String)
     }
-
-    var updateViewModel: UpdateStateModel
     let windowId: UUID
     let featureFlags: CmuxFeatureFlags
     let sidebarUnread: SidebarUnreadModel
@@ -893,14 +888,12 @@ struct ContentView: View {
 
     @MainActor
     init(
-        updateViewModel: UpdateStateModel,
         windowId: UUID,
         featureFlags: CmuxFeatureFlags? = nil,
         sidebarUnread: SidebarUnreadModel? = nil,
         titlebarControlsLayoutModel: TitlebarControlsLayoutModel? = nil,
         devicesModel: DevicesPanelViewModel? = nil
     ) {
-        self.updateViewModel = updateViewModel
         self.devicesModel = devicesModel
         self.windowId = windowId
         self.featureFlags = featureFlags ?? .shared
@@ -1085,7 +1078,6 @@ struct ContentView: View {
     @State private var commandPalettePendingActivation: CommandPalettePendingActivation?
     @State private var commandPaletteResultsRevision: UInt64 = 0
     @State private var commandPaletteUsageHistoryByCommandId: [String: CommandPaletteUsageEntry] = [:]
-    @State private var isFeedbackComposerPresented = false
     @AppStorage(AppCatalogSection().renameSelectsExistingName.userDefaultsKey)
     private var commandPaletteRenameSelectAllOnFocus = AppCatalogSection().renameSelectsExistingName.defaultValue
     @AppStorage(AppCatalogSection().commandPaletteSearchesAllSurfaces.userDefaultsKey)
@@ -1699,7 +1691,6 @@ struct ContentView: View {
 
     private var sidebarView: some View {
         let sidebar = VerticalTabsSidebar(
-            updateViewModel: updateViewModel,
             fileExplorerState: fileExplorerState,
             sessionIndexStore: sessionIndexStore,
             featureFlags: featureFlags,
@@ -3245,17 +3236,6 @@ struct ContentView: View {
             _ = handleCommandPaletteRenameDeleteBackward(modifiers: [])
         })
 
-        view = AnyView(view.onReceive(NotificationCenter.default.publisher(for: .feedbackComposerRequested)) { notification in
-            let requestedWindow = notification.object as? NSWindow
-            guard Self.shouldHandleCommandPaletteRequest(
-                observedWindow: observedWindow,
-                requestedWindow: requestedWindow,
-                keyWindow: NSApp.keyWindow,
-                mainWindow: NSApp.mainWindow
-            ) else { return }
-            presentFeedbackComposer()
-        })
-
         view = AnyView(view.background(WindowAccessor(dedupeByWindow: false) { window in
             let overlayController = commandPaletteWindowOverlayController(for: window)
             overlayController.update(
@@ -3436,10 +3416,6 @@ struct ContentView: View {
         })
 
         view = AnyView(view.ignoresSafeArea().overlay(WindowContentOverlayBrowserHost()))
-        view = AnyView(view.sheet(isPresented: $isFeedbackComposerPresented) {
-            SidebarFeedbackComposerSheet()
-        })
-
         view = AnyView(view.onDisappear {
             sidebarState.removeVisibilityWillChangeHandler(ownerId: windowId)
             workspaceSwitchPortalSignalRouter.clearSources()
@@ -3521,7 +3497,7 @@ struct ContentView: View {
         windowChrome.nativeTitlebarBackdropCoordinator.removeNativeTitlebarBackdrop(in: window)
 #if DEBUG
         if ProcessInfo.processInfo.environment["CMUX_UI_TEST_MODE"] == "1" {
-            AppDelegate.shared?.updateLog.append("ui test window accessor: id=\(windowIdentifier) visible=\(window.isVisible)")
+
         }
 #endif
         let backdropResult = windowChrome.backdropController.apply(plan: backdropPlan, to: window)
@@ -7546,9 +7522,6 @@ struct ContentView: View {
             }
         }
 
-        if case .updateAvailable = updateViewModel.effectiveState {
-            snapshot.setBool(CommandPaletteContextKeys.updateHasAvailable, true)
-        }
 
         return snapshot
     }
@@ -7924,7 +7897,6 @@ struct ContentView: View {
                 when: { !$0.bool(CommandPaletteContextKeys.mobileRemoteControlManagedByPolicy) }
             )
         )
-        contributions.append(contentsOf: Self.commandPaletteAuthCommandContributions() + Self.commandPaletteProCommandContributions())
         contributions.append(
             CommandPaletteCommandContribution(
                 commandId: "palette.makeDefaultTerminal",
@@ -7945,31 +7917,6 @@ struct ContentView: View {
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 .filter { !$0.isEmpty },
                 when: { !$0.bool(CommandPaletteContextKeys.defaultTerminalIsDefault) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.checkForUpdates",
-                title: constant(String(localized: "command.checkForUpdates.title", defaultValue: "Check for Updates")),
-                subtitle: constant(String(localized: "command.checkForUpdates.subtitle", defaultValue: "Global")),
-                keywords: ["update", "upgrade", "release"]
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.applyUpdateIfAvailable",
-                title: constant(String(localized: "command.applyUpdateIfAvailable.title", defaultValue: "Apply Update (If Available)")),
-                subtitle: constant(String(localized: "command.applyUpdateIfAvailable.subtitle", defaultValue: "Global")),
-                keywords: ["apply", "install", "update", "available"],
-                when: { $0.bool(CommandPaletteContextKeys.updateHasAvailable) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.attemptUpdate",
-                title: constant(String(localized: "command.attemptUpdate.title", defaultValue: "Attempt Update")),
-                subtitle: constant(String(localized: "command.attemptUpdate.subtitle", defaultValue: "Global")),
-                keywords: ["attempt", "check", "update", "upgrade", "release"]
             )
         )
         contributions.append(
@@ -8826,7 +8773,9 @@ struct ContentView: View {
             )
         }
 
-        return contributions
+        return contributions.filter {
+            !["palette.mobileConnect", "palette.checkForUpdates", "palette.applyUpdateIfAvailable", "palette.attemptUpdate", "palette.sendFeedback"].contains($0.commandId)
+        }
     }
 
     private func sanitizeCmuxConfigPaletteText(_ text: String) -> String {
@@ -9214,19 +9163,8 @@ struct ContentView: View {
                 debugSource: "palette.mobileConnect"
             )
         }
-        registerAuthCommandHandlers(&registry)
-        registerProCommandHandlers(&registry)
         registry.register(commandId: "palette.makeDefaultTerminal") {
             DefaultTerminalUserAction.setAsDefault(debugSource: "palette.makeDefaultTerminal")
-        }
-        registry.register(commandId: "palette.checkForUpdates") {
-            AppDelegate.shared?.checkForUpdates(nil)
-        }
-        registry.register(commandId: "palette.applyUpdateIfAvailable") {
-            AppDelegate.shared?.applyUpdateIfAvailable(nil)
-        }
-        registry.register(commandId: "palette.attemptUpdate") {
-            AppDelegate.shared?.attemptUpdate(nil)
         }
         registry.register(commandId: "palette.restartSocketListener") {
             AppDelegate.shared?.restartSocketListener(nil)
@@ -10271,9 +10209,7 @@ struct ContentView: View {
     }
 
     private func presentFeedbackComposer() {
-        DispatchQueue.main.async {
-            isFeedbackComposerPresented = true
-        }
+        // Feedback is unavailable in the local product.
     }
 
     static func shouldHandleCommandPaletteRequest(
@@ -11348,7 +11284,6 @@ struct VerticalTabsSidebar: View, Equatable {
     static func == (lhs: VerticalTabsSidebar, rhs: VerticalTabsSidebar) -> Bool {
         lhs.windowId == rhs.windowId
             && lhs.observedWindowReference.window === rhs.observedWindowReference.window
-            && lhs.updateViewModel === rhs.updateViewModel
             && lhs.fileExplorerState === rhs.fileExplorerState
             && lhs.sessionIndexStore === rhs.sessionIndexStore
             && lhs.featureFlags === rhs.featureFlags
@@ -11357,8 +11292,6 @@ struct VerticalTabsSidebar: View, Equatable {
             && lhs.isPresented == rhs.isPresented
             && lhs.chromeBackgroundColor.isEqual(rhs.chromeBackgroundColor)
     }
-
-    var updateViewModel: UpdateStateModel
     @ObservedObject var fileExplorerState: FileExplorerState
     let sessionIndexStore: SessionIndexStore
     var featureFlags: CmuxFeatureFlags = .shared
@@ -11975,7 +11908,6 @@ struct VerticalTabsSidebar: View, Equatable {
             }
             if isPresented {
                 SidebarFooter(
-                    updateViewModel: updateViewModel,
                     fileExplorerState: fileExplorerState,
                     modifierKeyMonitor: modifierKeyMonitor,
                     onSendFeedback: onSendFeedback
@@ -15682,16 +15614,15 @@ struct SidebarWorkspaceRowFramePreferenceKey: PreferenceKey {
 }
 
 private struct SidebarFooter: View {
-    var updateViewModel: UpdateStateModel
     @ObservedObject var fileExplorerState: FileExplorerState
     let modifierKeyMonitor: WindowScopedShortcutHintModifierMonitor
     let onSendFeedback: () -> Void
 
     var body: some View {
 #if DEBUG
-        SidebarDevFooter(updateViewModel: updateViewModel, fileExplorerState: fileExplorerState, modifierKeyMonitor: modifierKeyMonitor, onSendFeedback: onSendFeedback)
+        SidebarDevFooter(fileExplorerState: fileExplorerState, modifierKeyMonitor: modifierKeyMonitor, onSendFeedback: onSendFeedback)
 #else
-        SidebarFooterButtons(updateViewModel: updateViewModel, fileExplorerState: fileExplorerState, modifierKeyMonitor: modifierKeyMonitor, onSendFeedback: onSendFeedback)
+        SidebarFooterButtons(fileExplorerState: fileExplorerState, modifierKeyMonitor: modifierKeyMonitor, onSendFeedback: onSendFeedback)
             .padding(.leading, 6)
             .padding(.trailing, 10)
             .padding(.bottom, 6)
@@ -15701,8 +15632,6 @@ private struct SidebarFooter: View {
 
 struct SidebarFooterButtons: View {
     @Environment(\.cmuxAccentColor) private var cmuxAccent
-    private var accountFlow: HostAccountFlow? { AppDelegate.shared?.auth?.accountFlow }
-    var updateViewModel: UpdateStateModel
     @ObservedObject var fileExplorerState: FileExplorerState
     let modifierKeyMonitor: WindowScopedShortcutHintModifierMonitor
     let onSendFeedback: () -> Void
@@ -15723,47 +15652,20 @@ struct SidebarFooterButtons: View {
         WorkspacePresentationModeSettings.mode(for: workspacePresentationMode)
     }
 
-    private var billingPlanRefreshID: String? {
-        guard let flow = accountFlow, let accountID = flow.currentIdentity?.id else { return nil }
-        return "\(accountID):\(flow.confirmedTeamID ?? "personal"):\(flow.isProUpgradeAvailable):\(flow.isAuthenticated)"
-    }
-
-    private var isProStatusKnownForUpgrade: Bool {
-        guard let flow = accountFlow else { return true }
-        return !flow.isWorkingOnAuth && (flow.currentIdentity == nil || flow.hasLoadedBillingPlan)
-    }
-
     private func shows(_ control: SidebarFooterControl) -> Bool {
         SidebarFooterPresentationPolicy.isVisible(control, presentationMode: presentationMode)
     }
 
     var body: some View {
         HStack(spacing: 4) {
-            if shows(.account) || shows(.mobileConnect) || shows(.help) {
-                HStack(spacing: 0) {
-                    if shows(.account), CmuxFeatureFlags.shared.isSidebarAccountButtonEnabled {
-                        SidebarAccountMenuButton()
-                    }
-                    if shows(.mobileConnect), CmuxFeatureFlags.shared.isMobileConnectButtonEnabled {
-                        SidebarMobileConnectButton()
-                    }
-                    if shows(.help) {
-                        SidebarHelpMenuButton(onSendFeedback: onSendFeedback)
-                    }
-                }
+            if shows(.help) {
+                SidebarHelpMenuButton(onSendFeedback: onSendFeedback)
             }
             // Command-hold reveal: appears immediately before Upgrade. It stays
             // mounted while its popover is open so releasing ⌘ does not dismiss it.
             if shows(.shortcutDiscovery),
                (showModifierHoldHints && modifierKeyMonitor.isModifierPressed) || isShortcutPopoverPresented {
                 ShortcutDiscoveryButton(isPopoverPresented: $isShortcutPopoverPresented)
-            }
-            if shows(.upgrade),
-               SidebarFooterPresentationPolicy.isUpgradeVisible(
-                   isProActive: accountFlow?.isProActive == true,
-                   isProStatusKnown: isProStatusKnownForUpgrade
-               ) {
-                SidebarProBadge()
             }
             // The puzzle button opens the extensions browser; it only shows
             // while the experimental Extensions feature is enabled.
@@ -15784,21 +15686,15 @@ struct SidebarFooterButtons: View {
                 .accessibilityIdentifier("SidebarExtensionMenuButton")
                 .background(TitlebarControlAnchorView { extensionBrowserAnchorView = $0 })
             }
-            if shows(.update), let updateActionsHost = AppDelegate.shared {
-                UpdatePill(model: updateViewModel, accent: cmuxAccent.color, actions: updateActionsHost).windowHintTarget(updateViewModel.text)
-            }
+
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .task(id: billingPlanRefreshID) {
-            guard let flow = accountFlow, flow.isAuthenticated else { return }
-            await flow.refreshBillingPlan()
-        }
+
     }
 }
 
 private enum SidebarHelpMenuAction {
     case settings
-    case upgrade
     case importBrowserData
     case keyboardShortcuts
     case docs
@@ -15806,8 +15702,6 @@ private enum SidebarHelpMenuAction {
     case github
     case githubIssues
     case discord
-    case checkForUpdates
-    case sendFeedback
     case welcome
 }
 
@@ -15890,13 +15784,6 @@ private struct SidebarHelpMenuButton: View {
                 isExternalLink: false
             )
             helpOptionButton(
-                title: String(localized: "menu.help.upgradeToPro", defaultValue: "Upgrade to cmux Pro…"),
-                action: .upgrade,
-                accessibilityIdentifier: "SidebarHelpMenuOptionUpgrade",
-                isExternalLink: false,
-                trailingSystemImage: "sparkles"
-            )
-            helpOptionButton(
                 title: String(localized: "menu.app.settings", defaultValue: "Settings…"),
                 action: .settings,
                 accessibilityIdentifier: "SidebarHelpMenuOptionSettings",
@@ -15914,14 +15801,6 @@ private struct SidebarHelpMenuButton: View {
                 action: .importBrowserData,
                 accessibilityIdentifier: "SidebarHelpMenuOptionImportBrowserData",
                 isExternalLink: false
-            )
-            helpOptionButton(
-                title: String(localized: "sidebar.help.sendFeedback", defaultValue: "Send Feedback"),
-                action: .sendFeedback,
-                accessibilityIdentifier: "SidebarHelpMenuOptionSendFeedback",
-                isExternalLink: false,
-                shortcutHint: sendFeedbackShortcutHint,
-                trailingSystemImage: "bubble.left.and.text.bubble.right"
             )
             if docsURL != nil {
                 helpOptionButton(
@@ -15963,12 +15842,6 @@ private struct SidebarHelpMenuButton: View {
                     isExternalLink: true
                 )
             }
-            helpOptionButton(
-                title: String(localized: "command.checkForUpdates.title", defaultValue: "Check for Updates"),
-                action: .checkForUpdates,
-                accessibilityIdentifier: "SidebarHelpMenuOptionCheckForUpdates",
-                isExternalLink: false
-            )
         }
         .padding(8)
         .frame(minWidth: 200)
@@ -16031,8 +15904,6 @@ private struct SidebarHelpMenuButton: View {
                     AppDelegate.presentPreferencesWindow()
                 }
             }
-        case .upgrade:
-            ProUpgradePresenter.present(source: .sidebarHelpMenu)
         case .importBrowserData:
             isPopoverPresented = false
             DispatchQueue.main.async {
@@ -16067,13 +15938,6 @@ private struct SidebarHelpMenuButton: View {
         case .discord:
             guard let discordURL else { return }
             NSWorkspace.shared.open(discordURL)
-        case .checkForUpdates:
-            Task { @MainActor in
-                AppDelegate.shared?.checkForUpdates(nil)
-            }
-        case .sendFeedback:
-            isPopoverPresented = false
-            onSendFeedback()
         case .welcome:
             isPopoverPresented = false
             Task { @MainActor in

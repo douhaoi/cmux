@@ -37,7 +37,7 @@ enum DevicesFeature {
         cloudEnabled: Bool? = nil
     ) -> Bool {
         let policy = policy ?? ManagedDevicePolicy(defaults: defaults)
-        return !policy.isEnforced(.disableCloud)
+        return LocalProduct().includesHostedServices && !policy.isEnforced(.disableCloud)
             && (cloudEnabled ?? CloudMachinesFeature.isEnabled(defaults: defaults, policy: policy))
     }
 

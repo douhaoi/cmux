@@ -15,7 +15,7 @@ import OSLog
 @MainActor
 struct ControlTerminalSocketTarget {
     nonisolated private static let logger = Logger(
-        subsystem: "com.cmuxterm.app",
+        subsystem: "com.cmuxterm.local",
         category: "socket.terminal-binding"
     )
 

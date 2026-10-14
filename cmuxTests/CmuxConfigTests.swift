@@ -1567,7 +1567,7 @@ final class CmuxConfigDecodingTests: XCTestCase {
         {
           "packs": [
             "./packs/team",
-            { "path": "~/.config/cmux/packs/personal/cmux.pack.json" }
+            { "path": "~/.config/cmux-local/packs/personal/cmux.pack.json" }
           ]
         }
         """
@@ -1575,7 +1575,7 @@ final class CmuxConfigDecodingTests: XCTestCase {
 
         XCTAssertEqual(config.packs.map(\.path), [
             "./packs/team",
-            "~/.config/cmux/packs/personal/cmux.pack.json"
+            "~/.config/cmux-local/packs/personal/cmux.pack.json"
         ])
     }
 

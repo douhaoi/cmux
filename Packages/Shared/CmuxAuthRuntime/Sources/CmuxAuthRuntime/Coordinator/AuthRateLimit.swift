@@ -1,5 +1,4 @@
 import Foundation
-import StackAuth
 
 /// A 429 answer from the sign-in service, recognized on whatever error a
 /// call surfaced, plus the bounded retry policy the sign-in flow uses.
@@ -14,20 +13,7 @@ public struct AuthRateLimit: Sendable, Equatable {
     /// Recognizes a rate-limit error, or returns `nil` for any other error.
     /// - Parameter error: The error a sign-in or session call threw.
     public init?(error: any Error) {
-        guard let stackError = error as? any StackAuthErrorProtocol else { return nil }
-        switch stackError.code.uppercased() {
-        case "RATE_LIMITED", "RATE_LIMIT":
-            break
-        default:
-            return nil
-        }
-        if let seconds = stackError.details?[StackAuthError.retryAfterSecondsKey] as? TimeInterval,
-           seconds.isFinite, seconds >= 0 {
-            // A remote header: bound it before the Int64 conversion.
-            retryAfter = .milliseconds(Int64(min(seconds, 86_400) * 1000))
-        } else {
-            retryAfter = nil
-        }
+        return nil
     }
 
     /// Retries the sign-in flow makes after a 429 before it shows a failure.

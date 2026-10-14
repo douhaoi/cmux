@@ -5,7 +5,7 @@ import Foundation
 import os
 
 private nonisolated let agentChatThemeSyncLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "AgentChatThemeSync"
 )
 

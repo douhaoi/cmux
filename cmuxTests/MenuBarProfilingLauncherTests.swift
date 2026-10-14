@@ -10,12 +10,12 @@ struct MenuBarProfilingLauncherTests {
     @Test
     func testMenuBarProfilingLaunchesCurrentProcessForFifteenSecondsWithoutOpeningOutput() {
         let arguments = MenuBarProfilingLauncher.arguments(pid: 1234)
-        #expect(arguments == ["--pid", "1234", "--duration", "15"])
+        #expect(arguments == ["--pid", "1234", "--duration", "15", "--no-submit"])
     }
 
     @Test
-    func testMenuBarProfilingCanDeferSubmissionToProgressWindow() {
-        let arguments = MenuBarProfilingLauncher.arguments(pid: 1234, submitProfile: false)
+    func testMenuBarProfilingCannotEnableSubmission() {
+        let arguments = MenuBarProfilingLauncher.arguments(pid: 1234, submitProfile: true)
         #expect(arguments == ["--pid", "1234", "--duration", "15", "--no-submit"])
     }
 

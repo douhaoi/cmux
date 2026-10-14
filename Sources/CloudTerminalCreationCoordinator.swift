@@ -3,7 +3,7 @@ import CmuxSurfaceCatalogModel
 import Foundation
 import os
 
-nonisolated private let cloudTerminalCreationLogger = Logger(subsystem: "com.cmuxterm.app", category: "CloudTerminalCreation")
+nonisolated private let cloudTerminalCreationLogger = Logger(subsystem: "com.cmuxterm.local", category: "CloudTerminalCreation")
 
 /// Coordinates one asynchronous Cloud terminal creation behind a reserved pane.
 ///

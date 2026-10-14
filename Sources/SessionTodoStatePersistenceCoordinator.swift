@@ -2,7 +2,7 @@ import Foundation
 import os
 
 private let sessionTodoPersistenceLogger = Logger(
-    subsystem: "com.cmuxterm.app",
+    subsystem: "com.cmuxterm.local",
     category: "SessionTodoPersistence"
 )
 

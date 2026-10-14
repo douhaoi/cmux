@@ -53,6 +53,7 @@ extension AppDelegate {
     /// boundary. Existing workspace configurations and catalog identities stay
     /// persisted; only controllers, retries, and transport tasks are stopped.
     func applyCloudFeatureFlag(enabled: Bool) {
+        guard LocalProduct().includesHostedServices else { return }
         devicesRegistry?.evaluate()
         MobileHostService.shared.syncToSettings()
         if !enabled {
@@ -150,6 +151,7 @@ extension AppDelegate {
     /// is re-read after every suspension, so a lift that arrives while a
     /// teardown is still running cannot be overtaken by it.
     func applyManagedCloudPolicy() {
+        guard LocalProduct().includesHostedServices else { return }
         let previous = managedCloudPolicyTask
         managedCloudPolicyTask = Task { @MainActor [weak self] in
             _ = await previous?.value

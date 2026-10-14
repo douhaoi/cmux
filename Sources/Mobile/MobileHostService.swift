@@ -12,7 +12,6 @@ import CryptoKit
 import Foundation
 @preconcurrency import Network
 import OSLog
-import StackAuth
 import os
 
 private let mobileHostLog = Logger(subsystem: "dev.cmux", category: "mobile-host")
@@ -298,24 +297,13 @@ final class MobileHostService {
         routes: [CmxAttachRoute],
         deviceID: String,
         additionalCapabilities: Set<String> = [],
-        phonePushDefaults: UserDefaults = .standard,
-        phonePushAdmission: PhonePushAdmission = .unknown,
-        phonePushQueuePersistenceStatus: PhonePushQueuePersistenceStatus =
-            .unknown,
-        phonePushAPIBaseURL: URL = AuthEnvironment.vmAPIBaseURL,
+        identityDefaults: UserDefaults = .standard,
         now: Date = Date()
     ) -> [String: Any] {
         var payload = publicStatusPayload(routes: [], now: now)
         payload["routes"] = routes.mobileHostJSONObjects(for: .authenticated, at: now)
         payload["capabilities"] = applyingDebugCapabilitySuppressions(
-            mobileHostCapabilities
-                + additionalCapabilities
-                    .union([
-                        phonePushStatusCapability,
-                        phonePushSettingsCapability,
-                        phonePushTestCapability,
-                    ])
-                    .sorted()
+            mobileHostCapabilities + additionalCapabilities.sorted()
         )
         payload["terminal_theme_revision_epoch"] = terminalThemeRevisionEpoch
         payload["mac_device_id"] = deviceID
@@ -329,23 +317,8 @@ final class MobileHostService {
         // exact-tag phone adopts it (the phone ignores the field from any
         // other reporter), so advertising it unconditionally is safe.
         payload["mac_compatible_mac_tags"] = MobileCompatibleMacTags.tags(
-            in: phonePushDefaults
+            in: identityDefaults
         )
-        payload["phone_push"] = [
-            "forwarding_enabled": PhonePushConfiguration.forwardingEnabled(
-                in: phonePushDefaults
-            ),
-            "mode": PhoneForwardingMode.fromDefaults(phonePushDefaults).rawValue,
-            "admission": phonePushAdmission.rawValue,
-            "queue_persistence": phonePushQueuePersistenceStatus.rawValue,
-            "hide_content": phonePushDefaults.bool(
-                forKey: PhonePushSettings.hideContentKey
-            ),
-            "api_origin": canonicalPhonePushAPIBaseURL(phonePushAPIBaseURL),
-            // Reaching this payload means `verifiedStackCaller` already proved
-            // the presented token belongs to the Mac's current Stack account.
-            "account_scope": "verified_same_account",
-        ]
         if let displayName = MobileHostIdentity.instanceDisplayName() {
             payload["mac_display_name"] = displayName
         }
@@ -357,14 +330,6 @@ final class MobileHostService {
             payload["mac_app_build"] = appBuild
         }
         return payload
-    }
-
-    nonisolated private static func canonicalPhonePushAPIBaseURL(_ url: URL) -> String {
-        var value = url.absoluteString
-        while value.hasSuffix("/") {
-            value.removeLast()
-        }
-        return value
     }
 
     /// The `mobile.host.status` reply for a network caller.
@@ -405,23 +370,11 @@ final class MobileHostService {
         guard verified else {
             return MobileHostPublicStatusCache.result(includeIdentity: false)
         }
-        let phonePushStatus = await MainActor.run {
-            (
-                PhonePushClient.shared.currentAdmission(),
-                PhonePushClient.shared.queuePersistenceStatus
-            )
-        }
-        return MobileHostPublicStatusCache.result(
-            includeIdentity: true,
-            phonePushAdmission: phonePushStatus.0,
-            phonePushQueuePersistenceStatus: phonePushStatus.1
-        )
+        return MobileHostPublicStatusCache.result(includeIdentity: true)
     }
 
-    private let callbackQueue = DispatchQueue(label: "dev.cmux.mobile.host-listener")
     private let ticketStore = MobileAttachTicketStore()
     private var clientIDsByConnectionID: [UUID: Set<String>] = [:]
-    private var pathMonitor: MobileHostNetworkPathMonitor?
     /// Injected once via `configure(auth:)` at app startup, before the
     /// listener starts accepting connections.
     private var auth: AuthCoordinator?
@@ -432,19 +385,14 @@ final class MobileHostService {
     #endif
 
     private let defaults: UserDefaults
-    private let runtimeOverride: (any MobileHostPairingRuntime)?
-    private var pairingRuntime: any MobileHostPairingRuntime { runtimeOverride ?? MobileHostIrxRuntime.shared }
 
-    init(defaults: UserDefaults = .standard, runtime: (any MobileHostPairingRuntime)? = nil) {
+    init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        runtimeOverride = runtime
     }
 
-    /// Inject the auth dependency. Call once at the composition root.
-    /// The v2 runtime owns the selected team's IROH device identity.
+    /// Retains authorization context for the retired protocol adapters.
     func configure(auth: AuthCoordinator) {
         self.auth = auth
-        pairingRuntime.configure(auth: auth)
     }
 
     func updateIrohRoute(
@@ -757,13 +705,7 @@ final class MobileHostService {
         defaults: UserDefaults,
         buildFlavor: BuildFlavor
     ) -> Bool {
-        guard !ManagedDevicePolicy(defaults: defaults).isIncomingDeviceAccessDisabled else { return false }
-        // The current iOS choice takes precedence over the historical key;
-        // incoming Mac access remains an independent opt-in.
-        let iOSPairingEnabled = defaults.object(forKey: listeningEnabledDefaultsKey) as? Bool
-            ?? defaults.object(forKey: "cmuxMobilePairingHostEnabled") as? Bool
-            ?? false
-        return iOSPairingEnabled
+        return false
     }
 
     /// User-default key for the preferred iOS pairing listener port.
@@ -785,22 +727,12 @@ final class MobileHostService {
         guard (1...65535).contains(port) else { return .invalid }
         defaults.set(port, forKey: Self.portDefaultsKey)
         NotificationCenter.default.post(name: .mobileHostStatusDidChange, object: nil)
-        let state = pairingRuntime.listenerState
-        if pairingRuntime.isNetworkingAllowed, state.isRunning, state.boundPort == port {
-            return .applied(port)
-        }
         return .savedForLater
     }
 
-    func start() {
-        syncToSettings()
-    }
+    func start() {}
 
     func stop() {
-        let runtime = pairingRuntime
-        runtime.prepareForStop()
-        Task { @MainActor in await runtime.stopHost() }
-        stopNetworkPathMonitor()
         for connection in MobileHostConnectionRegistry.shared.removeAll() {
             Task { await connection.close(reason: "service stopped") }
         }
@@ -853,59 +785,27 @@ final class MobileHostService {
         }
     }
 
-    /// Waits for the IROH owner's actual readiness, with a bounded UI wait.
+    /// This distribution has no mobile listener to start or await.
     func ensureListeningAndReady(timeout: Duration = .seconds(6)) async -> MobileHostServiceStatus {
-        let runtime = pairingRuntime
-        if !runtime.isNetworkingAllowed { runtime.prepareForStop() }
-        await runtime.applyManagedNetworkingPolicy()
-        guard runtime.isNetworkingAllowed, !runtime.listenerState.isSettled else { return statusSnapshot() }
-        let updates = runtime.listenerStateUpdates()
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask {
-                for await state in updates {
-                    if Task.isCancelled || state.isSettled { return }
-                }
-            }
-            group.addTask { try? await Task.sleep(for: timeout) }
-            _ = await group.next()
-            group.cancelAll()
-        }
-        return statusSnapshot()
+        statusSnapshot()
     }
 
     private func makeStatus(routes: [CmxAttachRoute]) -> MobileHostServiceStatus {
-        let runtime = pairingRuntime
-        let state = runtime.isNetworkingAllowed ? runtime.listenerState : MobileHostListenerState()
-        let desiredPort = Self.configuredPort(defaults: defaults)
-        return MobileHostServiceStatus(
-            isRunning: state.isRunning,
-            port: state.boundPort,
-            configuredPort: desiredPort,
-            usesEphemeralFallback: state.usesEphemeralFallback,
-            routes: state.isRunning ? routes : [],
-            activeConnectionCount: MobileHostConnectionRegistry.shared.count,
-            lastErrorDescription: state.failureDescription,
-            pendingPortChange: state.isRunning && state.preferredPort != desiredPort,
-            localSocketAddresses: state.localSocketAddresses,
-            isPairingReady: state.isRunning && state.hasAuthenticatedRegistration
+        MobileHostServiceStatus(
+            isRunning: false,
+            port: nil,
+            configuredPort: Self.configuredPort(defaults: defaults),
+            usesEphemeralFallback: false,
+            routes: [],
+            activeConnectionCount: 0,
+            lastErrorDescription: nil,
+            pendingPortChange: false,
+            localSocketAddresses: [],
+            isPairingReady: false
         )
     }
 
-    /// The runtime alone reconciles pairing policy. Ordinary settings writes
-    /// leave its endpoint and established sessions running.
-    func syncToSettings() {
-        let runtime = pairingRuntime
-        if !runtime.isNetworkingAllowed { runtime.prepareForStop() }
-        Task { @MainActor in await runtime.applyManagedNetworkingPolicy() }
-        if runtime.isNetworkingAllowed {
-            startNetworkPathMonitorIfNeeded()
-        } else {
-            stopNetworkPathMonitor()
-            for connection in MobileHostConnectionRegistry.shared.removeAll() {
-                Task { await connection.close(reason: "iOS pairing disabled") }
-            }
-        }
-    }
+    func syncToSettings() {}
 
     @discardableResult
     nonisolated static func acceptTransport(
@@ -1000,8 +900,11 @@ final class MobileHostService {
                         }
                     )
                 }
-                if request.method == "phone_push.keys.exchange" {
-                    return await MobileHostService.shared.handlePhonePushKeyExchange(request)
+                if request.method.hasPrefix("phone_push.") {
+                    return .failure(MobileHostRPCError(
+                        code: "unavailable",
+                        message: String(localized: "localProduct.serviceUnavailable", defaultValue: "This service is not included in the local edition.")
+                    ))
                 }
                 let result = await TerminalController.shared.mobileHostHandleRPC(
                     request,
@@ -1076,20 +979,12 @@ final class MobileHostService {
         case .stackBearer:
             return await stackStatus(request)
         case .irohAdmission:
-            let phonePushStatus = await MainActor.run {
-                (
-                    PhonePushClient.shared.currentAdmission(),
-                    PhonePushClient.shared.queuePersistenceStatus
-                )
-            }
             return MobileHostPublicStatusCache.result(
                 includeIdentity: true,
                 deviceID: hostDeviceID,
                 additionalCapabilities: supportsArtifactLane
                     ? Set([irohArtifactLaneCapability])
-                    : Set(),
-                phonePushAdmission: phonePushStatus.0,
-                phonePushQueuePersistenceStatus: phonePushStatus.1
+                    : Set()
             )
         }
     }
@@ -1397,29 +1292,7 @@ final class MobileHostService {
         }
     }
 
-    // MARK: - Network path monitoring
 
-    /// Begin republishing routes on network path changes (observation and
-    /// dedup live in ``MobileHostNetworkPathMonitor``). Idempotent; runs for
-    /// the lifetime of the listener and is stopped by ``stop()``.
-    private func startNetworkPathMonitorIfNeeded() {
-        guard pathMonitor == nil else { return }
-        let monitor = MobileHostNetworkPathMonitor { [weak self] in
-            self?.handleNetworkPathChange()
-        }
-        monitor.start(queue: callbackQueue)
-        pathMonitor = monitor
-    }
-
-    private func stopNetworkPathMonitor() {
-        pathMonitor?.cancel()
-        pathMonitor = nil
-    }
-
-    private func handleNetworkPathChange() {
-        let runtime = pairingRuntime
-        Task { @MainActor in await runtime.foreground() }
-    }
 }
 
 
