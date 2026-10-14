@@ -285,7 +285,7 @@ final class CmuxFeatureFlags {
     // flag is remotely disabled.
     static let computerUseUXFlag = CmuxFeatureFlagDefinition(
         key: "computer-use-ux-enabled-release",
-        title: String(localized: "featureFlags.computerUseUX.title", defaultValue: "cmux Computer Use UX"),
+        title: String(localized: "featureFlags.computerUseUX.title", defaultValue: "LocalDeck Computer Use UX"),
         flagDescription: String(
             localized: "featureFlags.computerUseUX.description",
             defaultValue: "Shows the Computer Use menu-bar item and automatic onboarding."

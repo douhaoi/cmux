@@ -69,7 +69,7 @@
   },
   "about.appName": {
     "class": "brand",
-    "source": "cmux"
+    "source": "LocalDeck"
   },
   "about.commit": {
     "source": "Commit",
@@ -776,7 +776,7 @@
   },
   "command.cmuxConfig.builtInSubtitle": {
     "class": "brand",
-    "source": "cmux"
+    "source": "LocalDeck"
   },
   "command.cmuxConfig.defaultClaudeCodeTitle": {
     "source": "Claude Code",
@@ -1026,7 +1026,7 @@
   },
   "computerUse.menu.title": {
     "class": "brand",
-    "source": "cmux Computer Use"
+    "source": "LocalDeck Computer Use"
   },
   "computerUse.menu.unknownTarget": {
     "source": "App",
@@ -2693,7 +2693,7 @@
   },
   "settings.config.source.cmux": {
     "class": "brand",
-    "source": "cmux"
+    "source": "LocalDeck"
   },
   "settings.customSidebars.renderer": {
     "source": "Renderer",

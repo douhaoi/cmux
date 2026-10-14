@@ -130,121 +130,121 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Named local-tmux sessions keep processes and scrollback alive across cmux quit, crashes, and updates. Ordinary terminals keep their current behavior."
+            "value": "Named local-tmux sessions keep processes and scrollback alive across LocalDeck quit, crashes, and updates. Ordinary terminals keep their current behavior."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Benannte local-tmux-Sitzungen halten Prozesse und Scrollback über das Beenden, Abstürze und Updates von cmux hinweg am Leben. Normale Terminals behalten ihr aktuelles Verhalten."
+            "value": "Benannte local-tmux-Sitzungen halten Prozesse und Scrollback über das Beenden, Abstürze und Updates von LocalDeck hinweg am Leben. Normale Terminals behalten ihr aktuelles Verhalten."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les sessions local-tmux nommées conservent les processus et l’historique lors de la fermeture, des plantages et des mises à jour de cmux. Les terminaux ordinaires conservent leur comportement actuel."
+            "value": "Les sessions local-tmux nommées conservent les processus et l’historique lors de la fermeture, des plantages et des mises à jour de LocalDeck. Les terminaux ordinaires conservent leur comportement actuel."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las sesiones local-tmux con nombre mantienen los procesos y el historial al salir de cmux, tras fallos y durante actualizaciones. Los terminales normales conservan su comportamiento actual."
+            "value": "Las sesiones local-tmux con nombre mantienen los procesos y el historial al salir de LocalDeck, tras fallos y durante actualizaciones. Los terminales normales conservan su comportamiento actual."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le sessioni local-tmux con nome mantengono processi e cronologia attivi dopo chiusure, arresti anomali e aggiornamenti di cmux. I terminali normali mantengono il comportamento attuale."
+            "value": "Le sessioni local-tmux con nome mantengono processi e cronologia attivi dopo chiusure, arresti anomali e aggiornamenti di LocalDeck. I terminali normali mantengono il comportamento attuale."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "名前付き local-tmux セッションは、cmux の終了、クラッシュ、更新後もプロセスとスクロールバックを維持します。通常のターミナルの動作は変わりません。"
+            "value": "名前付き local-tmux セッションは、LocalDeck の終了、クラッシュ、更新後もプロセスとスクロールバックを維持します。通常のターミナルの動作は変わりません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이름이 지정된 local-tmux 세션은 cmux 종료, 충돌 및 업데이트 후에도 프로세스와 스크롤백을 유지합니다. 일반 터미널의 현재 동작은 그대로 유지됩니다."
+            "value": "이름이 지정된 local-tmux 세션은 LocalDeck 종료, 충돌 및 업데이트 후에도 프로세스와 스크롤백을 유지합니다. 일반 터미널의 현재 동작은 그대로 유지됩니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "命名的 local-tmux 会话可在 cmux 退出、崩溃和更新后继续保留进程与回滚内容。普通终端保持现有行为。"
+            "value": "命名的 local-tmux 会话可在 LocalDeck 退出、崩溃和更新后继续保留进程与回滚内容。普通终端保持现有行为。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "具名 local-tmux 工作階段可在 cmux 結束、當機與更新後繼續保留程序及捲動記錄。一般終端機維持目前行為。"
+            "value": "具名 local-tmux 工作階段可在 LocalDeck 結束、當機與更新後繼續保留程序及捲動記錄。一般終端機維持目前行為。"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تحافظ جلسات local-tmux المسماة على العمليات وسجل التمرير بعد إنهاء cmux أو تعطله أو تحديثه. وتبقى المحطات العادية على سلوكها الحالي."
+            "value": "تحافظ جلسات local-tmux المسماة على العمليات وسجل التمرير بعد إنهاء LocalDeck أو تعطله أو تحديثه. وتبقى المحطات العادية على سلوكها الحالي."
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Imenovane local-tmux sesije čuvaju procese i historiju pomjeranja nakon izlaska iz cmux-a, rušenja i ažuriranja. Obični terminali zadržavaju trenutno ponašanje."
+            "value": "Imenovane local-tmux sesije čuvaju procese i historiju pomjeranja nakon izlaska iz LocalDeck-a, rušenja i ažuriranja. Obični terminali zadržavaju trenutno ponašanje."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Navngivne local-tmux-sessioner holder processer og scrollback i live på tværs af afslutning, nedbrud og opdateringer af cmux. Almindelige terminaler beholder deres nuværende adfærd."
+            "value": "Navngivne local-tmux-sessioner holder processer og scrollback i live på tværs af afslutning, nedbrud og opdateringer af LocalDeck. Almindelige terminaler beholder deres nuværende adfærd."
           }
         },
         "km": {
           "stringUnit": {
             "state": "translated",
-            "value": "សម័យ local-tmux ដែលមានឈ្មោះរក្សាដំណើរការ និងប្រវត្តិរំកិលឱ្យនៅសល់បន្ទាប់ពីបិទ cmux គាំង ឬធ្វើបច្ចុប្បន្នភាព។ ស្ថានីយធម្មតារក្សាឥរិយាបថបច្ចុប្បន្ន។"
+            "value": "សម័យ local-tmux ដែលមានឈ្មោះរក្សាដំណើរការ និងប្រវត្តិរំកិលឱ្យនៅសល់បន្ទាប់ពីបិទ LocalDeck គាំង ឬធ្វើបច្ចុប្បន្នភាព។ ស្ថានីយធម្មតារក្សាឥរិយាបថបច្ចុប្បន្ន។"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Navngitte local-tmux-økter holder prosesser og tilbakerulling i live gjennom avslutning, krasj og oppdateringer av cmux. Vanlige terminaler beholder dagens oppførsel."
+            "value": "Navngitte local-tmux-økter holder prosesser og tilbakerulling i live gjennom avslutning, krasj og oppdateringer av LocalDeck. Vanlige terminaler beholder dagens oppførsel."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nazwane sesje local-tmux zachowują procesy i historię przewijania po zamknięciu, awarii i aktualizacji cmux. Zwykłe terminale zachowują dotychczasowe działanie."
+            "value": "Nazwane sesje local-tmux zachowują procesy i historię przewijania po zamknięciu, awarii i aktualizacji LocalDeck. Zwykłe terminale zachowują dotychczasowe działanie."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sessões local-tmux nomeadas mantêm processos e histórico de rolagem após o encerramento, falhas e atualizações do cmux. Terminais comuns mantêm o comportamento atual."
+            "value": "Sessões local-tmux nomeadas mantêm processos e histórico de rolagem após o encerramento, falhas e atualizações do LocalDeck. Terminais comuns mantêm o comportamento atual."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Именованные сеансы local-tmux сохраняют процессы и историю прокрутки после выхода, сбоев и обновлений cmux. Обычные терминалы сохраняют текущее поведение."
+            "value": "Именованные сеансы local-tmux сохраняют процессы и историю прокрутки после выхода, сбоев и обновлений LocalDeck. Обычные терминалы сохраняют текущее поведение."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "เซสชัน local-tmux ที่ตั้งชื่อจะเก็บโปรเซสและประวัติการเลื่อนไว้เมื่อออกจาก cmux เกิดข้อขัดข้อง หรืออัปเดต เทอร์มินัลทั่วไปยังคงทำงานแบบเดิม"
+            "value": "เซสชัน local-tmux ที่ตั้งชื่อจะเก็บโปรเซสและประวัติการเลื่อนไว้เมื่อออกจาก LocalDeck เกิดข้อขัดข้อง หรืออัปเดต เทอร์มินัลทั่วไปยังคงทำงานแบบเดิม"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Adlandırılmış local-tmux oturumları cmux kapanışları, çökmeleri ve güncellemeleri boyunca süreçleri ve geri kaydırma geçmişini korur. Normal terminaller mevcut davranışlarını sürdürür."
+            "value": "Adlandırılmış local-tmux oturumları LocalDeck kapanışları, çökmeleri ve güncellemeleri boyunca süreçleri ve geri kaydırma geçmişini korur. Normal terminaller mevcut davranışlarını sürdürür."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Іменовані сеанси local-tmux зберігають процеси й історію прокручування після виходу, збоїв та оновлень cmux. Звичайні термінали зберігають поточну поведінку."
+            "value": "Іменовані сеанси local-tmux зберігають процеси й історію прокручування після виходу, збоїв та оновлень LocalDeck. Звичайні термінали зберігають поточну поведінку."
           }
         }
       }
@@ -626,121 +626,121 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Creates a named local-tmux session in the selected workspace directory and attaches it to cmux."
+            "value": "Creates a named local-tmux session in the selected workspace directory and attaches it to LocalDeck."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erstellt im Verzeichnis des ausgewählten Arbeitsbereichs eine benannte local-tmux-Sitzung und verbindet sie mit cmux."
+            "value": "Erstellt im Verzeichnis des ausgewählten Arbeitsbereichs eine benannte local-tmux-Sitzung und verbindet sie mit LocalDeck."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crée une session local-tmux nommée dans le dossier de l’espace de travail sélectionné et l’attache à cmux."
+            "value": "Crée une session local-tmux nommée dans le dossier de l’espace de travail sélectionné et l’attache à LocalDeck."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crea una sesión local-tmux con nombre en el directorio del espacio de trabajo seleccionado y la adjunta a cmux."
+            "value": "Crea una sesión local-tmux con nombre en el directorio del espacio de trabajo seleccionado y la adjunta a LocalDeck."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crea una sessione local-tmux con nome nella directory dell’area di lavoro selezionata e la collega a cmux."
+            "value": "Crea una sessione local-tmux con nome nella directory dell’area di lavoro selezionata e la collega a LocalDeck."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "選択中のワークスペースのディレクトリに名前付き local-tmux セッションを作成し、cmux に接続します。"
+            "value": "選択中のワークスペースのディレクトリに名前付き local-tmux セッションを作成し、LocalDeck に接続します。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "선택한 작업 공간 디렉터리에 이름이 지정된 local-tmux 세션을 만들고 cmux에 연결합니다."
+            "value": "선택한 작업 공간 디렉터리에 이름이 지정된 local-tmux 세션을 만들고 LocalDeck에 연결합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在所选工作区目录中创建命名的 local-tmux 会话并将其附加到 cmux。"
+            "value": "在所选工作区目录中创建命名的 local-tmux 会话并将其附加到 LocalDeck。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "在所選工作區目錄中建立具名 local-tmux 工作階段，並將其附加至 cmux。"
+            "value": "在所選工作區目錄中建立具名 local-tmux 工作階段，並將其附加至 LocalDeck。"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ينشئ جلسة local-tmux مسماة في مجلد مساحة العمل المحددة ويربطها بـ cmux."
+            "value": "ينشئ جلسة local-tmux مسماة في مجلد مساحة العمل المحددة ويربطها بـ LocalDeck."
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kreira imenovanu local-tmux sesiju u direktoriju odabranog radnog prostora i povezuje je s cmux-om."
+            "value": "Kreira imenovanu local-tmux sesiju u direktoriju odabranog radnog prostora i povezuje je s LocalDeck-om."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opretter en navngiven local-tmux-session i den valgte arbejdsområdemappe og knytter den til cmux."
+            "value": "Opretter en navngiven local-tmux-session i den valgte arbejdsområdemappe og knytter den til LocalDeck."
           }
         },
         "km": {
           "stringUnit": {
             "state": "translated",
-            "value": "បង្កើតសម័យ local-tmux ដែលមានឈ្មោះក្នុងថតកន្លែងធ្វើការដែលបានជ្រើស ហើយភ្ជាប់វាទៅ cmux។"
+            "value": "បង្កើតសម័យ local-tmux ដែលមានឈ្មោះក្នុងថតកន្លែងធ្វើការដែលបានជ្រើស ហើយភ្ជាប់វាទៅ LocalDeck។"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oppretter en navngitt local-tmux-økt i mappen til det valgte arbeidsområdet og kobler den til cmux."
+            "value": "Oppretter en navngitt local-tmux-økt i mappen til det valgte arbeidsområdet og kobler den til LocalDeck."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tworzy nazwaną sesję local-tmux w katalogu wybranego obszaru roboczego i dołącza ją do cmux."
+            "value": "Tworzy nazwaną sesję local-tmux w katalogu wybranego obszaru roboczego i dołącza ją do LocalDeck."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cria uma sessão local-tmux nomeada no diretório do espaço de trabalho selecionado e a anexa ao cmux."
+            "value": "Cria uma sessão local-tmux nomeada no diretório do espaço de trabalho selecionado e a anexa ao LocalDeck."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Создаёт именованный сеанс local-tmux в каталоге выбранной рабочей области и подключает его к cmux."
+            "value": "Создаёт именованный сеанс local-tmux в каталоге выбранной рабочей области и подключает его к LocalDeck."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "สร้างเซสชัน local-tmux ที่ตั้งชื่อในไดเรกทอรีเวิร์กสเปซที่เลือกและแนบเข้ากับ cmux"
+            "value": "สร้างเซสชัน local-tmux ที่ตั้งชื่อในไดเรกทอรีเวิร์กสเปซที่เลือกและแนบเข้ากับ LocalDeck"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seçili çalışma alanı dizininde adlandırılmış bir local-tmux oturumu oluşturur ve cmux'a bağlar."
+            "value": "Seçili çalışma alanı dizininde adlandırılmış bir local-tmux oturumu oluşturur ve LocalDeck'a bağlar."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Створює іменований сеанс local-tmux у каталозі вибраного робочого простору та підключає його до cmux."
+            "value": "Створює іменований сеанс local-tmux у каталозі вибраного робочого простору та підключає його до LocalDeck."
           }
         }
       }
@@ -2362,121 +2362,121 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Session persistence is unavailable. Reinstall cmux and try again."
+            "value": "Session persistence is unavailable. Reinstall LocalDeck and try again."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sitzungen können nicht dauerhaft gespeichert werden. Installiere cmux neu und versuche es erneut."
+            "value": "Sitzungen können nicht dauerhaft gespeichert werden. Installiere LocalDeck neu und versuche es erneut."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La persistance des sessions est indisponible. Réinstallez cmux et réessayez."
+            "value": "La persistance des sessions est indisponible. Réinstallez LocalDeck et réessayez."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La persistencia de sesiones no está disponible. Reinstala cmux e inténtalo de nuevo."
+            "value": "La persistencia de sesiones no está disponible. Reinstala LocalDeck e inténtalo de nuevo."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La persistenza delle sessioni non è disponibile. Reinstalla cmux e riprova."
+            "value": "La persistenza delle sessioni non è disponibile. Reinstalla LocalDeck e riprova."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "セッションの永続化を利用できません。cmux を再インストールして、もう一度お試しください。"
+            "value": "セッションの永続化を利用できません。LocalDeck を再インストールして、もう一度お試しください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "세션 유지를 사용할 수 없습니다. cmux를 다시 설치하고 다시 시도하세요."
+            "value": "세션 유지를 사용할 수 없습니다. LocalDeck를 다시 설치하고 다시 시도하세요."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "会话持久化不可用。请重新安装 cmux，然后重试。"
+            "value": "会话持久化不可用。请重新安装 LocalDeck，然后重试。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "工作階段持續保存功能無法使用。請重新安裝 cmux，然後重試。"
+            "value": "工作階段持續保存功能無法使用。請重新安裝 LocalDeck，然後重試。"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الاحتفاظ بالجلسات غير متاح. أعد تثبيت cmux وحاول مرة أخرى."
+            "value": "الاحتفاظ بالجلسات غير متاح. أعد تثبيت LocalDeck وحاول مرة أخرى."
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trajno čuvanje sesija nije dostupno. Ponovo instalirajte cmux i pokušajte ponovo."
+            "value": "Trajno čuvanje sesija nije dostupno. Ponovo instalirajte LocalDeck i pokušajte ponovo."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bevaring af sessioner er ikke tilgængelig. Geninstaller cmux, og prøv igen."
+            "value": "Bevaring af sessioner er ikke tilgængelig. Geninstaller LocalDeck, og prøv igen."
           }
         },
         "km": {
           "stringUnit": {
             "state": "translated",
-            "value": "មិនអាចប្រើមុខងាររក្សាទុកសម័យបានទេ។ ដំឡើង cmux ឡើងវិញ ហើយព្យាយាមម្តងទៀត។"
+            "value": "មិនអាចប្រើមុខងាររក្សាទុកសម័យបានទេ។ ដំឡើង LocalDeck ឡើងវិញ ហើយព្យាយាមម្តងទៀត។"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lagring av vedvarende økter er utilgjengelig. Installer cmux på nytt og prøv igjen."
+            "value": "Lagring av vedvarende økter er utilgjengelig. Installer LocalDeck på nytt og prøv igjen."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zachowywanie sesji jest niedostępne. Zainstaluj ponownie cmux i spróbuj jeszcze raz."
+            "value": "Zachowywanie sesji jest niedostępne. Zainstaluj ponownie LocalDeck i spróbuj jeszcze raz."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "A persistência de sessões está indisponível. Reinstale o cmux e tente novamente."
+            "value": "A persistência de sessões está indisponível. Reinstale o LocalDeck e tente novamente."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сохранение сеансов недоступно. Переустановите cmux и повторите попытку."
+            "value": "Сохранение сеансов недоступно. Переустановите LocalDeck и повторите попытку."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ไม่สามารถใช้การเก็บรักษาเซสชันได้ โปรดติดตั้ง cmux ใหม่แล้วลองอีกครั้ง"
+            "value": "ไม่สามารถใช้การเก็บรักษาเซสชันได้ โปรดติดตั้ง LocalDeck ใหม่แล้วลองอีกครั้ง"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oturum kalıcılığı kullanılamıyor. cmux uygulamasını yeniden yükleyip tekrar deneyin."
+            "value": "Oturum kalıcılığı kullanılamıyor. LocalDeck uygulamasını yeniden yükleyip tekrar deneyin."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Збереження сеансів недоступне. Перевстановіть cmux і спробуйте ще раз."
+            "value": "Збереження сеансів недоступне. Перевстановіть LocalDeck і спробуйте ще раз."
           }
         }
       }
@@ -6726,121 +6726,121 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "When enabled, cmux wraps the pi command and loads its bundled session extension without changing your Pi configuration. Disable if you prefer to manage Pi hooks yourself."
+            "value": "When enabled, LocalDeck wraps the pi command and loads its bundled session extension without changing your Pi configuration. Disable if you prefer to manage Pi hooks yourself."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "عند التفعيل، يغلّف cmux أمر pi ويحمّل امتداد الجلسة المضمّن دون تغيير إعدادات Pi. عطّل هذا الخيار إذا كنت تفضّل إدارة خطافات Pi بنفسك."
+            "value": "عند التفعيل، يغلّف LocalDeck أمر pi ويحمّل امتداد الجلسة المضمّن دون تغيير إعدادات Pi. عطّل هذا الخيار إذا كنت تفضّل إدارة خطافات Pi بنفسك."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wenn aktiviert, umhüllt cmux den pi-Befehl und lädt seine gebündelte Sitzungserweiterung, ohne deine Pi-Konfiguration zu ändern. Deaktiviere dies, wenn du die Pi-Hooks selbst verwalten möchtest."
+            "value": "Wenn aktiviert, umhüllt LocalDeck den pi-Befehl und lädt seine gebündelte Sitzungserweiterung, ohne deine Pi-Konfiguration zu ändern. Deaktiviere dies, wenn du die Pi-Hooks selbst verwalten möchtest."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cuando está activado, cmux envuelve el comando pi y carga su extensión de sesión integrada sin cambiar tu configuración de Pi. Desactívalo si prefieres gestionar tú mismo los hooks de Pi."
+            "value": "Cuando está activado, LocalDeck envuelve el comando pi y carga su extensión de sesión integrada sin cambiar tu configuración de Pi. Desactívalo si prefieres gestionar tú mismo los hooks de Pi."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lorsque cette option est activée, cmux encapsule la commande pi et charge son extension de session intégrée sans modifier votre configuration Pi. Désactivez-la si vous préférez gérer les hooks Pi vous-même."
+            "value": "Lorsque cette option est activée, LocalDeck encapsule la commande pi et charge son extension de session intégrée sans modifier votre configuration Pi. Désactivez-la si vous préférez gérer les hooks Pi vous-même."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "有効にすると、cmuxはpiコマンドをラップし、Piの設定を変更せずにバンドルされたセッション拡張機能を読み込みます。Piのフックを自分で管理する場合は無効にしてください。"
+            "value": "有効にすると、LocalDeckはpiコマンドをラップし、Piの設定を変更せずにバンドルされたセッション拡張機能を読み込みます。Piのフックを自分で管理する場合は無効にしてください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "활성화하면 cmux가 pi 명령을 래핑하고 Pi 설정을 변경하지 않고 번들 세션 확장을 로드합니다. Pi 훅을 직접 관리하려면 비활성화하세요."
+            "value": "활성화하면 LocalDeck가 pi 명령을 래핑하고 Pi 설정을 변경하지 않고 번들 세션 확장을 로드합니다. Pi 훅을 직접 관리하려면 비활성화하세요."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "启用后，cmux 会包装 pi 命令并加载内置会话扩展，不会更改你的 Pi 配置。如果你希望自行管理 Pi 钩子，请禁用此选项。"
+            "value": "启用后，LocalDeck 会包装 pi 命令并加载内置会话扩展，不会更改你的 Pi 配置。如果你希望自行管理 Pi 钩子，请禁用此选项。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "啟用後，cmux 會包裝 pi 指令並載入內建工作階段擴充功能，不會變更你的 Pi 設定。若偏好自行管理 Pi 掛鉤，請停用此選項。"
+            "value": "啟用後，LocalDeck 會包裝 pi 指令並載入內建工作階段擴充功能，不會變更你的 Pi 設定。若偏好自行管理 Pi 掛鉤，請停用此選項。"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kada je omogućeno, cmux obavija naredbu pi i učitava ugrađeno proširenje sesije bez mijenjanja vaše Pi konfiguracije. Onemogućite ako želite sami upravljati Pi kukama."
+            "value": "Kada je omogućeno, LocalDeck obavija naredbu pi i učitava ugrađeno proširenje sesije bez mijenjanja vaše Pi konfiguracije. Onemogućite ako želite sami upravljati Pi kukama."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Når funktionen er aktiveret, indpakker cmux pi-kommandoen og indlæser den medfølgende sessionsudvidelse uden at ændre din Pi-konfiguration. Deaktiver den, hvis du selv vil administrere Pi-hooks."
+            "value": "Når funktionen er aktiveret, indpakker LocalDeck pi-kommandoen og indlæser den medfølgende sessionsudvidelse uden at ændre din Pi-konfiguration. Deaktiver den, hvis du selv vil administrere Pi-hooks."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quando è abilitata, cmux avvolge il comando pi e carica l'estensione di sessione inclusa senza modificare la configurazione di Pi. Disabilitala se preferisci gestire autonomamente gli hook di Pi."
+            "value": "Quando è abilitata, LocalDeck avvolge il comando pi e carica l'estensione di sessione inclusa senza modificare la configurazione di Pi. Disabilitala se preferisci gestire autonomamente gli hook di Pi."
           }
         },
         "km": {
           "stringUnit": {
             "state": "translated",
-            "value": "នៅពេលបើកដំណើរការ cmux នឹងរុំពាក្យបញ្ជា pi ហើយផ្ទុកផ្នែកបន្ថែមសម័យដែលភ្ជាប់មកជាមួយ ដោយមិនផ្លាស់ប្តូរការកំណត់ Pi របស់អ្នក។ បិទវា ប្រសិនបើអ្នកចង់គ្រប់គ្រង hooks របស់ Pi ដោយខ្លួនឯង។"
+            "value": "នៅពេលបើកដំណើរការ LocalDeck នឹងរុំពាក្យបញ្ជា pi ហើយផ្ទុកផ្នែកបន្ថែមសម័យដែលភ្ជាប់មកជាមួយ ដោយមិនផ្លាស់ប្តូរការកំណត់ Pi របស់អ្នក។ បិទវា ប្រសិនបើអ្នកចង់គ្រប់គ្រង hooks របស់ Pi ដោយខ្លួនឯង។"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Når dette er aktivert, pakker cmux inn pi-kommandoen og laster den medfølgende øktutvidelsen uten å endre Pi-konfigurasjonen din. Deaktiver hvis du vil administrere Pi-hookene selv."
+            "value": "Når dette er aktivert, pakker LocalDeck inn pi-kommandoen og laster den medfølgende øktutvidelsen uten å endre Pi-konfigurasjonen din. Deaktiver hvis du vil administrere Pi-hookene selv."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Po włączeniu cmux opakuje polecenie pi i załaduje dołączone rozszerzenie sesji bez zmieniania konfiguracji Pi. Wyłącz tę opcję, jeśli wolisz samodzielnie zarządzać hookami Pi."
+            "value": "Po włączeniu LocalDeck opakuje polecenie pi i załaduje dołączone rozszerzenie sesji bez zmieniania konfiguracji Pi. Wyłącz tę opcję, jeśli wolisz samodzielnie zarządzać hookami Pi."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quando ativado, o cmux envolve o comando pi e carrega a extensão de sessão incluída sem alterar sua configuração do Pi. Desative se preferir gerenciar os hooks do Pi por conta própria."
+            "value": "Quando ativado, o LocalDeck envolve o comando pi e carrega a extensão de sessão incluída sem alterar sua configuração do Pi. Desative se preferir gerenciar os hooks do Pi por conta própria."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "При включении cmux оборачивает команду pi и загружает встроенное расширение сеанса, не изменяя конфигурацию Pi. Отключите этот параметр, если предпочитаете управлять хуками Pi самостоятельно."
+            "value": "При включении LocalDeck оборачивает команду pi и загружает встроенное расширение сеанса, не изменяя конфигурацию Pi. Отключите этот параметр, если предпочитаете управлять хуками Pi самостоятельно."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "เมื่อเปิดใช้งาน cmux จะครอบคำสั่ง pi และโหลดส่วนขยายเซสชันที่มาพร้อมกับโปรแกรมโดยไม่เปลี่ยนการตั้งค่า Pi ของคุณ ปิดใช้งานหากต้องการจัดการ hooks ของ Pi เอง"
+            "value": "เมื่อเปิดใช้งาน LocalDeck จะครอบคำสั่ง pi และโหลดส่วนขยายเซสชันที่มาพร้อมกับโปรแกรมโดยไม่เปลี่ยนการตั้งค่า Pi ของคุณ ปิดใช้งานหากต้องการจัดการ hooks ของ Pi เอง"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Etkinleştirildiğinde cmux, Pi yapılandırmanızı değiştirmeden pi komutunu sarar ve birlikte gelen oturum uzantısını yükler. Pi kancalarını kendiniz yönetmeyi tercih ediyorsanız devre dışı bırakın."
+            "value": "Etkinleştirildiğinde LocalDeck, Pi yapılandırmanızı değiştirmeden pi komutunu sarar ve birlikte gelen oturum uzantısını yükler. Pi kancalarını kendiniz yönetmeyi tercih ediyorsanız devre dışı bırakın."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Якщо ввімкнено, cmux обгортає команду pi й завантажує вбудоване розширення сеансу, не змінюючи конфігурацію Pi. Вимкніть цей параметр, якщо хочете самостійно керувати хуками Pi."
+            "value": "Якщо ввімкнено, LocalDeck обгортає команду pi й завантажує вбудоване розширення сеансу, не змінюючи конфігурацію Pi. Вимкніть цей параметр, якщо хочете самостійно керувати хуками Pi."
           }
         }
       }
@@ -6851,121 +6851,121 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi runs without cmux integration."
+            "value": "Pi runs without LocalDeck integration."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يعمل Pi بدون تكامل cmux."
+            "value": "يعمل Pi بدون تكامل LocalDeck."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi läuft ohne cmux-Integration."
+            "value": "Pi läuft ohne LocalDeck-Integration."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi se ejecuta sin integración con cmux."
+            "value": "Pi se ejecuta sin integración con LocalDeck."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi s’exécute sans intégration cmux."
+            "value": "Pi s’exécute sans intégration LocalDeck."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Piはcmux連携なしで実行されます。"
+            "value": "PiはLocalDeck連携なしで実行されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi가 cmux 연동 없이 실행됩니다."
+            "value": "Pi가 LocalDeck 연동 없이 실행됩니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi 在没有 cmux 集成的情况下运行。"
+            "value": "Pi 在没有 LocalDeck 集成的情况下运行。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi 會在不使用 cmux 整合的情況下執行。"
+            "value": "Pi 會在不使用 LocalDeck 整合的情況下執行。"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi radi bez cmux integracije."
+            "value": "Pi radi bez LocalDeck integracije."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi kører uden cmux-integration."
+            "value": "Pi kører uden LocalDeck-integration."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi viene eseguito senza l'integrazione con cmux."
+            "value": "Pi viene eseguito senza l'integrazione con LocalDeck."
           }
         },
         "km": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi ដំណើរការដោយគ្មានការរួមបញ្ចូល cmux។"
+            "value": "Pi ដំណើរការដោយគ្មានការរួមបញ្ចូល LocalDeck។"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi kjører uten cmux-integrasjon."
+            "value": "Pi kjører uten LocalDeck-integrasjon."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi działa bez integracji z cmux."
+            "value": "Pi działa bez integracji z LocalDeck."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Pi é executado sem a integração com o cmux."
+            "value": "O Pi é executado sem a integração com o LocalDeck."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi работает без интеграции с cmux."
+            "value": "Pi работает без интеграции с LocalDeck."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi ทำงานโดยไม่มีการผสานรวมกับ cmux"
+            "value": "Pi ทำงานโดยไม่มีการผสานรวมกับ LocalDeck"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi, cmux entegrasyonu olmadan çalışır."
+            "value": "Pi, LocalDeck entegrasyonu olmadan çalışır."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pi працює без інтеграції з cmux."
+            "value": "Pi працює без інтеграції з LocalDeck."
           }
         }
       }
@@ -13345,55 +13345,55 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use the terminal theme foreground for flashes; unread rings stay cmux blue."
+            "value": "Use the terminal theme foreground for flashes; unread rings stay LocalDeck blue."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verwende die Vordergrundfarbe des Terminaldesigns für Blitze; ungelesene Ringe bleiben cmux-blau."
+            "value": "Verwende die Vordergrundfarbe des Terminaldesigns für Blitze; ungelesene Ringe bleiben LocalDeck-blau."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Utiliser le premier plan du thème du terminal pour les flashs ; les anneaux non lus restent bleus cmux."
+            "value": "Utiliser le premier plan du thème du terminal pour les flashs ; les anneaux non lus restent bleus LocalDeck."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "استخدم مقدمة سمة الطرفية للومضات؛ تبقى حلقات عدم القراءة باللون الأزرق لـ cmux."
+            "value": "استخدم مقدمة سمة الطرفية للومضات؛ تبقى حلقات عدم القراءة باللون الأزرق لـ LocalDeck."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usa el primer plano del tema de la terminal para los destellos; los anillos no leídos siguen siendo azules de cmux."
+            "value": "Usa el primer plano del tema de la terminal para los destellos; los anillos no leídos siguen siendo azules de LocalDeck."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用終端主題前景色顯示閃爍；未讀環維持 cmux 藍色。"
+            "value": "使用終端主題前景色顯示閃爍；未讀環維持 LocalDeck 藍色。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用终端主题前景色显示闪烁；未读环保持 cmux 蓝色。"
+            "value": "使用终端主题前景色显示闪烁；未读环保持 LocalDeck 蓝色。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "플래시에 터미널 테마 전경색을 사용하며 읽지 않은 링은 cmux 파란색으로 유지합니다."
+            "value": "플래시에 터미널 테마 전경색을 사용하며 읽지 않은 링은 LocalDeck 파란색으로 유지합니다."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "フラッシュにターミナルテーマの前景色を使い、未読リングは cmux ブルーのままにします。"
+            "value": "フラッシュにターミナルテーマの前景色を使い、未読リングは LocalDeck ブルーのままにします。"
           }
         }
       }
@@ -14053,55 +14053,55 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Native agent panels use a cmux-owned scratch directory per session."
+            "value": "Native agent panels use a LocalDeck-owned scratch directory per session."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تستخدم لوحات الوكلاء الأصلية دليلًا مؤقتًا خاصًا بـ cmux لكل جلسة."
+            "value": "تستخدم لوحات الوكلاء الأصلية دليلًا مؤقتًا خاصًا بـ LocalDeck لكل جلسة."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Native Agent-Panels verwenden pro Sitzung ein eigenes Scratch-Verzeichnis von cmux."
+            "value": "Native Agent-Panels verwenden pro Sitzung ein eigenes Scratch-Verzeichnis von LocalDeck."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los paneles nativos de agentes usan un directorio temporal propio de cmux por sesión."
+            "value": "Los paneles nativos de agentes usan un directorio temporal propio de LocalDeck por sesión."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les panneaux d’agent natifs utilisent un répertoire de travail géré par cmux pour chaque session."
+            "value": "Les panneaux d’agent natifs utilisent un répertoire de travail géré par LocalDeck pour chaque session."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ネイティブエージェントパネルはセッションごとに cmux 管理のスクラッチディレクトリを使用します。"
+            "value": "ネイティブエージェントパネルはセッションごとに LocalDeck 管理のスクラッチディレクトリを使用します。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "네이티브 에이전트 패널이 세션마다 cmux 소유의 스크래치 디렉터리를 사용합니다."
+            "value": "네이티브 에이전트 패널이 세션마다 LocalDeck 소유의 스크래치 디렉터리를 사용합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "原生代理面板为每个会话使用由 cmux 管理的临时目录。"
+            "value": "原生代理面板为每个会话使用由 LocalDeck 管理的临时目录。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "原生代理程式面板為每個工作階段使用由 cmux 管理的暫存目錄。"
+            "value": "原生代理程式面板為每個工作階段使用由 LocalDeck 管理的暫存目錄。"
           }
         }
       }

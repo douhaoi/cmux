@@ -2254,7 +2254,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         )
         alert.informativeText = String(
             localized: "dialog.simulatorCameraCleanupFailed.message",
-            defaultValue: "cmux stayed open because it could not restore a Simulator app’s camera state. Quit again to retry cleanup."
+            defaultValue: "LocalDeck stayed open because it could not restore a Simulator app’s camera state. Quit again to retry cleanup."
         )
         alert.addButton(withTitle: String(localized: "common.ok", defaultValue: "OK"))
         _ = alert.runCmuxModal()
@@ -2628,7 +2628,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 surfaceId: nil,
                 title: String(
                     localized: "crashBreadcrumb.title",
-                    defaultValue: "cmux crashed during your last session"
+                    defaultValue: "LocalDeck crashed during your last session"
                 ),
                 subtitle: String(
                     localized: "crashBreadcrumb.subtitle",

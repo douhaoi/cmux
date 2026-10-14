@@ -109,7 +109,7 @@ extension TerminalController {
         let informativeText = String(
             format: String(
                 localized: "surfaceResumeApproval.proposal.message",
-                defaultValue: "A process wants cmux to keep this resume command for the current terminal:\n\nWorking directory: %@\n\n%@"
+                defaultValue: "A process wants LocalDeck to keep this resume command for the current terminal:\n\nWorking directory: %@\n\n%@"
             ),
             cwd,
             binding.command

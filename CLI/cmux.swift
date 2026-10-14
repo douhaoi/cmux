@@ -4628,7 +4628,7 @@ final class SocketClient {
         // matching the wire response before mapping it to a CLIError below.
         let localizedAccessDeniedResponse = "ERROR: " + String(
             localized: "socket.client.accessDenied",
-            defaultValue: "Access denied - only processes started inside cmux can connect",
+            defaultValue: "Access denied - only processes started inside LocalDeck can connect",
             bundle: CLIExecutableLocator.enclosingAppBundle() ?? .main
         )
         while true {

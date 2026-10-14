@@ -6,7 +6,7 @@ import Foundation
 @MainActor
 final class MenuBarExtraController: NSObject, NSMenuDelegate {
     private let statusItem: NSStatusItem
-    private let menu = NSMenu(title: "cmux")
+    private let menu = NSMenu(title: "LocalDeck")
     private let notificationStore: TerminalNotificationStore
     private let caffeineController: CaffeineController
     private let onShowGlobalSearch: (NSStatusBarButton, (() -> Void)?) -> Void
@@ -28,7 +28,7 @@ final class MenuBarExtraController: NSObject, NSMenuDelegate {
     private let stateHintItem = NSMenuItem(title: String(localized: "statusMenu.noUnread", defaultValue: "No unread notifications"), action: nil, keyEquivalent: "")
     private let buildHintItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let globalSearchItem = NSMenuItem(title: String(localized: "statusMenu.searchAllWindows", defaultValue: "Search All Windows..."), action: nil, keyEquivalent: "")
-    private let showMainWindowItem = NSMenuItem(title: String(localized: "statusMenu.showCmux", defaultValue: "Show cmux"), action: nil, keyEquivalent: "")
+    private let showMainWindowItem = NSMenuItem(title: String(localized: "statusMenu.showCmux", defaultValue: "Show LocalDeck"), action: nil, keyEquivalent: "")
     private let taskManagerItem = NSMenuItem(title: String(localized: "statusMenu.taskManager", defaultValue: "Task Manager..."), action: nil, keyEquivalent: "")
     private let sleepyModeItem = NSMenuItem(title: String(localized: "statusMenu.sleepyMode", defaultValue: "Sleepy Mode"), action: nil, keyEquivalent: "")
     private let caffeineItem = NSMenuItem(title: String(localized: "statusMenu.keepMacAwake", defaultValue: "Keep Mac Awake"), action: nil, keyEquivalent: "")
@@ -39,7 +39,7 @@ final class MenuBarExtraController: NSObject, NSMenuDelegate {
     private let markAllReadItem = NSMenuItem(title: String(localized: "statusMenu.markAllRead", defaultValue: "Mark All Read"), action: nil, keyEquivalent: "")
     private let clearAllItem = NSMenuItem(title: String(localized: "statusMenu.clearAll", defaultValue: "Clear All"), action: nil, keyEquivalent: "")
     private let preferencesItem = NSMenuItem(title: String(localized: "menu.preferences", defaultValue: "Preferences…"), action: nil, keyEquivalent: "")
-    private let quitItem = NSMenuItem(title: String(localized: "menu.quitCmux", defaultValue: "Quit cmux"), action: nil, keyEquivalent: "")
+    private let quitItem = NSMenuItem(title: String(localized: "menu.quitCmux", defaultValue: "Quit LocalDeck"), action: nil, keyEquivalent: "")
 
     private var notificationItems: [NSMenuItem] = []
     private let cloudSectionSeparator = NSMenuItem.separator()
@@ -83,7 +83,7 @@ final class MenuBarExtraController: NSObject, NSMenuDelegate {
             button.imagePosition = .imageOnly
             button.imageScaling = .scaleProportionallyDown
             button.image = MenuBarIconRenderer.makeImage(unreadCount: 0)
-            button.toolTip = "cmux"
+            button.toolTip = "LocalDeck"
         }
 
         notificationMenuSnapshotCancellable = notificationStore.$notificationMenuSnapshot
@@ -240,10 +240,10 @@ final class MenuBarExtraController: NSObject, NSMenuDelegate {
         if let button = statusItem.button {
             button.image = MenuBarIconRenderer.makeImage(unreadCount: displayedUnreadCount)
             button.toolTip = displayedUnreadCount == 0
-                ? "cmux"
+                ? "LocalDeck"
                 : displayedUnreadCount == 1
-                    ? "cmux: " + String(localized: "statusMenu.tooltip.unread.one", defaultValue: "1 unread notification")
-                    : "cmux: " + String(localized: "statusMenu.tooltip.unread.other", defaultValue: "\(displayedUnreadCount) unread notifications")
+                    ? "LocalDeck: " + String(localized: "statusMenu.tooltip.unread.one", defaultValue: "1 unread notification")
+                    : "LocalDeck: " + String(localized: "statusMenu.tooltip.unread.other", defaultValue: "\(displayedUnreadCount) unread notifications")
         }
     }
 
@@ -565,7 +565,7 @@ enum MenuBarBuildHintFormatter {
     ) -> String? {
         guard isDebugBuild else { return nil }
         let normalized = appName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let prefix = "cmux DEV"
+        let prefix = "LocalDeck DEV"
         guard normalized.hasPrefix(prefix) else { return "Build: DEV" }
 
         let suffix = String(normalized.dropFirst(prefix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -771,7 +771,7 @@ enum MenuBarIconRenderer {
         image.lockFocus()
         defer { image.unlockFocus() }
 
-        let glyphRect = NSRect(x: 1.2, y: 1.5, width: 11.6, height: 15.0)
+        let glyphRect = NSRect(x: 1.0, y: 2.5, width: 14.0, height: 12.0)
         drawGlyph(in: glyphRect)
 
         if let text = badgeText {
@@ -783,11 +783,11 @@ enum MenuBarIconRenderer {
     }
 
     private static func drawGlyph(in rect: NSRect) {
-        // Match the canonical cmux center-mark path from Icon Center Image Artwork.svg.
-        let srcMinX: CGFloat = 384.0
-        let srcMinY: CGFloat = 255.0
-        let srcWidth: CGFloat = 369.0
-        let srcHeight: CGFloat = 513.0
+        // Use the LocalDeck workspace mark in a single-color status-item form.
+        let srcMinX: CGFloat = 200.0
+        let srcMinY: CGFloat = 234.0
+        let srcWidth: CGFloat = 624.0
+        let srcHeight: CGFloat = 536.0
 
         func map(_ x: CGFloat, _ y: CGFloat) -> NSPoint {
             let nx = (x - srcMinX) / srcWidth
@@ -798,17 +798,34 @@ enum MenuBarIconRenderer {
             )
         }
 
-        let path = NSBezierPath()
-        path.move(to: map(384.0, 255.0))
-        path.line(to: map(753.0, 511.5))
-        path.line(to: map(384.0, 768.0))
-        path.line(to: map(384.0, 654.0))
-        path.line(to: map(582.692, 511.5))
-        path.line(to: map(384.0, 369.0))
-        path.close()
-
         NSColor.black.setFill()
-        path.fill()
+        NSColor.black.setStroke()
+        let lowerLeft = map(218.0, 752.0)
+        let upperRight = map(806.0, 304.0)
+        let frame = NSBezierPath(
+            roundedRect: NSRect(x: lowerLeft.x, y: lowerLeft.y, width: upperRight.x - lowerLeft.x, height: upperRight.y - lowerLeft.y),
+            xRadius: rect.width * 52.0 / srcWidth,
+            yRadius: rect.height * 52.0 / srcHeight
+        )
+        frame.lineWidth = max(0.8, rect.width * 30.0 / srcWidth)
+        frame.stroke()
+
+        let path = NSBezierPath()
+        path.lineWidth = frame.lineWidth
+        path.lineCapStyle = .round
+        path.lineJoinStyle = .round
+        path.move(to: map(302.0, 252.0))
+        path.line(to: map(750.0, 252.0))
+        path.move(to: map(222.0, 408.0))
+        path.line(to: map(802.0, 408.0))
+        path.move(to: map(598.0, 416.0))
+        path.line(to: map(598.0, 740.0))
+        path.move(to: map(308.0, 490.0))
+        path.line(to: map(386.0, 556.0))
+        path.line(to: map(308.0, 622.0))
+        path.move(to: map(432.0, 626.0))
+        path.line(to: map(500.0, 626.0))
+        path.stroke()
     }
 
     private static func drawBadge(text: String, in rect: NSRect, config: MenuBarBadgeRenderConfig) {

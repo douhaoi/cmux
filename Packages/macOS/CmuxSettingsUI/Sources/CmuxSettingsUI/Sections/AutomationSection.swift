@@ -247,7 +247,7 @@ public struct AutomationSection: View {
             SettingsCardRow(
                 configurationReview: .json("automation.socketControlMode"),
                 String(localized: "settings.automation.socketMode", defaultValue: "Socket Control Mode"),
-                subtitle: String(localized: "settings.automation.socketMode.subtitle", defaultValue: "Choose which local processes can control cmux."),
+                subtitle: String(localized: "settings.automation.socketMode.subtitle", defaultValue: "Choose which local processes can control LocalDeck."),
                 controlWidth: Self.columnWidth
             ) {
                 Picker("", selection: Binding(
@@ -285,7 +285,7 @@ public struct AutomationSection: View {
                 )
                 SettingsCardNote(String.localizedStringWithFormat(format, effectiveMode.displayName))
             }
-            SettingsCardNote(String(localized: "settings.automation.socketMode.note", defaultValue: "“Off” turns control off. “cmux processes only” accepts only processes started in cmux terminals. “Automation mode” also accepts other apps running as this Mac user. “Password mode” requires a password. “Full open access” accepts any local process without a password and is unsafe."))
+            SettingsCardNote(String(localized: "settings.automation.socketMode.note", defaultValue: "“Off” turns control off. “LocalDeck processes only” accepts only processes started in LocalDeck terminals. “Automation mode” also accepts other apps running as this Mac user. “Password mode” requires a password. “Full open access” accepts any local process without a password and is unsafe."))
             if isPassword {
                 SettingsCardDivider()
                 SettingsCardRow(
@@ -354,7 +354,7 @@ public struct AutomationSection: View {
                     .accessibilityIdentifier("SettingsClaudeCodeHooksToggle")
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.claudeCode.note", defaultValue: "When enabled, cmux wraps the claude command to inject session tracking and notification hooks. Disable if you prefer to manage Claude Code hooks yourself."))
+            SettingsCardNote(String(localized: "settings.automation.claudeCode.note", defaultValue: "When enabled, LocalDeck wraps the claude command to inject session tracking and notification hooks. Disable if you prefer to manage Claude Code hooks yourself."))
         }
     }
     @ViewBuilder
@@ -371,7 +371,7 @@ public struct AutomationSection: View {
                     .accessibilityIdentifier("SettingsCodexHooksToggle")
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.codex.note", defaultValue: "When enabled, cmux wraps the codex command to inject session tracking and notification hooks. Disable if you prefer to manage Codex hooks yourself. cmux still tracks live Codex sessions it can observe even when this is off. To also track Codex launched through a custom launcher that bypasses the wrapper (e.g. a subrouter), run `cmux hooks setup --agent codex`, which installs hooks into ~/.codex/hooks.json."))
+            SettingsCardNote(String(localized: "settings.automation.codex.note", defaultValue: "When enabled, LocalDeck wraps the codex command to inject session tracking and notification hooks. Disable if you prefer to manage Codex hooks yourself. LocalDeck still tracks live Codex sessions it can observe even when this is off. To also track Codex launched through a custom launcher that bypasses the wrapper (e.g. a subrouter), run `cmux hooks setup --agent codex`, which installs hooks into ~/.codex/hooks.json."))
         }
     }
     @ViewBuilder
@@ -432,7 +432,7 @@ public struct AutomationSection: View {
                 }
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.workspaceAutoNaming.note", defaultValue: "When enabled, cmux summarizes supported agent sessions into short workspace and tab names using each agent's own binary, refreshed as the topic shifts. Manual renames always win and stop auto-naming for that workspace or tab. Uses your agent account for the short summarization calls."))
+            SettingsCardNote(String(localized: "settings.automation.workspaceAutoNaming.note", defaultValue: "When enabled, LocalDeck summarizes supported agent sessions into short workspace and tab names using each agent's own binary, refreshed as the topic shifts. Manual renames always win and stop auto-naming for that workspace or tab. Uses your agent account for the short summarization calls."))
             if autoNamingModel.current,
                !claudeCodeModel.current,
                autoNamingAgentModel.current == AutoNamingAgentCatalog.autoSlug || autoNamingAgentModel.current == "claude" {
@@ -499,7 +499,7 @@ public struct AutomationSection: View {
                 configurationReview: .json("automation.canonicalAgentScratch"),
                 String(localized: "settings.automation.canonicalAgentScratch", defaultValue: "Canonical Agent Scratch"),
                 subtitle: canonicalAgentScratchModel.current
-                    ? String(localized: "settings.automation.canonicalAgentScratch.subtitleOn", defaultValue: "Native agent panels use a cmux-owned scratch directory per session.")
+                    ? String(localized: "settings.automation.canonicalAgentScratch.subtitleOn", defaultValue: "Native agent panels use a LocalDeck-owned scratch directory per session.")
                     : String(localized: "settings.automation.canonicalAgentScratch.subtitleOff", defaultValue: "Native agent panels use the system temporary directory."),
                 controlWidth: Self.columnWidth
             ) {
@@ -541,7 +541,7 @@ public struct AutomationSection: View {
                     .accessibilityIdentifier("SettingsAmpHooksToggle")
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.amp.note", defaultValue: "Hooks must be installed with `cmux hooks amp install`. They no-op outside cmux terminals. When disabled, the installed Amp plugin stays inactive without needing to be removed."))
+            SettingsCardNote(String(localized: "settings.automation.amp.note", defaultValue: "Hooks must be installed with `cmux hooks amp install`. They no-op outside LocalDeck terminals. When disabled, the installed Amp plugin stays inactive without needing to be removed."))
         }
     }
 
@@ -559,7 +559,7 @@ public struct AutomationSection: View {
                     .accessibilityIdentifier("SettingsCursorHooksToggle")
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.cursor.note", defaultValue: "Hooks must be installed with `cmux hooks cursor install`. They no-op outside cmux terminals."))
+            SettingsCardNote(String(localized: "settings.automation.cursor.note", defaultValue: "Hooks must be installed with `cmux hooks cursor install`. They no-op outside LocalDeck terminals."))
         }
     }
 
@@ -577,7 +577,7 @@ public struct AutomationSection: View {
                     .accessibilityIdentifier("SettingsGeminiHooksToggle")
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.gemini.note", defaultValue: "Hooks must be installed with `cmux hooks gemini install`. They no-op outside cmux terminals."))
+            SettingsCardNote(String(localized: "settings.automation.gemini.note", defaultValue: "Hooks must be installed with `cmux hooks gemini install`. They no-op outside LocalDeck terminals."))
         }
     }
 
@@ -611,7 +611,7 @@ public struct AutomationSection: View {
                 .accessibilityIdentifier("SettingsKiroNotificationLevelPicker")
             }
             SettingsCardDivider()
-            SettingsCardNote(String(localized: "settings.automation.kiro.note", defaultValue: "Hooks must be installed with `cmux hooks kiro install`, then run Kiro with `kiro-cli chat --agent cmux` (or set it as your default agent). They no-op outside cmux terminals."))
+            SettingsCardNote(String(localized: "settings.automation.kiro.note", defaultValue: "Hooks must be installed with `cmux hooks kiro install`, then run Kiro with `kiro-cli chat --agent cmux` (or set it as your default agent). They no-op outside LocalDeck terminals."))
         }
     }
 

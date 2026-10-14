@@ -76,12 +76,12 @@ extension RemoteTmuxError {
         case .windowCreationFailed:
             return String(
                 localized: "remoteTmux.error.windowCreationFailed",
-                defaultValue: "cmux could not create a new window"
+                defaultValue: "LocalDeck could not create a new window"
             )
         case let .unsupportedTmux(detected):
             let format = String(
                 localized: "remoteTmux.error.unsupportedVersion",
-                defaultValue: "remote session server is too old (found %@; cmux needs version %@ or newer)"
+                defaultValue: "remote session server is too old (found %@; LocalDeck needs version %@ or newer)"
             )
             return String(
                 format: format,
@@ -91,7 +91,7 @@ extension RemoteTmuxError {
         case let .authenticationRequired(detail):
             let format = String(
                 localized: "remoteTmux.error.authenticationRequired",
-                defaultValue: "%@ asked for credentials and cmux has nowhere to type them. Log in to the host, then try again."
+                defaultValue: "%@ asked for credentials and LocalDeck has nowhere to type them. Log in to the host, then try again."
             )
             return String(format: format, Self.sanitizedDetail(detail))
         case let .tmuxNotFound(destination):

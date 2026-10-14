@@ -182,7 +182,7 @@ public struct BetaFeaturesSection: View {
             configurationReview: .settingsOnly,
             searchAnchorID: "setting:betaFeatures:extensions",
             String(localized: "settings.betaFeatures.extensions", defaultValue: "Extensions"),
-            subtitle: String(localized: "settings.betaFeatures.extensions.subtitle", defaultValue: "Adds the extensions button and lets cmux install and run sidebar extensions.")
+            subtitle: String(localized: "settings.betaFeatures.extensions.subtitle", defaultValue: "Adds the extensions button and lets LocalDeck install and run sidebar extensions.")
         ) {
             Toggle("", isOn: Binding(get: { extensions.current }, set: { extensions.set($0) }))
                 .labelsHidden()
@@ -215,7 +215,7 @@ public struct BetaFeaturesSection: View {
             configurationReview: .settingsOnly,
             searchAnchorID: "setting:betaFeatures:remoteTmux",
             String(localized: "settings.betaFeatures.remoteTmux", defaultValue: "Remote tmux"),
-            subtitle: String(localized: "settings.betaFeatures.remoteTmux.subtitle", defaultValue: "Shows tmux sessions on remote hosts as workspaces in the sidebar. The sessions keep running after cmux quits.")
+            subtitle: String(localized: "settings.betaFeatures.remoteTmux.subtitle", defaultValue: "Shows tmux sessions on remote hosts as workspaces in the sidebar. The sessions keep running after LocalDeck quits.")
         ) {
             Toggle("", isOn: Binding(get: { remoteTmux.current }, set: { remoteTmux.set($0) }))
                 .labelsHidden()

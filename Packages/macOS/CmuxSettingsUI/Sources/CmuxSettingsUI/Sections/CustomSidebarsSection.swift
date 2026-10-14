@@ -104,7 +104,7 @@ public struct CustomSidebarsSection: View {
         SettingsCardRow(
             configurationReview: .json("customSidebars.renderer"),
             String(localized: "settings.customSidebars.renderer", defaultValue: "Renderer"),
-            subtitle: String(localized: "settings.customSidebars.renderer.subtitle", defaultValue: "Isolated process protects cmux from a faulty sidebar but accepts clicks only. In-app also accepts hover, focus, and typing.")
+            subtitle: String(localized: "settings.customSidebars.renderer.subtitle", defaultValue: "Isolated process protects LocalDeck from a faulty sidebar but accepts clicks only. In-app also accepts hover, focus, and typing.")
         ) {
             Picker("", selection: Binding(get: { renderer.current }, set: { renderer.set($0) })) {
                 ForEach(CustomSidebarRendererMode.uiCases, id: \.self) { mode in
@@ -246,7 +246,7 @@ public struct CustomSidebarsSection: View {
         case .templateUnavailable:
             operationMessage = String(
                 localized: "settings.customSidebars.templateUnavailable",
-                defaultValue: "Could not load the sidebar template. Reinstall cmux and try again."
+                defaultValue: "Could not load the sidebar template. Reinstall LocalDeck and try again."
             )
         case .writeFailed:
             operationMessage = String(
@@ -399,7 +399,7 @@ private struct CustomSidebarTemplateGallery: View {
     private func operationMessage(for result: CustomSidebarOnboardingResult) -> String {
         switch result {
         case .templateUnavailable:
-            return String(localized: "settings.customSidebars.templateUnavailable", defaultValue: "Could not load the sidebar template. Reinstall cmux and try again.", bundle: .module)
+            return String(localized: "settings.customSidebars.templateUnavailable", defaultValue: "Could not load the sidebar template. Reinstall LocalDeck and try again.", bundle: .module)
         case .writeFailed:
             return String(localized: "settings.customSidebars.writeFailed", defaultValue: "Could not create the sidebar. Check folder permissions and free disk space, then try again.", bundle: .module)
         case .created:

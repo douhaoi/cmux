@@ -51,7 +51,7 @@ private func makeAboutWindow() -> NSWindow {
         store.applyCurrentOptions(to: window, for: .about)
 
         // Overrides disabled -> defaults: title falls back, not resizable.
-        #expect(window.title == "About cmux")
+        #expect(window.title == "About LocalDeck")
         #expect(window.styleMask.contains(.resizable) == false)
         #expect(decorator.decoratedCount >= 1)
     }

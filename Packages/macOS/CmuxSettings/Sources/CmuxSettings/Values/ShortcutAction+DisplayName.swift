@@ -13,7 +13,7 @@ extension ShortcutAction {
         case .newWindow: return "New Window"
         case .closeWindow: return "Close Window"
         case .toggleFullScreen: return "Toggle Full Screen"
-        case .quit: return "Quit cmux"
+        case .quit: return "Quit LocalDeck"
         case .toggleSidebar: return "Toggle Left Sidebar"
         case .focusSidebar:
             return String(localized: "shortcut.focusSidebar.label", defaultValue: "Focus Sidebar")

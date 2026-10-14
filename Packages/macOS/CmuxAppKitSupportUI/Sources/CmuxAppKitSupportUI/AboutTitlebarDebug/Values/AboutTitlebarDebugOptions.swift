@@ -71,7 +71,7 @@ public struct AboutTitlebarDebugOptions: Equatable, Sendable {
         case .about:
             return AboutTitlebarDebugOptions(
                 overridesEnabled: false,
-                windowTitle: "About cmux",
+                windowTitle: String(localized: "menu.app.about", defaultValue: "About LocalDeck"),
                 titleVisibility: .hidden,
                 titlebarAppearsTransparent: true,
                 movableByWindowBackground: false,

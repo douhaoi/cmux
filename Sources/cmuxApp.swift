@@ -325,7 +325,7 @@ struct cmuxApp: App {
     }
 
     private static func terminateForMissingLaunchTag() -> Never {
-        let message = "error: refusing to launch untagged cmux DEV; start with ./scripts/reload.sh --tag <name> (or set CMUX_TAG for test harnesses)"
+        let message = "error: refusing to launch untagged LocalDeck DEV; start with ./scripts/reload.sh --tag <name> (or set CMUX_TAG for test harnesses)"
         fputs("\(message)\n", stderr)
         fflush(stderr)
         NSLog("%@", message)
@@ -521,7 +521,7 @@ struct cmuxApp: App {
                 splitCommandButton(title: String(localized: "menu.app.reloadConfiguration", defaultValue: "Reload Configuration"), shortcut: menuShortcut(for: .reloadConfiguration)) {
                     dispatchReloadConfigurationMenuCommand()
                 }
-                Button(String(localized: "menu.app.makeDefaultTerminal", defaultValue: "Make cmux the Default Terminal")) {
+                Button(String(localized: "menu.app.makeDefaultTerminal", defaultValue: "Make LocalDeck the Default Terminal")) {
                     DefaultTerminalUserAction.setAsDefault(debugSource: "menu.makeDefaultTerminal")
                 }
                 Divider()
@@ -535,14 +535,14 @@ struct cmuxApp: App {
             }
 
             CommandGroup(replacing: .appInfo) {
-                Button(String(localized: "menu.app.about", defaultValue: "About cmux")) {
+                Button(String(localized: "menu.app.about", defaultValue: "About LocalDeck")) {
                     showAboutPanel()
                 }
 
             }
 
             CommandGroup(replacing: .appTermination) {
-                splitCommandButton(title: String(localized: "menu.quitCmux", defaultValue: "Quit cmux"), shortcut: menuShortcut(for: .quit)) {
+                splitCommandButton(title: String(localized: "menu.quitCmux", defaultValue: "Quit LocalDeck"), shortcut: menuShortcut(for: .quit)) {
                     AppDelegate.requestApplicationTermination()
                 }
             }
@@ -3357,7 +3357,7 @@ private struct SidebarFooterProfileIconReference: View {
             SidebarFooterProfileDisplayDebugChoice(rawValue: profileDisplay) == .picture
         SidebarAccountAvatar(
             avatarURL: nil,
-            displayName: "cmux",
+            displayName: "LocalDeck",
             email: "",
             isSignedIn: showsProfilePicture,
             size: showsProfilePicture
@@ -4341,7 +4341,7 @@ private struct TabBarBackdropLabSample: View {
 
         let titles = [
             String(localized: "debug.tabBarBackdropLab.tab.agentBrowserLogs", defaultValue: "agent-browser logs"),
-            String(localized: "debug.tabBarBackdropLab.tab.terminalTransparency", defaultValue: "cmux terminal transparency"),
+            String(localized: "debug.tabBarBackdropLab.tab.terminalTransparency", defaultValue: "LocalDeck terminal transparency"),
             String(localized: "debug.tabBarBackdropLab.tab.underlayText", defaultValue: "underlay tab text visible here"),
             String(localized: "debug.tabBarBackdropLab.tab.backdropCheck", defaultValue: "split button backdrop check"),
             String(localized: "debug.tabBarBackdropLab.tab.rightEdgeOverflow", defaultValue: "right edge overflow sample"),

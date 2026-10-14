@@ -142,7 +142,7 @@ extension GhosttyNSView {
         case .openInCmuxBrowser:
             return String(
                 localized: "terminalContextMenu.openLinkInCmuxBrowser",
-                defaultValue: "Open Link in cmux Browser"
+                defaultValue: "Open Link in LocalDeck Browser"
             )
         case .openInDefaultBrowser:
             return String(

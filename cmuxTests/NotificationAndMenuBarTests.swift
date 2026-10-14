@@ -2444,19 +2444,19 @@ final class NotificationMenuSnapshotBuilderTests: XCTestCase {
 
 final class MenuBarBuildHintFormatterTests: XCTestCase {
     func testReleaseBuildShowsNoHint() {
-        XCTAssertNil(MenuBarBuildHintFormatter.menuTitle(appName: "cmux DEV menubar-extra", isDebugBuild: false))
+        XCTAssertNil(MenuBarBuildHintFormatter.menuTitle(appName: "LocalDeck DEV menubar-extra", isDebugBuild: false))
     }
 
     func testDebugBuildWithTagShowsTag() {
         XCTAssertEqual(
-            MenuBarBuildHintFormatter.menuTitle(appName: "cmux DEV menubar-extra", isDebugBuild: true),
+            MenuBarBuildHintFormatter.menuTitle(appName: "LocalDeck DEV menubar-extra", isDebugBuild: true),
             "Build Tag: menubar-extra"
         )
     }
 
     func testDebugBuildWithoutTagShowsUntagged() {
         XCTAssertEqual(
-            MenuBarBuildHintFormatter.menuTitle(appName: "cmux DEV", isDebugBuild: true),
+            MenuBarBuildHintFormatter.menuTitle(appName: "LocalDeck DEV", isDebugBuild: true),
             "Build: DEV (untagged)"
         )
     }

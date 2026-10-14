@@ -145,7 +145,7 @@ extension TerminalController {
         if let requested = params["transport"] as? String, RemoteTmuxTransportKind.parse(requested) == nil {
             return String(
                 localized: "socket.remoteTmux.transportUnknown",
-                defaultValue: "transport is not one cmux knows; use ssh or et"
+                defaultValue: "transport is not one LocalDeck knows; use ssh or et"
             )
         }
         if let transportPort = params["transport_port"] as? Int, !(1...65535).contains(transportPort) {

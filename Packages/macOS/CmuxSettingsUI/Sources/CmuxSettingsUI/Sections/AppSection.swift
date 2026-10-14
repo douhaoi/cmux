@@ -191,7 +191,7 @@ public struct AppSection: View {
     private var globalFontMagnificationSubtitle: String {
         String(
             localized: "settings.app.globalFontMagnification.subtitle",
-            defaultValue: "Scales all text in cmux. Command-Plus and Command-Minus still zoom the focused pane."
+            defaultValue: "Scales all text in LocalDeck. Command-Plus and Command-Minus still zoom the focused pane."
         )
     }
 
@@ -207,7 +207,7 @@ public struct AppSection: View {
             SettingsCardRow(
                 configurationReview: .json("app.language"),
                 String(localized: "settings.app.language", defaultValue: "Language"),
-                subtitle: languageOverrideTouched || (languageAtAppear != nil && language.current != languageAtAppear) ? String(localized: "settings.app.language.restartSubtitle", defaultValue: "Restart cmux to apply") : nil,
+                subtitle: languageOverrideTouched || (languageAtAppear != nil && language.current != languageAtAppear) ? String(localized: "settings.app.language.restartSubtitle", defaultValue: "Restart LocalDeck to apply") : nil,
                 controlWidth: Self.columnWidth
             ) {
                 Picker("", selection: Binding(get: { language.current }, set: { newLanguage in if newLanguage != language.current { languageOverrideTouched = true }; language.set(newLanguage) { hostActions.applyLanguageOverride(newLanguage) } })) {
@@ -310,7 +310,7 @@ public struct AppSection: View {
             SettingsCardRow(
                 configurationReview: .json("app.focusPaneOnFirstClick"),
                 String(localized: "settings.app.paneFirstClickFocus", defaultValue: "Focus Pane on First Click"),
-                subtitle: String(localized: "settings.app.paneFirstClickFocus.subtitle", defaultValue: "Clicking a pane while cmux is in the background focuses that pane right away.")
+                subtitle: String(localized: "settings.app.paneFirstClickFocus.subtitle", defaultValue: "Clicking a pane while LocalDeck is in the background focuses that pane right away.")
             ) {
                 Toggle("", isOn: Binding(get: { firstClick.current }, set: { firstClick.set($0) }))
                     .labelsHidden()
@@ -385,8 +385,8 @@ public struct AppSection: View {
             // Open Supported Files in cmux
             SettingsCardRow(
                 configurationReview: .json("app.openSupportedFilesInCmux"),
-                String(localized: "settings.app.openSupportedFilesInCmux", defaultValue: "Open Supported Files in cmux"),
-                subtitle: String(localized: "settings.app.openSupportedFilesInCmux.subtitle", defaultValue: "Cmd-clicking readable files opens text, code, PDFs, images, audio, video, and Quick Look previews in cmux.")
+                String(localized: "settings.app.openSupportedFilesInCmux", defaultValue: "Open Supported Files in LocalDeck"),
+                subtitle: String(localized: "settings.app.openSupportedFilesInCmux.subtitle", defaultValue: "Cmd-clicking readable files opens text, code, PDFs, images, audio, video, and Quick Look previews in LocalDeck.")
             ) {
                 Toggle("", isOn: Binding(get: { openSupported.current }, set: { openSupported.set($0) }))
                     .labelsHidden()
@@ -399,7 +399,7 @@ public struct AppSection: View {
                 configurationReview: .action,
                 searchAnchorID: "setting:app:terminal-config",
                 String(localized: "settings.app.configWindow", defaultValue: "Terminal Config"),
-                subtitle: String(localized: "settings.app.configWindow.subtitle", defaultValue: "Open the cmux terminal config and generated preview in one utility window."),
+                subtitle: String(localized: "settings.app.configWindow.subtitle", defaultValue: "Open the LocalDeck terminal config and generated preview in one utility window."),
                 controlWidth: Self.columnWidth
             ) {
                 Button(String(localized: "settings.app.configWindow.openButton", defaultValue: "Open Config")) {
@@ -426,8 +426,8 @@ public struct AppSection: View {
             // Open Markdown in cmux Viewer
             SettingsCardRow(
                 configurationReview: .json("app.openMarkdownInCmuxViewer"),
-                String(localized: "settings.app.openMarkdownInCmuxViewer", defaultValue: "Open Markdown in cmux Viewer"),
-                subtitle: String(localized: "settings.app.openMarkdownInCmuxViewer.subtitle", defaultValue: "When supported file routing is on, Cmd-clicking Markdown files opens the rendered cmux markdown viewer instead of the generic file preview.")
+                String(localized: "settings.app.openMarkdownInCmuxViewer", defaultValue: "Open Markdown in LocalDeck Viewer"),
+                subtitle: String(localized: "settings.app.openMarkdownInCmuxViewer.subtitle", defaultValue: "When supported file routing is on, Cmd-clicking Markdown files opens the rendered LocalDeck markdown viewer instead of the generic file preview.")
             ) {
                 Toggle("", isOn: Binding(get: { openMarkdown.current }, set: { openMarkdown.set($0) }))
                     .labelsHidden()
@@ -663,7 +663,7 @@ public struct AppSection: View {
             SettingsCardRow(
                 configurationReview: .json("app.menuBarOnly"),
                 String(localized: "settings.app.menuBarOnly", defaultValue: "Menu Bar Only"),
-                subtitle: String(localized: "settings.app.menuBarOnly.subtitle", defaultValue: "Hide the Dock icon and Cmd+Tab entry. Use the menu bar item to show cmux.")
+                subtitle: String(localized: "settings.app.menuBarOnly.subtitle", defaultValue: "Hide the Dock icon and Cmd+Tab entry. Use the menu bar item to show LocalDeck.")
             ) {
                 Toggle("", isOn: Binding(get: { menuBarOnly.current }, set: { enabled in
                     if hostActions.setMenuBarOnly(enabled) {
@@ -680,7 +680,7 @@ public struct AppSection: View {
             SettingsCardRow(
                 configurationReview: .json("notifications.showInMenuBar"),
                 String(localized: "settings.app.showInMenuBar", defaultValue: "Show in Menu Bar"),
-                subtitle: String(localized: "settings.app.showInMenuBar.subtitle", defaultValue: "Keep cmux in the menu bar for unread notifications and quick actions.")
+                subtitle: String(localized: "settings.app.showInMenuBar.subtitle", defaultValue: "Keep LocalDeck in the menu bar for unread notifications and quick actions.")
             ) {
                 Toggle("", isOn: Binding(get: { showInMenuBar.current }, set: { showInMenuBar.set($0) }))
                     .labelsHidden()
@@ -705,7 +705,7 @@ public struct AppSection: View {
             SettingsCardRow(
                 configurationReview: .json("notifications.paneFlash"),
                 String(localized: "settings.notifications.paneFlash.title", defaultValue: "Pane Flash"),
-                subtitle: String(localized: "settings.notifications.paneFlash.subtitle", defaultValue: "Briefly flash an outline when cmux highlights a pane.")
+                subtitle: String(localized: "settings.notifications.paneFlash.subtitle", defaultValue: "Briefly flash an outline when LocalDeck highlights a pane.")
             ) {
                 Toggle("", isOn: Binding(get: { paneFlash.current }, set: { paneFlash.set($0) }))
                     .labelsHidden()
@@ -741,7 +741,7 @@ public struct AppSection: View {
             SettingsCardRow(
                 configurationReview: .json("notifications.paneFlashThemeColor"),
                 String(localized: "settings.notifications.paneFlashThemeColor.title", defaultValue: "Use Theme Foreground"),
-                subtitle: String(localized: "settings.notifications.paneFlashThemeColor.subtitle", defaultValue: "Use the terminal theme foreground for flashes; unread rings stay cmux blue.")
+                subtitle: String(localized: "settings.notifications.paneFlashThemeColor.subtitle", defaultValue: "Use the terminal theme foreground for flashes; unread rings stay LocalDeck blue.")
             ) {
                 Toggle("", isOn: Binding(get: { paneFlashThemeColor.current }, set: { paneFlashThemeColor.set($0) }))
                     .labelsHidden()

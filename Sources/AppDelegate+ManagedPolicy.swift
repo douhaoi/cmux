@@ -111,7 +111,7 @@ extension AppDelegate {
         )
         alert.informativeText = String(
             localized: "managedPolicy.autoUpdate.disabledDetail",
-            defaultValue: "cmux does not check for or install updates on this Mac. Your organization deploys new versions."
+            defaultValue: "LocalDeck does not check for or install updates on this Mac. Your organization deploys new versions."
         )
         alert.alertStyle = .informational
         alert.runModal()

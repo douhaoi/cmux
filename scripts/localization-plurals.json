@@ -42,7 +42,7 @@
     ]
   },
   "browser.profile.automation.error.profileInUse": {
-    "source": "Cannot delete cmux browser profile '%@' while %2$d browser panels are using it",
+    "source": "Cannot delete LocalDeck browser profile '%@' while %2$d browser panels are using it",
     "arguments": [
       2
     ]
@@ -717,7 +717,7 @@
     ]
   },
   "taskManager.killProcess.message.other": {
-    "source": "Ask %lld processes to terminate gracefully. cmux will force-kill remaining processes after a short grace period. PIDs: %@.",
+    "source": "Ask %lld processes to terminate gracefully. LocalDeck will force-kill remaining processes after a short grace period. PIDs: %@.",
     "arguments": [
       1
     ]

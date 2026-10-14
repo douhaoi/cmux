@@ -356,19 +356,19 @@ class TerminalController {
                 return String.localizedStringWithFormat(
                     String(
                         localized: "socket.terminal.notRunning.hibernated",
-                        defaultValue: "The terminal is hibernated: cmux suspended its idle agent to save memory. Wake it by showing it (this brings its window to the front), then retry: %@"
+                        defaultValue: "The terminal is hibernated: LocalDeck suspended its idle agent to save memory. Wake it by showing it (this brings its window to the front), then retry: %@"
                     ),
                     wakeCommand
                 )
             }
             return String(
                 localized: "socket.terminal.notRunning.hibernatedNoCommand",
-                defaultValue: "The terminal is hibernated: cmux suspended its idle agent to save memory. Show the terminal in cmux to wake it, then retry."
+                defaultValue: "The terminal is hibernated: LocalDeck suspended its idle agent to save memory. Show the terminal in LocalDeck to wake it, then retry."
             )
         case .awaitingRestore:
             return String(
                 localized: "socket.terminal.notRunning.awaitingRestore",
-                defaultValue: "cmux is still restoring the terminal after it reopened and is checking which agent session to resume. Retry in a few seconds."
+                defaultValue: "LocalDeck is still restoring the terminal after it reopened and is checking which agent session to resume. Retry in a few seconds."
             )
         case .starting:
             return String(
