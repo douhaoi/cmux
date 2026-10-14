@@ -347,6 +347,15 @@ def main():
         1,
     )
 
+    def remove_ios_workspace(repo):
+        os.remove(os.path.join(repo, "ios/cmux.xcworkspace/contents.xcworkspacedata"))
+
+    ok &= expect(
+        "(i) retired workspace does not require its unused lockfile to change",
+        scenario(remove_ios_workspace),
+        0,
+    )
+
     if not ok:
         return 1
     print("check-package-resolved-policy regression tests OK")

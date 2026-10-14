@@ -51,6 +51,13 @@ def write_catalog(root: Path, strings: dict) -> Path:
 
 
 class LocalizeChangesTests(unittest.TestCase):
+    def test_removed_web_product_does_not_load_website_messages(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            locales = MODULE.discover_web_locales(root)
+            self.assertEqual(locales, ())
+            self.assertEqual(MODULE.web_work(root, "HEAD", ["web/messages/en.json"], locales), ([], [], 0))
+
     def test_parse_swift_messages_can_report_the_keys_it_dropped_for_conflicts(self):
         text = (
             'String(localized: "same", defaultValue: "Open")\n'
