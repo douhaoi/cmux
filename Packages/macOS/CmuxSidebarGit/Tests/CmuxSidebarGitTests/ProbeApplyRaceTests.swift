@@ -22,8 +22,8 @@ import CmuxGit
         return service
     }
 
-    @Test(.timeLimit(.minutes(1)))
-    func remoteTrustWhileProbeInFlightDropsLocalSnapshotApply() async throws {
+    @Test(.timeLimit(.minutes(1)), arguments: [false, true])
+    func remoteTrustWhileProbeInFlightDropsLocalSnapshotApply(deferApply: Bool) async throws {
         let host = RecordingSidebarGitHost()
         let (workspaceId, panelId) = host.addWorkspace(panelDirectory: "/tmp/repo")
         host.workspaces[0].state.isRemote = true
@@ -37,7 +37,7 @@ import CmuxGit
             pullRequestProbing: pullRequestProbing
         )
 
-        service.scheduleInitialWorkspaceGitMetadataRefreshIfPossible(
+        service.scheduleWorkspaceGitMetadataRefreshIfPossible(
             workspaceId: workspaceId,
             panelId: panelId,
             reason: "test"
@@ -46,8 +46,17 @@ import CmuxGit
         await clock.resumeNext()
         #expect(await reader.waitForProbe())
 
-        host.workspaces[0].state.panels[panelId]?.hasTrustedRemoteDirectory = true
-        await reader.openGate()
+        if deferApply {
+            host.terminalTypingActive = true
+            await reader.openGate()
+            await clock.waitForSleeper()
+            host.workspaces[0].state.panels[panelId]?.hasTrustedRemoteDirectory = true
+            host.terminalTypingActive = false
+            await clock.resumeNext()
+        } else {
+            host.workspaces[0].state.panels[panelId]?.hasTrustedRemoteDirectory = true
+            await reader.openGate()
+        }
 
         #expect(await waitUntil {
             service.activeWorkspaceGitProbePanelIds(workspaceId: workspaceId).isEmpty
@@ -63,8 +72,11 @@ import CmuxGit
         })
     }
 
-    @Test(.timeLimit(.minutes(1)))
-    func snapshotFinishingDuringTerminalTypingDefersApplyAndRetries() async throws {
+    @Test(.timeLimit(.minutes(1)), arguments: [
+        "unchanged", "filesystemEvent", "newRequest", "unwatched",
+        "cancelled", "directoryChanged", "pollingDisabled",
+    ])
+    func snapshotFinishingDuringTypingReusesOnlyWatchedValidResults(scenario: String) async throws {
         let host = RecordingSidebarGitHost()
         let (workspaceId, panelId) = host.addWorkspace(panelDirectory: "/tmp/repo")
         let clock = ManualGitPollClock()
@@ -74,7 +86,11 @@ import CmuxGit
         )
         let service = makeService(host: host, reader: reader, clock: clock)
 
-        service.scheduleInitialWorkspaceGitMetadataRefreshIfPossible(
+        if scenario != "unwatched" {
+            service.markWorkspaceGitSnapshotCacheEligible(directory: "/tmp/repo")
+        }
+
+        service.scheduleWorkspaceGitMetadataRefreshIfPossible(
             workspaceId: workspaceId,
             panelId: panelId,
             reason: "test"
@@ -85,22 +101,40 @@ import CmuxGit
 
         host.terminalTypingActive = true
         await reader.openGate()
-        #expect(await waitUntil("deferred snapshot retry sleeper") {
-            await clock.recordedDurations.count >= 2
-        })
+        await clock.waitForSleeper()
         #expect(host.workspaces[0].state.panels[panelId]?.branch == nil)
 
-        host.terminalTypingActive = false
-        let clockDriver = Task { @MainActor in
-            while !Task.isCancelled {
-                await clock.resumeNext()
-                try? await Task.sleep(for: .milliseconds(1))
-            }
+        if scenario == "newRequest" {
+            service.markWorkspaceGitSnapshotRerunPending(directory: "/tmp/repo")
+        } else if scenario == "filesystemEvent" {
+            service.advanceWorkspaceGitSnapshotCacheGenerationIfEligible(directory: "/tmp/repo")
+        } else if scenario == "cancelled" {
+            service.resetAllWorkspaceGitProbeTracking()
+        } else if scenario == "directoryChanged" {
+            host.workspaces[0].state.panels[panelId]?.directory = "/tmp/other-repo"
+        } else if scenario == "pollingDisabled" {
+            host.gitMetadataActivity = .disabled
         }
-        defer { clockDriver.cancel() }
-        #expect(await reader.waitForProbe(count: 2))
+
+        host.terminalTypingActive = false
+        await clock.resumeNext()
+        if ["cancelled", "directoryChanged", "pollingDisabled"].contains(scenario) {
+            #expect(await waitUntil {
+                service.activeWorkspaceGitProbePanelIds(workspaceId: workspaceId).isEmpty
+            })
+            #expect(host.workspaces[0].state.panels[panelId]?.branch == nil)
+            #expect(service.workspaceGitSnapshotTasksByDirectory.isEmpty)
+            #expect(service.workspaceGitSnapshotRequestsByDirectory.isEmpty)
+            #expect(await reader.probedDirectories.count == 1)
+            return
+        }
+        if scenario != "unchanged" {
+            await clock.waitForSleeper()
+            await clock.resumeNext()
+        }
         #expect(await waitUntil {
             host.workspaces[0].state.panels[panelId]?.branch?.branch == "local-main"
         })
+        #expect(await reader.probedDirectories.count == (scenario == "unchanged" ? 1 : 2))
     }
 }

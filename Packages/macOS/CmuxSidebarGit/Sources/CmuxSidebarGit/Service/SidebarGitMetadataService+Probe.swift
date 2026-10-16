@@ -104,6 +104,11 @@ extension SidebarGitMetadataService {
         isLastAttempt: Bool,
         reason: String
     ) {
+        // A completed snapshot waiting for quiet still owns this request.
+        if case .inFlight = workspaceGitProbeStateByKey[probeKey] {
+            markWorkspaceGitProbeRerunPending(for: probeKey)
+            return
+        }
         if host?.terminalTypingIsActive(within: Self.terminalTypingQuietInterval) == true {
             workspaceGitProbeStateByKey[probeKey] = .idle
             let delay = max(
@@ -174,10 +179,12 @@ extension SidebarGitMetadataService {
             trackedPathEventGeneration: trackedPathEventGenerationForSnapshot(
                 directory: expectedDirectory,
                 reason: reason
-            )
+            ),
+            invalidationGeneration: workspaceGitSnapshotCacheGeneration(directory: expectedDirectory)
         )
         guard workspaceGitSnapshotTasksByDirectory[expectedDirectory] == nil else {
-            if workspaceGitSnapshotTaskContextByDirectory[expectedDirectory] != taskContext {
+            if workspaceGitSnapshotTaskContextByDirectory[expectedDirectory]?.trackedPathEventGeneration
+                != taskContext.trackedPathEventGeneration {
                 markWorkspaceGitSnapshotRerunPending(directory: expectedDirectory)
             }
 #if DEBUG
@@ -212,7 +219,8 @@ extension SidebarGitMetadataService {
                 guard !Task.isCancelled else { return }
                 self?.applyWorkspaceGitMetadataSnapshotBatch(
                     snapshot,
-                    expectedDirectory: expectedDirectory
+                    expectedDirectory: expectedDirectory,
+                    taskContext: taskContext
                 )
             }
         }
@@ -220,15 +228,16 @@ extension SidebarGitMetadataService {
 
     private func applyWorkspaceGitMetadataSnapshotBatch(
         _ snapshot: InitialWorkspaceGitMetadataSnapshot,
-        expectedDirectory: String
+        expectedDirectory: String,
+        taskContext: WorkspaceGitSnapshotTaskContext,
+        wasDeferred: Bool = false
     ) {
-        workspaceGitSnapshotTasksByDirectory.removeValue(forKey: expectedDirectory)
-        workspaceGitSnapshotTaskContextByDirectory.removeValue(forKey: expectedDirectory)
+        guard workspaceGitSnapshotTaskContextByDirectory[expectedDirectory]?.id == taskContext.id else { return }
 
         // A reader admitted before typing began can still finish during the
         // typing window. Keep its requests in the directory mailbox and use
-        // the same owned snapshot-task slot for a quiet-period retry, rather
-        // than publishing sidebar state in the middle of a terminal turn.
+        // the same owned task slot until quiet. Reuse the result only if no
+        // request or filesystem event has invalidated it in the meantime.
         if host?.terminalTypingIsActive(within: Self.terminalTypingQuietInterval) == true {
             let delay = max(
                 Self.terminalTypingQuietInterval,
@@ -242,29 +251,30 @@ extension SidebarGitMetadataService {
                     return
                 }
                 guard let self, !Task.isCancelled else { return }
-                self.workspaceGitSnapshotTasksByDirectory.removeValue(forKey: expectedDirectory)
-                let requests = self.workspaceGitSnapshotRequestsByDirectory.removeValue(forKey: expectedDirectory) ?? [:]
-                for request in requests.values {
-                    self.workspaceGitSnapshotDirectoryByProbeKey.removeValue(forKey: request.probeKey)
-                    self.workspaceGitProbeStateByKey[request.probeKey] = .idle
-                    self.scheduleWorkspaceGitMetadataRefreshIfPossible(
-                        workspaceId: request.probeKey.workspaceId,
-                        panelId: request.probeKey.panelId,
-                        reason: "terminalTypingDeferredApply"
-                    )
-                }
+                self.applyWorkspaceGitMetadataSnapshotBatch(
+                    snapshot, expectedDirectory: expectedDirectory,
+                    taskContext: taskContext, wasDeferred: true
+                )
             }
             return
         }
 
+        workspaceGitSnapshotTasksByDirectory.removeValue(forKey: expectedDirectory)
+        workspaceGitSnapshotTaskContextByDirectory.removeValue(forKey: expectedDirectory)
         let requests = workspaceGitSnapshotRequestsByDirectory.removeValue(forKey: expectedDirectory) ?? [:]
+        let needsFreshSnapshot = wasDeferred && (
+            taskContext.invalidationGeneration == nil ||
+                workspaceGitSnapshotCacheGeneration(directory: expectedDirectory) != taskContext.invalidationGeneration ||
+                requests.keys.contains { workspaceGitProbeRerunPending(for: $0) }
+        )
         for request in requests.values {
             workspaceGitSnapshotDirectoryByProbeKey.removeValue(forKey: request.probeKey)
             applyWorkspaceGitMetadataSnapshot(
                 snapshot,
                 probeKey: request.probeKey,
                 expectedDirectory: expectedDirectory,
-                isLastAttempt: request.isLastAttempt
+                isLastAttempt: request.isLastAttempt,
+                requiresFreshSnapshot: needsFreshSnapshot
             )
         }
     }
@@ -277,7 +287,8 @@ extension SidebarGitMetadataService {
         _ snapshot: InitialWorkspaceGitMetadataSnapshot,
         probeKey: WorkspaceGitProbeKey,
         expectedDirectory: String,
-        isLastAttempt: Bool
+        isLastAttempt: Bool,
+        requiresFreshSnapshot: Bool = false
     ) {
         let wasInFlight: Bool = {
             if case .inFlight = workspaceGitProbeStateByKey[probeKey] { return true }
@@ -330,6 +341,11 @@ extension SidebarGitMetadataService {
         }
 
         guard wasInFlight else { return }
+        guard sidebarGitMetadataActivePollingEnabled else {
+            clearWorkspaceGitMetadata(for: probeKey)
+            didClearProbe = true
+            return
+        }
         guard let host, host.workspaceExists(probeKey.workspaceId) else {
             clearWorkspaceGitProbe(probeKey)
             didClearProbe = true
@@ -364,6 +380,13 @@ extension SidebarGitMetadataService {
                 "expected=\(expectedDirectory) current=\(currentDirectory)"
             )
 #endif
+            return
+        }
+
+        if requiresFreshSnapshot {
+            // Run the same host/provenance/directory guards before retrying as
+            // before publishing. The owned completion path schedules the read.
+            markWorkspaceGitProbeRerunPending(for: probeKey)
             return
         }
 
