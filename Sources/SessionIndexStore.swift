@@ -682,25 +682,49 @@ final class SessionIndexStore: ObservableObject {
     }
 
     private var loadTask: Task<Void, Never>?
+    private var reloadRequested = false
 
     func reload() {
-        loadTask?.cancel()
-        isLoading = true
         directorySnapshotGeneration += 1
         invalidateDirectorySnapshots()
+        // Filesystem loaders may be inside synchronous work when cancelled.
+        // Drain one scan, then run one fresh pass for all intervening requests.
+        guard loadTask == nil else {
+            reloadRequested = true
+            return
+        }
         let snapshotLoader = self.snapshotLoader
         let ampSessionRepository = self.ampSessionRepository
         loadTask = Task { @MainActor [weak self] in
-            let scanned = await snapshotLoader.load(
-                ampSessionRepository: ampSessionRepository
-            )
-            guard let self, !Task.isCancelled else { return }
-            self.entries = scanned
-            self.isLoading = false
-            self.backfillAgentOrderFromEntries()
-            self.backfillDirectoryOrderFromEntries()
-            self.refreshLiveSessionKeys()
+            while !Task.isCancelled {
+                let scanned = await snapshotLoader.load(
+                    ampSessionRepository: ampSessionRepository
+                )
+                guard let self, !Task.isCancelled else { return }
+                if self.reloadRequested {
+                    self.reloadRequested = false
+                    continue
+                }
+                // @Published emits before didSet; avoid invalidating the whole
+                // list when even the complete entry payload is unchanged.
+                if self.entries != scanned {
+                    self.entries = scanned
+                    self.backfillAgentOrderFromEntries()
+                    self.backfillDirectoryOrderFromEntries()
+                }
+                // Combine subscribers can request another refresh synchronously
+                // while the entry/order publications above are being delivered.
+                if self.reloadRequested {
+                    self.reloadRequested = false
+                    continue
+                }
+                self.loadTask = nil
+                self.isLoading = false
+                self.refreshLiveSessionKeys()
+                return
+            }
         }
+        isLoading = true
     }
 
 #if DEBUG
