@@ -15,6 +15,21 @@ import Testing
 
 @MainActor
 extension MobileHostAuthorizationTests {
+    @Test("The local distribution cannot issue independent artifact transfers")
+    func localDistributionRejectsArtifactTransfers() async {
+        let context = MobileHostRPCExecutionContext(
+            connectionID: UUID(), authorization: .stackBearer
+        )
+        do {
+            _ = try await context.issueArtifactTransfer(canonicalPath: "/unused-local-artifact")
+            Issue.record("The local distribution must not issue artifact transfer capabilities")
+        } catch MobileHostRPCExecutionContext.ArtifactTransferError.unavailable {
+            // The removed transport stays unavailable before any file is opened.
+        } catch {
+            Issue.record("Unexpected artifact transfer failure: \(error)")
+        }
+    }
+
     @Test("Combined startup status preserves the v2 installation identity", .timeLimit(.minutes(1)))
     func combinedWorkspaceStatusPreservesV2InstallationIdentity() async throws {
         let fixture = TerminalPortalTestWorkspace()

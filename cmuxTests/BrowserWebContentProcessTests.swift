@@ -689,7 +689,7 @@ struct BrowserWebContentProcessTests {
 
     @Test
     func browserAppSessionCallbackWaitTimesOutWhenWebKitDropsCompletion() async {
-        let outcome = await awaitBrowserAppSessionCallback(
+        let outcome = await BrowserAppSessionCallbackWaiter().wait(
             timeout: .milliseconds(20)
         ) { _ in
             // Reproduce a WebKit API that never invokes its completion handler.
@@ -701,13 +701,35 @@ struct BrowserWebContentProcessTests {
     @Test
     func browserAppSessionCallbackWaitCompletesWhenItsTaskIsCancelled() async {
         let task = Task { @MainActor in
-            await awaitBrowserAppSessionCallback(timeout: .seconds(30)) { _ in
+            await BrowserAppSessionCallbackWaiter().wait(timeout: .seconds(30)) { _ in
                 // Keep the callback parked until cancellation wins the race.
             }
         }
         await Task.yield()
 
         task.cancel()
+
+        #expect(await task.value == .cancelled)
+    }
+
+    @Test
+    func browserAppSessionCallbackCompletesOnlyOnce() async {
+        let outcome = await BrowserAppSessionCallbackWaiter().wait(timeout: .seconds(30)) { completion in
+            completion()
+            completion()
+        }
+
+        #expect(outcome == .completed)
+    }
+
+    @Test
+    func browserAppSessionCallbackDoesNotStartWhenAlreadyCancelled() async {
+        let task = Task { @MainActor in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return await BrowserAppSessionCallbackWaiter().wait(timeout: .seconds(30)) { _ in
+                Issue.record("A cancelled callback wait must not start WebKit work")
+            }
+        }
 
         #expect(await task.value == .cancelled)
     }

@@ -13,6 +13,21 @@ import Testing
 @MainActor
 @Suite("Cloud workspace targeting", .serialized, .exclusiveAppContext)
 struct CloudWorkspaceTargetingTests {
+    @Test("The local distribution rejects every Cloud creation entrypoint")
+    func localDistributionRejectsCloudCreation() {
+        let fixture = CloudWorkspaceTargetingFixture()
+        defer { fixture.close() }
+        let selectedID = fixture.manager.selectedTabId
+        let workspaceIDs = fixture.manager.tabs.map(\.id)
+
+        #expect(!fixture.app.performNewCloudWorkspaceOnResolvedMachineAction(tabManager: fixture.manager))
+        #expect(!fixture.app.performNewCloudWorkspaceOnCurrentMachineAction(tabManager: fixture.manager, vmID: "local-disabled"))
+        #expect(!fixture.app.performNewCloudMachineAction(tabManager: fixture.manager))
+        #expect(fixture.requests.isEmpty)
+        #expect(fixture.manager.selectedTabId == selectedID)
+        #expect(fixture.manager.tabs.map(\.id) == workspaceIDs)
+    }
+
     @Test("The shared UI action follows A → local and B → local, independent of the legacy default")
     func selectionFlow() async throws {
         let fixture = CloudWorkspaceTargetingFixture()
