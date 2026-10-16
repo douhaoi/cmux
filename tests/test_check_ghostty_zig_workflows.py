@@ -95,13 +95,13 @@ def test_initialized_consumer_passes() -> None:
 
 
 
-def test_release_architecture_selection_remains_analyzed() -> None:
+def test_current_workflow_zig_resolver_remains_analyzed() -> None:
     workflow = yaml.safe_load(
-        (Path(__file__).resolve().parents[1] / ".github/workflows/ci-macos.yml").read_text()
+        (Path(__file__).resolve().parents[1] / ".github/workflows/localdeck-package.yml").read_text()
     )
     step = next(
-        step for step in workflow["jobs"]["swift-package-tests"]["steps"]
-        if step.get("name") == "Build Release Ghostty CLI helper"
+        step for step in workflow["jobs"]["package"]["steps"]
+        if step.get("name") == "Read Ghostty's Zig pin"
     )
     # Exercise the real shell body: unsupported syntax must not hide a helper
     # invocation, and changing its target must not bypass the submodule guard.
@@ -109,7 +109,7 @@ def test_release_architecture_selection_remains_analyzed() -> None:
     failures = failures_for(yaml.safe_dump(fixture))
     assert len(failures) == 1, failures
     assert "before Ghostty submodule init" in failures[0], failures
-    assert "build-ghostty-cli-helper.sh" in failures[0], failures
+    assert "ghostty-zig-version.sh" in failures[0], failures
 
     fixture["jobs"]["build"]["steps"].insert(0, {
         "uses": "actions/checkout@v6", "with": {"submodules": "recursive"},
@@ -390,7 +390,7 @@ if __name__ == "__main__":
     test_non_executing_mentions_do_not_require_ghostty()
     test_executing_consumer_before_init_fails()
     test_initialized_consumer_passes()
-    test_release_architecture_selection_remains_analyzed()
+    test_current_workflow_zig_resolver_remains_analyzed()
     test_wrapped_and_prefixed_consumer_execution_fails()
     test_submodule_update_without_init_does_not_satisfy_guard()
     test_retrying_init_script_satisfies_guard()

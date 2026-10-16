@@ -20,7 +20,7 @@ its shims. Keep view code that way when you want it here.
 Each render writes light and dark PNGs at 2x, plus a 4x crop for detail, and
 prints their paths. The binary is cached by input hash, so an unchanged
 re-run only renders. This is a design loop, not proof: the CI UI tests
-(`scripts/ui-test`) still check the real app.
+still check the real app when run against a GitHub-built artifact.
 """
 
 from __future__ import annotations

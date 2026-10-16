@@ -19,11 +19,7 @@ import unittest
 from unittest import mock
 from pathlib import Path
 import git_fixture_env  # noqa: F401  (disables git auto maintenance)
-from test_ci_change_areas import (
-    GUARD_WORKFLOW as GUARD_WORKFLOW_PATH,
-    workflow_job_block,
-    workflow_job_step_script,
-)
+
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,22 +53,6 @@ jobs:
 
 
 class RegistryBlastRadiusTests(unittest.TestCase):
-    def test_cli_product_lane_selects_the_hook_spool_regression(self) -> None:
-        result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/ci/run_python_test_lane.py"),
-             "--lane", "macos-cli-product", "--list"],
-            cwd=ROOT, capture_output=True, text=True, check=True,
-        )
-        self.assertEqual(
-            result.stdout.splitlines(),
-            ["tests/test_claude_hook_spool.py", "tests/test_cli_hooks_setup_arguments.py"],
-        )
-        errors, _, _ = validator.validate(
-            ROOT,
-            added={"tests/test_claude_hook_spool.py", "tests/test_cli_hooks_setup_arguments.py"},
-        )
-        self.assertEqual(errors, [])
-
     def make_root(self, *, tests: list[str], registry: str) -> Path:
         root = Path(tempfile.mkdtemp(prefix="cmux-test-execution-registry-"))
         self.addCleanup(shutil.rmtree, root, ignore_errors=True)
@@ -281,7 +261,7 @@ class RegistryBlastRadiusTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(validator.register_derivable(root), [])  # idempotent
 
-    def test_a_test_a_workflow_runs_through_a_workload_profile_is_live(self) -> None:
+    def test_retired_workload_profiles_cannot_claim_test_execution(self) -> None:
         root = self.make_root(
             tests=["test_kept.py", "test_profiled.py"],
             registry=self.kept_registry()
@@ -302,7 +282,7 @@ class RegistryBlastRadiusTests(unittest.TestCase):
         )
 
         errors, _, _ = validator.validate(root, added=set())
-        self.assertEqual(errors, [])
+        self.assertIn("tests/test_profiled.py: linux-guard lane is not run by any workflow", errors)
 
     def test_write_leaves_a_test_no_workflow_runs_for_a_person_to_place(self) -> None:
         root = self.make_root(tests=["test_kept.py", "test_orphan.py"], registry=self.kept_registry())
@@ -438,25 +418,6 @@ class RegistryBlastRadiusTests(unittest.TestCase):
             # tip must keep it at warning severity.
             self.assertEqual(validate().returncode, 0)
 
-    def test_registry_workflow_resolves_the_current_base_ref(self) -> None:
-        block = workflow_job_block("workflow-guard-tests", GUARD_WORKFLOW_PATH)
-        start = block.index("      - name: Validate Python test execution registry")
-        end = block.index("      - name:", start + 1)
-        step = block[start:end]
-
-        self.assertIn(
-            "CMUX_TEST_REGISTRY_BASE_REF: ${{ github.event.pull_request.base.ref || github.event.merge_group.base_ref || '' }}",
-            step,
-        )
-        self.assertNotIn("github.event.pull_request.base.sha", step)
-        self.assertIn(
-            'git fetch --no-tags --depth=1 origin "$CMUX_TEST_REGISTRY_BASE_REF"',
-            step,
-        )
-        self.assertIn('CMUX_TEST_REGISTRY_BASE_SHA="$(git rev-parse FETCH_HEAD)"', step)
-        self.assertIn('validate_test_execution_registry.py "${args[@]+"${args[@]}"}"', step)
-        self.assertIn('args=(--base-sha "$CMUX_TEST_REGISTRY_BASE_SHA")', step)
-
     def test_newly_added_tests_show_why_the_workflow_needs_the_current_base_tip(self) -> None:
         root = Path(tempfile.mkdtemp(prefix="cmux-test-execution-registry-git-"))
         self.addCleanup(shutil.rmtree, root, ignore_errors=True)
@@ -505,29 +466,6 @@ class RegistryBlastRadiusTests(unittest.TestCase):
             {"tests/test_mine.py"},
         )
 
-        # Execute the workflow fetch against the fixture's origin and observe
-        # the validator arguments, including the no-base push-event path.
-        git("remote", "add", "origin", str(root))
-        script = workflow_job_step_script(
-            "workflow-guard-tests",
-            "Validate Python test execution registry",
-            GUARD_WORKFLOW_PATH,
-        )
-        script = script.replace(
-            'python3 scripts/ci/validate_test_execution_registry.py "${args[@]+"${args[@]}"}"',
-            'printf "%s\\n" "${args[@]+"${args[@]}"}"',
-        )
-        for base_ref, expected in (("main", ["--base-sha", main_tip]), ("", [""])):
-            with self.subTest(base_ref=base_ref):
-                result = subprocess.run(
-                    ["bash", "-c", script],
-                    cwd=root,
-                    env={**os.environ, "CMUX_TEST_REGISTRY_BASE_REF": base_ref},
-                    check=True,
-                    text=True,
-                    capture_output=True,
-                )
-                self.assertEqual(result.stdout.splitlines(), expected)
 
 
 # Each fake test records its start, then waits until `peers` tests have

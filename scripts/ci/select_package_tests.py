@@ -26,18 +26,11 @@ EXTRA_INPUTS = {
 # The job itself: its workflow, the scripts its test steps call, and the pinned
 # toolchain and GhosttyKit revision. A change to any of these selects everything.
 GLOBAL_INPUTS = (
-    ".github/workflows/ci.yml",
-    ".github/workflows/ci-macos.yml",
+    ".github/workflows/localdeck-package.yml",
     "scripts/build-ghostty-cli-helper.sh",
-    "scripts/ci/git-seed.sh",
-    "scripts/ci/release-build-archs.sh",
     "scripts/ci/ci_process_tree.py",
     "scripts/ci/hung_test_watchdog.py",
-    "scripts/ci/owned_spm_scratch.py",
-    "scripts/ci/package_input_key.py",
-    "scripts/ci/package_interface_fingerprint.py",
     "scripts/ci/package-test-lane.sh",
-    "scripts/ci/reuse_package_results.py",
     "scripts/ci/require_swift_test_execution.py",
     "scripts/ci/run-swift-testing-suites.sh",
     "scripts/ci/swift_package_submodules.py",

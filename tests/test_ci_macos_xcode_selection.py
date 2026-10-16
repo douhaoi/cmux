@@ -36,35 +36,10 @@ BELOW_FLOOR = "CMUX_CI_XCODE_ALLOW_BELOW_FLOOR"
 
 # (workflow, job) -> why the job does not go through select-ci-xcode.sh.
 EXEMPT = {
-    ("build-ghosttykit.yml", "build-ghosttykit"):
-        "Zig-only GhosttyKit xcframework build on the background lane; it takes "
-        "the image's SDK, and moving it changes a published artifact",
-    ("release.yml", "build-ghostty-cli-helper"):
-        "Zig-only Ghostty CLI helper, built against the macOS 15 image's SDK 15 "
-        "default like the helper in ci-macos.yml",
-    ("nightly.yml", "build-nightly-ghostty-cli-helper"):
-        "Zig-only Ghostty CLI helper, built against the macOS 15 image's SDK 15 "
-        "default like the helper in ci-macos.yml",
-    ("ci-macos-compat.yml", "compat-tests"):
-        "compatibility lane: builds with the newest Xcode each older image "
-        "carries (16.x on macos-14), below the floor on purpose",
-    ("relay-tls.yml", "system-keychain"):
-        "runs the relay TLS verifier under Xcode 16.2 / Swift 6, below the "
-        "floor on purpose",
-    ("remote-daemon.yml", "remote-daemon-macos-tests"): "Go only; no Xcode",
-    ("ci.yml", "claude-wrapper"): "shell wrapper tests only; no Xcode",
-    ("cmux-tui.yml", "lint"): "Rust only; no Xcode",
-    ("cmux-tui.yml", "test"): "Rust only; no Xcode",
-    ("cmux-tui.yml", "cdp-browser-smoke"): "Rust only; no Xcode",
-    ("cmux-tui-build-package.yml", "build"):
-        "Rust release binaries linked against the runner's default macOS SDK, "
-        "as the nightly and release callers always have; pinning it would "
-        "change published artifacts",
-    ("relay-publish-npm.yml", "smoke"): "npm package smoke test; no Xcode",
+    ("localdeck-package.yml", "checks"): "portable static checks; no native compilation",
+    ("localdeck-package.yml", "package"): "selects the repository major from installed hosted-runner Xcodes",
 }
-
-# (workflow, job, step name) allowed to set CMUX_CI_XCODE_ALLOW_BELOW_FLOOR.
-BELOW_FLOOR_STEPS = {("ci-macos.yml", "swift-package-tests", "Select helper Xcode")}
+BELOW_FLOOR_STEPS = set()
 
 # A step that reaches the Xcode toolchain directly or through a repo script.
 TOOLCHAIN = re.compile(
@@ -306,7 +281,7 @@ def main() -> int:
         print(f"FAIL: {error}", file=sys.stderr)
     if errors:
         return 1
-    print("PASS: every macOS job selects its Xcode through scripts/select-ci-xcode.sh")
+    print("PASS: Xcode policy fixtures and current workflow exemptions are valid")
     return 0
 
 

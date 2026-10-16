@@ -17,12 +17,7 @@
 #      pool pin: a newer image Xcode costs a fork cache misses, never a failed
 #      job (docs/ci-runners.md, fork contract). The floor still applies.
 #
-# A pinned Xcode this runner does not have is the machine's fault, not the
-# code's: the error carries MACHINE_MARKER, which scripts/ci/classify_failures.py
-# and scripts/ci/machine_failure.py read as a machine failure, and the step is
-# named "Select Xcode", which scripts/ci/owned_pool_rescue.py treats as a
-# refusal on an owned Mac (re-run as github-actions[bot], so off the fleet).
-# scripts/ci/xcode_pin_audit.py finds such a Mac before a job does.
+# A missing pinned Xcode is reported as a runner toolchain failure.
 #
 # Whatever is selected must be at least the Xcode major in .xcode-version, or
 # the script stops with one ::error:: naming the found and required versions
@@ -36,7 +31,7 @@ SELECT_XCODE_REPO_ROOT="$(dirname "$SELECT_XCODE_SCRIPT_DIR")"
 XCODE_VERSION_FILE="${CMUX_XCODE_VERSION_FILE:-$SELECT_XCODE_REPO_ROOT/.xcode-version}"
 XCODE_PINS_FILE="${CMUX_CI_XCODE_PINS_FILE:-$SELECT_XCODE_REPO_ROOT/scripts/ci/xcode-pins.txt}"
 ALLOW_BELOW_FLOOR="${CMUX_CI_XCODE_ALLOW_BELOW_FLOOR:-0}"
-# Keep in step with classify_failures.py's "xcode-pin-missing" signature.
+# Stable diagnostic marker for a missing runner toolchain.
 MACHINE_MARKER="[cmux-ci machine: xcode-pin-missing]"
 
 APPLICATIONS_DIR="${CMUX_XCODE_APPLICATIONS_DIR:-/Applications}"

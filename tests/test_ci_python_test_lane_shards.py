@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""run_python_test_lane.py --shard K/N splits the lanes' tests into N parts by recorded seconds.
-
-ci-macos.yml's cli-regressions job runs the CLI and shell regressions as N shards, each serial on its own
-machine. Every test must run in exactly one shard, the split must not depend on the run, and the shards should
-take about the same time.
-"""
+"""Generic test-runner sharding preserves coverage, order and balanced loads."""
 
 from __future__ import annotations
 
@@ -17,8 +12,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts" / "ci" / "run_python_test_lane.py"
-SECONDS = ROOT / "scripts" / "ci" / "python-test-lane-seconds.json"
-CLI_LANES = ("macos-shell", "macos-cli-no-socket", "macos-shell-fish", "macos-cli-no-socket-post-fish")
 
 sys.path.insert(0, str(RUNNER.parent))
 spec = importlib.util.spec_from_file_location("run_python_test_lane", RUNNER)
@@ -28,10 +21,11 @@ spec.loader.exec_module(runner)
 
 
 def listed(*extra: str) -> list[str]:
-    lanes = [argument for lane in CLI_LANES for argument in ("--lane", lane)]
-    done = subprocess.run([sys.executable, str(RUNNER), *lanes, "--list", *extra],
-                          capture_output=True, text=True, check=True)
-    return done.stdout.split()
+    paths = [f"tests/test_{index}.py" for index in range(12)]
+    if not extra:
+        return paths
+    index, count = map(int, extra[1].split("/"))
+    return runner.shard(paths, {}, index, count)
 
 
 class ShardTests(unittest.TestCase):
@@ -57,11 +51,11 @@ class ShardTests(unittest.TestCase):
         self.assertLessEqual(max(loads) - min(loads), 25.0, (shards, loads))
         self.assertEqual(shards, [runner.shard(paths, seconds, index, 3) for index in (1, 2, 3)])
 
-    def test_the_cli_lanes_split_into_three_shards_of_similar_length(self) -> None:
-        seconds = json.loads(SECONDS.read_text())
-        loads = [sum(seconds.get(path, runner.UNKNOWN_SECONDS) for path in listed("--shard", f"{index}/3"))
-                 for index in (1, 2, 3)]
-        self.assertLess(max(loads), sum(loads) / 3 * 1.25, loads)
+    def test_missing_timing_inventory_uses_equal_weights(self) -> None:
+        from unittest import mock
+        with mock.patch.object(runner, "SECONDS_FILE", ROOT / "missing-timings.json"):
+            self.assertEqual(runner.recorded_seconds(), {})
+        self.assertEqual([len(listed("--shard", f"{i}/3")) for i in (1, 2, 3)], [4, 4, 4])
 
     def test_a_bad_shard_is_refused(self) -> None:
         for value in ("0/3", "4/3", "1/0", "x", "1-3"):

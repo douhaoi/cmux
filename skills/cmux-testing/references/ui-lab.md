@@ -55,7 +55,7 @@ into a file with only AppKit/SwiftUI dependencies, which also keeps it testable.
 
 It renders a still frame of your view code in a mock layout, not the running
 app: no window chrome, real cell layout, animation or live data. Confirm the
-result in the app with a CI UI test (`scripts/ui-test`) or a dogfood tour
+result in the app with an explicitly configured native UI test or an isolated runtime check
 before calling a UI change done, and put that screenshot in the PR.
 
 Compiling a few files is fine on a laptop; this is not an app build.

@@ -15,9 +15,9 @@ before preparing a native build. Fast feedback starts with
 `python3 scripts/verify-local.py`; portable-tooling and documentation changes use
 their scoped checks without an unrelated app build.
 
-For native app or build-input changes, build with a tag as below. Setup (`./scripts/setup.sh`) initializes
-submodules, builds GhosttyKit and installs the project-normalization hook;
-it is not a prerequisite for portable static checks.
+For native app or build-input changes, use [GitHub packaging](../../CONTRIBUTING.md#github-packaging).
+Do not run native builds or packaging locally. `./scripts/setup.sh` remains a
+native dependency preparation helper and is unnecessary for static checks.
 
 ## Tagged local development
 
@@ -41,7 +41,7 @@ An app build does not establish test-target compilation or execution. Follow
 ## Toolchain and project files
 
 `.xcode-version` owns the Xcode major; `cmux.xcodeproj/project.pbxproj` currently
-uses objectVersion 60. The Intel/macOS 14 fallback uses Xcode 16.2/Swift 6.0;
+uses objectVersion 60. The workflow selects that major from installed runner toolchains;
 keep app-linked code compatible as specified in
 [Swift 6.0 compatibility](../cmux-architecture/references/swift-6-0-compatibility.md).
 

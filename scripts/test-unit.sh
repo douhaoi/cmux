@@ -13,7 +13,7 @@ if [ "$#" -eq 0 ]; then
   set -- test
 fi
 
-# cmuxTests emits no Swift module, as in CI (scripts/ci/compile-app-host-test-product.sh).
+# cmuxTests emits no Swift module, for isolated test builds.
 # Nothing imports cmuxTests.swiftmodule, but its emit-module job type-checks
 # every test declaration serially: 26 s of a 31 s one-test-file rebuild. The
 # standalone driver with -no-emit-module-separately skips it (4.1 s, #14364).

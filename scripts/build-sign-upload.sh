@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# This fork has no upstream credentials, appcast or hosted release pipeline.
-echo "Use scripts/reload.sh --tag <tag> --release --build-only to verify the local distribution." >&2
+# Packaging is owned by the repository's GitHub Actions workflow.
+echo "Use GitHub Actions: Package LocalDeck (localdeck-package.yml)." >&2
 exit 2

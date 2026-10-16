@@ -48,7 +48,6 @@ class InstallGitHooksTests(unittest.TestCase):
             "scripts/ci/merge_main_resolver.py",
             "scripts/ci/validate_test_execution_registry.py",
             "scripts/ci/test_execution_registry.py",
-            "scripts/ci/workload_entrypoints.py",
             "scripts/normalize-pbxproj.py",
         ):
             source, target = SOURCE / relative, root / relative
@@ -83,7 +82,6 @@ class InstallGitHooksTests(unittest.TestCase):
         for name in (
             "validate_test_execution_registry.py",
             "test_execution_registry.py",
-            "workload_entrypoints.py",
             "normalize-pbxproj.py",
             "python3-path",
         ):
@@ -348,7 +346,6 @@ class InstallGitHooksTests(unittest.TestCase):
         for relative in (
             "scripts/ci/validate_test_execution_registry.py",
             "scripts/ci/test_execution_registry.py",
-            "scripts/ci/workload_entrypoints.py",
         ):
             path = self.repo / relative
             reviewed = path.read_bytes()

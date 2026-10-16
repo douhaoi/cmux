@@ -66,7 +66,7 @@ key() {
 # keeping them split one seed into one per account, and SwiftPM finds the same
 # ~/Library/Caches through the user database without them. TMPDIR is dropped
 # so Foundation picks the per-user default. FileSystemMode is kept because
-# compile-app-host-test-product.sh sets it on the resolve and on every build,
+# callers set it consistently on the resolve and on every build,
 # and they must share one environment. CMUX_CI_SWIFTPM_KEEP_ENV names
 # extra variables to keep, for tests whose xcodebuild stub is configured
 # through the environment.

@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RELOAD_ORIGINAL_ARGS=("$@")
-# shellcheck source=scripts/lib/mobile-attach.sh
-source "$SCRIPT_DIR/lib/mobile-attach.sh"
+# shellcheck source=scripts/lib/tagged-build.sh
+source "$SCRIPT_DIR/lib/tagged-build.sh"
 
 APP_NAME="LocalDeck DEV"
 BUNDLE_ID="com.cmuxterm.local.debug"
@@ -20,22 +20,6 @@ TAG=""
 LAUNCH=0
 BUILD_ONLY=0
 CMUX_DEBUG_LOG=""
-CMUX_DEV_PORT=""
-CMUX_DEV_PORT_END=""
-CMUX_DEV_PORT_RANGE=""
-CMUX_DEV_ORIGIN=""
-CMUX_DEV_API_BASE_URL_VALUE=""
-CMUX_IROH_BROKER_BASE_URL_VALUE=""
-CMUX_IROH_V2_ENVIRONMENT_VALUE=""
-CMUX_IROH_V2_BASE_URL_VALUE=""
-CMUX_IROH_V2_FORCE_RELAY_VALUE="0"
-CMUX_AUTH_WWW_ORIGIN_VALUE=""
-CMUX_WWW_ORIGIN_VALUE=""
-PROD_AUTH=0
-AUTH_CREDENTIALS_FILE=""
-AUTH_PROFILE=""
-AUTH_EXPECTED_ACCOUNT=""
-CMUX_TUI_CLIENT_MANIFEST_URL_VALUE=""
 CLI_PATH=""
 NO_GLOBAL_CLI_LINKS=1
 # Matches CmuxStateDirectory (non-TCC ~/.local/state/cmux) where the app/CLI now
@@ -929,18 +913,11 @@ EOF
 }
 
 sanitize_bundle() {
-  cmux_attach__bundle_seg "$1"
+  cmux_tag_bundle_segment "$1"
 }
 
 sanitize_path() {
-  cmux_attach__slug_raw "$1"
-}
-
-is_valid_port() {
-  local port="${1:-}"
-  [[ "$port" =~ ^[0-9]+$ ]] || return 1
-  local numeric=$((10#$port))
-  (( numeric >= 1 && numeric <= 65535 ))
+  cmux_tag_slug_raw "$1"
 }
 
 is_positive_integer() {
@@ -948,42 +925,6 @@ is_positive_integer() {
   [[ "$value" =~ ^[0-9]+$ ]] || return 1
   local numeric=$((10#$value))
   (( numeric > 0 ))
-}
-
-choose_cmux_dev_port() {
-  if is_valid_port "${CMUX_PORT:-}"; then
-    echo "$CMUX_PORT"
-    return 0
-  fi
-  if is_valid_port "${PORT:-}"; then
-    echo "$PORT"
-    return 0
-  fi
-  echo "3777"
-}
-
-choose_cmux_dev_port_range() {
-  if is_positive_integer "${CMUX_PORT_RANGE:-}"; then
-    echo "$CMUX_PORT_RANGE"
-    return 0
-  fi
-  echo "1"
-}
-
-choose_cmux_dev_port_end() {
-  local start="$1"
-  local range="$2"
-  if is_valid_port "${CMUX_PORT_END:-}"; then
-    echo "$CMUX_PORT_END"
-    return 0
-  fi
-  local start_num=$((10#$start))
-  local range_num=$((10#$range))
-  local end=$((start_num + range_num - 1))
-  if (( end > 65535 )); then
-    end="$start_num"
-  fi
-  echo "$end"
 }
 
 set_plist_env() {
@@ -1292,9 +1233,7 @@ if [[ -z "$TAG" ]]; then
   exit 1
 fi
 
-# Release's product is LocalDeck.app, which the tag step stages as the tagged app. It
-# bundles the pinned cmux-tui by default; dogfood the checkout's own instead. Its
-# entitlements need a signing team, and the tagged app is signed ad hoc.
+# Release produces LocalDeck.app, staged under the isolated development tag.
 if [[ "$BUILD_CONFIGURATION" == Release ]]; then
   PRODUCT_APP_NAME="LocalDeck"
   export CMUX_NEXT_TUI_MODE=tree
@@ -1310,7 +1249,7 @@ if [[ "$BUILD_ONLY" -eq 1 && "$NAME_SET" -eq 1 && "$APP_NAME" == "$PRODUCT_APP_N
 fi
 
 if [[ -n "$TAG" ]]; then
-  if ! cmux_attach_validate_dev_tag "$TAG"; then
+  if ! cmux_validate_build_tag "$TAG"; then
     exit 1
   fi
   TAG_ID="$(sanitize_bundle "$TAG")"
@@ -1335,12 +1274,6 @@ if [[ -n "$TAG" ]]; then
   fi
 fi
 
-# The local distribution has no account, backend or cloud-client provisioning.
-CMUX_DEV_PORT="$(choose_cmux_dev_port)"
-CMUX_DEV_PORT_RANGE="$(choose_cmux_dev_port_range)"
-CMUX_DEV_PORT_END="$(choose_cmux_dev_port_end "$CMUX_DEV_PORT" "$CMUX_DEV_PORT_RANGE")"
-CMUX_DEV_ORIGIN=""
-export CMUX_DEV_BACKEND_MODE=local
 # Quiet logging: capture all noisy build output (xcodebuild, zig, codesign,
 # plistbuddy, etc.) to a single log file. On success we print only a one-line
 # summary plus the App/CLI paths. On failure we dump the log.
@@ -1397,19 +1330,6 @@ reload_finalize() {
     echo
     echo "App path:"
     echo "  $APP_PATH"
-  fi
-  if [[ -n "${CMUX_DEV_ORIGIN:-}" ]]; then
-    echo
-    echo "Dev web origin:"
-    echo "  $CMUX_DEV_ORIGIN"
-    echo "Dev API origin:"
-    echo "  $CMUX_DEV_API_BASE_URL_VALUE"
-    echo "Iroh broker origin:"
-    echo "  $CMUX_IROH_BROKER_BASE_URL_VALUE"
-    if [[ -n "${TAG_SLUG:-}" ]]; then
-      echo "Dev web command:"
-      echo "  cd web && CMUX_PORT=$CMUX_DEV_PORT CMUX_PORT_RANGE=$CMUX_DEV_PORT_RANGE CMUX_PORT_END=$CMUX_DEV_PORT_END CMUX_AUTH_CALLBACK_SCHEME=cmux-dev-$TAG_SLUG bun dev"
-    fi
   fi
   if [[ "$BUILD_ONLY" -ne 1 && -x "${CLI_PATH:-}" ]]; then
     echo
@@ -1825,7 +1745,6 @@ if [[ -n "$TAG" && "$APP_NAME" != "$SEARCH_APP_NAME" ]]; then
       CMUXD_SOCKET="${APP_SUPPORT_DIR}/cmuxd-dev-${TAG_SLUG}.sock"
       CMUX_SOCKET_PATH_VALUE="/tmp/cmux-local-debug-${TAG_SLUG}.sock"
       CMUX_DEBUG_LOG="/tmp/cmux-local-debug-${TAG_SLUG}.log"
-      CMUX_AUTH_CALLBACK_SCHEME_VALUE="cmux-dev-${TAG_SLUG}"
       if [[ "$BUILD_ONLY" -ne 1 ]]; then
         echo "$CMUX_DEBUG_LOG" > /tmp/cmux-last-debug-log-path || true
       fi
@@ -1845,10 +1764,6 @@ if [[ -n "$TAG" && "$APP_NAME" != "$SEARCH_APP_NAME" ]]; then
       fi
       set_plist_env "$INFO_PLIST" CMUX_BUNDLED_CLI_PATH "$BUNDLED_APP_PATH/Contents/Resources/bin/cmux"
       set_plist_env "$INFO_PLIST" CMUX_SHELL_INTEGRATION_DIR "$BUNDLED_APP_PATH/Contents/Resources/shell-integration"
-      set_plist_env "$INFO_PLIST" CMUX_PORT "$CMUX_DEV_PORT"
-      set_plist_env "$INFO_PLIST" CMUX_PORT_END "$CMUX_DEV_PORT_END"
-      set_plist_env "$INFO_PLIST" CMUX_PORT_RANGE "$CMUX_DEV_PORT_RANGE"
-      set_plist_env "$INFO_PLIST" PORT "$CMUX_DEV_PORT"
       if [[ "$BUILD_ONLY" -ne 1 && -S "$CMUXD_SOCKET" ]]; then
         for PID in $(lsof -t "$CMUXD_SOCKET" 2>/dev/null); do
           kill "$PID" 2>/dev/null || true
@@ -2049,10 +1964,6 @@ if [[ "$LAUNCH" -eq 1 ]]; then
     CMUXTERM_REPO_ROOT="$PWD"
     CMUX_BUNDLED_CLI_PATH="$CLI_PATH"
     CMUX_SHELL_INTEGRATION_DIR="$APP_PATH/Contents/Resources/shell-integration"
-    CMUX_PORT="$CMUX_DEV_PORT"
-    CMUX_PORT_END="$CMUX_DEV_PORT_END"
-    CMUX_PORT_RANGE="$CMUX_DEV_PORT_RANGE"
-    PORT="$CMUX_DEV_PORT"
   )
   LAUNCH_CMD=()
   LAUNCH_RETRY_CMD=()

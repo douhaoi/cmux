@@ -23,7 +23,7 @@ CONSUMER_NAMES = (
 CHECKOUT_ACTION = "actions/checkout@"
 SETUP_ZIG_ACTION = "mlugg/setup-zig@"
 SETUP_ZIG_VERSION = "${{ steps.ghostty-zig-version.outputs.version }}"
-TUI_WORKFLOW_NAMES = frozenset({"cmux-tui-build-package.yml", "cmux-tui.yml"})
+GHOSTTY_SETUP_WORKFLOW_NAMES = frozenset({"localdeck-package.yml", "cmux-tui-build-package.yml", "cmux-tui.yml"})
 SHELL_INTERPRETERS = {"bash", "sh", "zsh"}
 ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 QUOTED_HEREDOC = re.compile(r"(<<-?\s*)(['\"])([A-Za-z_][A-Za-z0-9_]*)(\2)")
@@ -588,7 +588,7 @@ def workflow_failures(
                         f"{event.consumer} before Ghostty submodule init"
                     )
 
-            if path.name in TUI_WORKFLOW_NAMES:
+            if path.name in GHOSTTY_SETUP_WORKFLOW_NAMES:
                 setup_failures, validated = _setup_zig_failures(path, job, events)
                 failures.extend(setup_failures)
                 validated_setup_jobs += int(validated)

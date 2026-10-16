@@ -1,0 +1,161 @@
+name: Package LocalDeck
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localdeck-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Static verification
+        run: python3 scripts/verify-local.py --all
+      - name: Portable tooling regressions
+        run: |
+          python3 tests/test_ci_test_execution_registry.py
+          python3 tests/test_install_git_hooks.py
+          python3 tests/test_ci_python_test_lane_shards.py
+          python3 tests/test_preflight_trust.py
+      - name: Validate test execution registry
+        run: python3 scripts/ci/validate_test_execution_registry.py
+
+  package:
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set isolated build caches
+        run: |
+          echo "CMUX_GHOSTTYKIT_CACHE_DIR=$RUNNER_TEMP/ghosttykit" >> "$GITHUB_ENV"
+          echo "CMUX_CUA_CACHE_DIR=$RUNNER_TEMP/cmux-cua" >> "$GITHUB_ENV"
+      - name: Initialize native dependencies
+        run: git submodule update --init --recursive ghostty vendor/bonsplit
+      - name: Select the repository's Xcode major
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+
+          major = Path('.xcode-version').read_text().strip()
+          candidates = []
+          for app in Path('/Applications').glob('Xcode*.app'):
+              developer = app / 'Contents/Developer'
+              result = subprocess.run(['xcodebuild', '-version'], env={**os.environ, 'DEVELOPER_DIR': str(developer)}, capture_output=True, text=True)
+              match = re.search(r'^Xcode (\d+(?:\.\d+)*)$', result.stdout, re.M)
+              if result.returncode == 0 and match and match[1].split('.')[0] == major:
+                  candidates.append((tuple(map(int, match[1].split('.'))), developer))
+          if not candidates:
+              raise SystemExit(f'No Xcode {major} installation on this runner')
+          developer = max(candidates, key=lambda item: item[0])[1]
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write(f'DEVELOPER_DIR={developer}\n')
+          PY
+      - name: Read Ghostty's Zig pin
+        id: ghostty-zig-version
+        shell: bash
+        run: |
+          source scripts/ghostty-zig-version.sh
+          version="$(ghostty_minimum_zig_version "$PWD")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2
+        with:
+          version: ${{ steps.ghostty-zig-version.outputs.version }}
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.14
+      - name: Prepare Rust toolchains
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          toolchain=$(awk -F '"' '/^[[:space:]]*channel[[:space:]]*=/{print $2; exit}' Native/DiffSidecar/rust-toolchain.toml)
+          rustup toolchain install "$toolchain" --profile minimal
+          rustup target add --toolchain "$toolchain" aarch64-apple-darwin x86_64-apple-darwin
+      - name: Fingerprint build toolchains
+        id: cache-inputs
+        shell: bash
+        run: |
+          toolchain=$(awk -F '"' '/^[[:space:]]*channel[[:space:]]*=/{print $2; exit}' Native/DiffSidecar/rust-toolchain.toml)
+          {
+            sw_vers -productVersion
+            xcodebuild -version
+            xcrun --sdk macosx --show-sdk-version
+            xcrun --sdk macosx --show-sdk-build-version
+            rustc -vV
+            rustup run "$toolchain" rustc -vV
+            zig version
+            bun --version
+          } > "$RUNNER_TEMP/localdeck-toolchains.txt"
+          digest=$(shasum -a 256 "$RUNNER_TEMP/localdeck-toolchains.txt" | awk '{print $1}')
+          echo "tools=$digest" >> "$GITHUB_OUTPUT"
+          echo "ghostty=$(git -C ghostty rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      # Exact keys deliberately have no broad restore prefix: compiled helpers
+      # must match the architecture, toolchain, source pin and build recipe.
+      - name: Cache GhosttyKit
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ${{ env.CMUX_GHOSTTYKIT_CACHE_DIR }}
+          key: localdeck-ghostty-v1-${{ runner.os }}-${{ matrix.arch }}-${{ steps.cache-inputs.outputs.tools }}-${{ steps.cache-inputs.outputs.ghostty }}-${{ hashFiles('scripts/ensure-ghosttykit.sh', 'scripts/ghostty-zig-version.sh', 'scripts/ghosttykit-checksums.txt', 'scripts/validate-xcframework-archive.py', 'ghostty.h') }}
+      - name: Cache Computer Use source and Cargo artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ${{ env.CMUX_CUA_CACHE_DIR }}
+          key: localdeck-cua-v1-${{ runner.os }}-${{ matrix.arch }}-${{ steps.cache-inputs.outputs.tools }}-${{ hashFiles('scripts/build-cmux-cua.sh', 'scripts/apply-cmux-cua-patch.sh', 'scripts/cmux-cua-codex-delivery-mode.patch', 'scripts/strip-cmux-cua-rpaths.sh') }}
+      - name: Cache dependency downloads
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          # Do not archive Cargo credentials/config, signing state or DerivedData.
+          path: |
+            ${{ runner.temp }}/localdeck-package-${{ matrix.arch }}/SourcePackages
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.bun/install/cache
+          key: localdeck-deps-v1-${{ runner.os }}-${{ matrix.arch }}-${{ steps.cache-inputs.outputs.tools }}-${{ hashFiles('**/Package.resolved', '**/Package.swift', 'Native/**/Cargo.lock', 'Native/**/Cargo.toml', 'bun.lock', 'package.json', 'webviews/bun.lock', 'webviews/package.json', 'agent-chat/bun.lock', 'agent-chat/package.json', 'scripts/build-cmux-cua.sh', 'scripts/cmux-cua-codex-delivery-mode.patch') }}
+      - name: Build embedded web resources
+        shell: bash
+        run: |
+          bun install --frozen-lockfile
+          bun run agent-session-web:build
+          scripts/build-webviews-app.sh
+      - name: Build and package
+        run: bash scripts/ci/build-localdeck.sh "${{ matrix.arch }}"
+      - name: Upload packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: LocalDeck-macos-${{ matrix.arch }}-${{ github.sha }}
+          path: ${{ runner.temp }}/localdeck-package-${{ matrix.arch }}/artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: LocalDeck-build-log-${{ matrix.arch }}-${{ github.sha }}
+          path: ${{ runner.temp }}/localdeck-package-${{ matrix.arch }}/*.log
+          if-no-files-found: ignore
+          retention-days: 7

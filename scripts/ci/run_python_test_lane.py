@@ -10,7 +10,7 @@ every failing file, and each test's output prints as one block when it ends.
 
 With `--shard K/N` it runs only the K-th of N parts of the lanes' tests, so N
 machines can share a lane. The parts are balanced by the seconds each test took
-in CI (SECONDS_FILE; a test without a record counts UNKNOWN_SECONDS), longest
+in an optional timing inventory (SECONDS_FILE; a test without a record counts UNKNOWN_SECONDS), longest
 first onto the least loaded part, and each part keeps registry order.
 """
 

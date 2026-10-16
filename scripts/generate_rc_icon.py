@@ -6,8 +6,7 @@ Takes the AppIcon-Debug icons (which have an orange "DEV" banner) and:
 2. Replaces the "DEV" text with "RC"
 
 This preserves the exact same icon design, glow effects, and chevron
-positioning as the debug icon, matching how generate_nightly_icon.py produces
-the nightly variant.
+positioning as the debug icon.
 """
 import os
 import sys

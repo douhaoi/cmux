@@ -41,7 +41,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from test_execution_registry import load_registry, parse_registry  # noqa: E402
-import workload_entrypoints  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -83,25 +82,10 @@ def workflow_files(workflows: Path = WORKFLOWS) -> list[Path]:
 
 
 def all_workflow_text(workflows: Path = WORKFLOWS) -> str:
-    """Every workflow's text, for asking whether a path is executed anywhere.
-
-    A Linux guard does not have to live in ci-guards.yml to be live. The
-    routed CI lanes run guards too -- the Testbox checks now live in
-    ci-guards.yml's `ci` group, while testbox-broker-guard.yml deliberately has
-    no path filter, and ci-artifact-transport.yml owns its own -- so checking
-    ci-guards.yml alone rejects a test that demonstrably executes on every
-    pull request.
-    """
+    """Workflow commands plus tests run by the shared static recipe."""
     texts = [workflow.read_text(encoding="utf-8") for workflow in workflow_files(workflows)]
     text = "\n".join(texts)
-    # A step that runs a workload profile runs that profile's entrypoint and
-    # everything the entrypoint names. An unresolvable profile adds nothing,
-    # so the tests it would run read as unrun rather than passing unseen.
-    try:
-        profiles = workload_entrypoints.entrypoints(text, workflows.parents[1])
-    except (OSError, UnicodeError, ValueError, KeyError):
-        profiles = []
-    return "\n".join([text, *recipe_tests(texts, workflows), *(script for _, script in profiles)])
+    return "\n".join([text, *recipe_tests(texts, workflows)])
 
 
 def recipe_tests(workflow_texts: list[str], workflows: Path = WORKFLOWS) -> list[str]:

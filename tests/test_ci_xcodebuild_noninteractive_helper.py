@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / "scripts" / "ci" / "xcodebuild_noninteractive.py"
 PROMPT = "Press space to interact, D to debug, or any other key to quit"
 # xcodebuild prints this and relaunches the crashed app host, resuming the run.
-# Same string as RESTART_MARKER in scripts/ci/app_host_result_accounting.py.
+# Same string as RESTART_MARKER in the build log consumer.
 RESTART = (
     "Restarting after unexpected exit, crash, or test timeout; "
     "summary will include totals from previous launches."
@@ -306,7 +306,7 @@ def main() -> int:
 
     # A crash-looping app host restarts and resumes forever. Every restart
     # already makes the run non-ratchetable (run_is_complete in
-    # scripts/ci/app_host_result_accounting.py), so once the budget is spent
+    # the build log consumer), so once the budget is spent
     # the helper must abort instead of holding a macOS concurrency slot to the
     # job timeout. https://github.com/manaflow-ai/cmux/issues/13707
     crash_loop_child = textwrap.dedent(

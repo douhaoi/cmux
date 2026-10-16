@@ -103,14 +103,4 @@ for consumer in "$ROOT_DIR/scripts/setup.sh" "$ROOT_DIR/scripts/ensure-ghosttyki
   fi
 done
 
-if ! awk '
-  /^  workflow-guard-tests:$/ { in_job = 1; next }
-  in_job && /^  [[:alnum:]_-]+:$/ { exit }
-  in_job && index($0, "scripts/ci/init-submodule.sh ghostty") { found = 1 }
-  END { exit !found }
-' "$ROOT_DIR/.github/workflows/ci-guards.yml"; then
-  echo "workflow-guard-tests does not initialize Ghostty before reading its Zig manifest" >&2
-  exit 1
-fi
-
 echo "PASS: cmux build scripts use Ghostty's declared Zig version ($actual)"

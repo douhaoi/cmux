@@ -66,12 +66,11 @@ cmux shot --region 0,0,420,900 --label sidebar-final     # keep the end state
   new one is closed. `--out` on a path that is not a file is refused, and so is
   one whose extension does not match the format: `--out clip.gif` needs `--gif`.
 
-## In a CI dogfood tour
+## Runtime evidence
 
-A dogfood scenario records with a `record` step wrapping the steps that matter,
-and captions with `note`, rather than by calling the CLI. The step table and the
-options are in
-[cmux-testing/references/dogfood-scenarios.md](../cmux-testing/references/dogfood-scenarios.md).
+The packaging workflow does not record tours or upload PR media. Capture an
+isolated GitHub-built artifact using the CLI commands above, and record its commit
+alongside the evidence. Publication of recordings requires explicit authorization.
 
 ## Deep-dive references
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# The swift-package-tests lane of ci-macos.yml as one script, so the same code
-# runs on a GitHub runner and as a fleet ci-step (`cmux-ci run`, hq#794) from a
-# fresh checkout of the commit on a mini.
+# Generic standalone package-test runner. It is retained for explicitly
+# requested native testing; the LocalDeck packaging workflow does not run it.
 #
 # Usage: package-test-lane.sh [run|select|bonsplit|packages|ghostty-sha]
 #          [--event[=]NAME] [--full-suite[=]true|false]
@@ -53,7 +52,7 @@ output() {
   fi
 }
 
-# A fleet step starts from a worktree without submodules. Bonsplit is a local
+# A standalone checkout may lack submodules. Bonsplit is a local
 # package of several packages and is read by the selector, so it has to be
 # there before anything else. A GitHub checkout already has it.
 ensure_bonsplit() {
@@ -63,56 +62,14 @@ ensure_bonsplit() {
 }
 
 # The selection needs the commit's first parent. A GitHub checkout fetches
-# depth 2; a fleet step's worktree may be shallow, so fetch the parent there.
+# depth 2; a standalone worktree may be shallow, so fetch the parent there.
 ensure_parent() {
   if git rev-parse -q --verify 'HEAD^1^{commit}' >/dev/null || [ "${GITHUB_ACTIONS:-}" = true ]; then
     return 0
   fi
   local remote
-  remote="$(git remote get-url origin 2>/dev/null || echo https://github.com/manaflow-ai/cmux.git)"
+  remote="$(git remote get-url origin 2>/dev/null || echo https://github.com/douhaoi/cmux.git)"
   git fetch --no-tags --no-write-fetch-head --depth=2 "$remote" "$(git rev-parse HEAD)" || true
-}
-
-# A same-repository pull request run (the workflow sets CMUX_PACKAGE_REUSE=1)
-# keys each selected package's test inputs (scripts/ci/package_input_key.py)
-# and, unless it is the full suite, drops the packages whose key passed on an
-# earlier run of this branch (scripts/ci/reuse_package_results.py). The select
-# step looks once; the run step selects again and drops the same packages.
-# record_passed publishes the keys that pass for the next run to reuse.
-package_keys="$work/package-input-keys.json"
-reused_packages="$work/reused-packages.txt"
-reuse_package_results() {
-  [ "${CMUX_PACKAGE_REUSE:-0}" = 1 ] && [ -s "$selected" ] || return 0
-  if [ ! -f "$package_keys" ] && ! python3 scripts/ci/package_input_key.py --packages-file "$selected" \
-      --extra "xcode=${CMUX_CI_XCODE_APP:-}" --extra "macos=$(sw_vers -productVersion 2>/dev/null || true)" \
-      --output "$package_keys"; then
-    rm -f "$package_keys"
-    return 0
-  fi
-  if [ "${CMUX_PACKAGE_REUSE:-0}" = 1 ] && [ "$full_suite" != "true" ] && [ "$event" = "pull_request" ]; then
-    if [ ! -f "$reused_packages" ]; then
-      python3 scripts/ci/reuse_package_results.py --repository "${GITHUB_REPOSITORY:-}" \
-        --branch "${CMUX_PACKAGE_REUSE_BRANCH:-}" --current-run-id "${GITHUB_RUN_ID:-0}" \
-        --selected "$selected" --keys "$package_keys" --reused "$reused_packages" || : > "$reused_packages"
-    fi
-    grep -vxF -f "$reused_packages" "$selected" > "$selected.remaining" || true
-    mv "$selected.remaining" "$selected"
-  fi
-}
-
-# record_passed PACKAGE...: write the input keys of these packages (each passed
-# here or was reused) as passed-packages.json for the workflow to publish.
-record_passed() {
-  [ -f "$package_keys" ] && [ "$#" -gt 0 ] || return 0
-  local directory="$work/passed-packages"
-  mkdir -p "$directory"
-  python3 - "$package_keys" "$directory/passed-packages.json" "$@" <<'PY'
-import json, sys
-keys = json.load(open(sys.argv[1], encoding="utf-8"))
-passed = {package: keys[package] for package in sys.argv[3:] if package in keys}
-json.dump(passed, open(sys.argv[2], "w", encoding="utf-8"), sort_keys=True)
-PY
-  output "passed_packages=$directory"
 }
 
 select_packages() {
@@ -134,13 +91,10 @@ select_packages() {
     CmuxWorkspacePresence
     CmuxIrohTransport
     CmuxIrxTransport
-    CmuxHive
     CmuxCommandPalette
     CmuxControlSocket
     CmuxFoundation
     CmuxGit
-    CmuxMobileTerminalKit
-    CmuxMobileWorkspace
     CmuxNotifications
     CmuxSettings
     CmuxSettingsUI
@@ -152,7 +106,6 @@ select_packages() {
     CmuxTerminalCore
     CmuxTerminalImport
     CmuxTerminalPrediction
-    CmuxUpdater
     CmuxWorkspaces
     CMUXAgentLaunch
     CmuxAgentJournal
@@ -165,7 +118,6 @@ select_packages() {
     CmuxCloudTunnelCore
     CMUXDebugLog
     CmuxExtensionKit
-    CmuxFeedback
     CmuxLiveEval
     CmuxPanes
     CmuxPhonePush
@@ -176,7 +128,6 @@ select_packages() {
     CmuxSwiftRender
     CmuxSwiftRenderUI
     CmuxTestSupport
-    CmuxUpdaterUI
     CmuxWindowing
   )
 
@@ -206,7 +157,6 @@ select_packages() {
     run_bonsplit=true
     printf '%s\n' "${PACKAGES[@]}" > "$selected"
   fi
-  reuse_package_results
   if [ "$run_bonsplit" = true ]; then
     output "bonsplit=true"
   fi
@@ -268,20 +218,6 @@ ensure_ghosttykit() {
     export GHOSTTYKIT_ARCHIVE_CACHE_DIR="$CI_SHARED_CACHE_DIR/ghosttykit-archives"
   fi
   ./scripts/download-prebuilt-ghosttykit.sh
-}
-
-# Compile-avoidance shadow (RFC #15391): classify whether the pull request's
-# package edits keep every importer-visible interface. Observation only; the
-# script never fails and macOS status reads its receipt line.
-interface_fingerprint() {
-  case "$event" in
-    pull_request|merge_group) ;;
-    *) return 0 ;;
-  esac
-  [ -s "$changed" ] || return 0
-  echo "::group::Package interface fingerprint"
-  python3 scripts/ci/package_interface_fingerprint.py --changed-files "$changed" || true
-  echo "::endgroup::"
 }
 
 install_rust() {
@@ -383,7 +319,8 @@ run_package_tests() {
   # The cmux-unit scheme only runs the cmuxTests app-host suite; it does
   # not execute the SPM package test targets. Run them here so package
   # tests (settings stores, secret-file migration, socket-control
-  # convergence, etc.) are a real CI gate, not just compiled.
+  # convergence, etc.) execute when this runner is explicitly invoked.
+  # This helper is not an automatic gate of the packaging workflow.
   # Scoped to packages that build headlessly via SwiftPM (no GhosttyKit /
   # app-target dependency). Add a package here once its `swift test`
   # is confirmed to resolve standalone. The GhosttyKit-referencing
@@ -495,11 +432,6 @@ run_package_tests() {
 
   summary=()
   passed=()
-  if [ -f "$reused_packages" ]; then
-    while IFS= read -r pkg; do
-      [ -n "$pkg" ] && passed+=("$pkg")
-    done < "$reused_packages"
-  fi
   failed=0
   first_failure_status=0
   while IFS= read -r pkg; do
@@ -533,7 +465,6 @@ run_package_tests() {
     printf '%s\n' ${summary[@]+"${summary[@]}"}
   )"
   printf 'Swift package test results:\n%s\n' "$table"
-  record_passed ${passed[@]+"${passed[@]}"}
   if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     printf '### Swift package tests\n\n```\n%s\n```\n' "$table" >> "$GITHUB_STEP_SUMMARY"
   fi
@@ -569,7 +500,6 @@ case "$phase" in
     # needs the files.
     GITHUB_OUTPUT="" select_packages
     select_xcode
-    interface_fingerprint
     if [ "$needs_ghosttykit" = true ]; then
       ensure_ghosttykit
     fi

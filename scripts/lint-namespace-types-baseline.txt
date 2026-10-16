@@ -1,5 +1,4 @@
-# Grandfathered namespace-type offenders (see lint-ios-package-conventions.sh,
-# "namespace-types" rule). Each entry is `<file>:<TypeName>` for a pre-existing
+# Historical namespace-type baseline. Each entry is `<file>:<TypeName>` for a pre-existing
 # all-static public type in a package owned by another refactor session at the
 # time the rule landed. This list may only SHRINK: fix an offender (receiver
 # extension or instantiated value with injected dependencies) and delete its

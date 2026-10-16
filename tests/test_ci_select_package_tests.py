@@ -50,11 +50,7 @@ def check(root: Path, changed: list[str] | None, expected: list[str], why: str) 
 
 def job_scripts() -> set[str]:
     """Scripts the swift-package-tests job runs, plus the helpers those scripts call beside them."""
-    workflow = (ROOT / ".github/workflows/ci-macos.yml").read_text(encoding="utf-8")
-    job = workflow.split("\n  swift-package-tests:\n", 1)[1]
-    job = re.split(r"\n  [A-Za-z0-9_-]+:\n", job, maxsplit=1)[0]
-    # The job's test steps run the lane script, which calls the rest by path.
-    job += (ROOT / LANE).read_text(encoding="utf-8")
+    job = (ROOT / LANE).read_text(encoding="utf-8")
     found = set(re.findall(r"(?:\./)?(scripts/[A-Za-z0-9_./-]+\.(?:sh|py))", job))
     pending = list(found)
     while pending:
@@ -147,14 +143,14 @@ def main() -> int:
         check(root, ["Native/CommandPaletteNucleoFFI/src/lib.rs"], ["Palette"],
               "an extra input reaches the packages that depend on its owner")
         check(root, ["Packages/macOS/Unlisted/Sources/A.swift"], [], "a package outside the list selects nothing")
-        check(root, [".github/workflows/ci.yml"], PACKAGES, "the job's own workflow runs everything")
+        check(root, [".github/workflows/localdeck-package.yml"], PACKAGES, "the job's own workflow runs everything")
         check(root, [".github/workflows/nightly.yml", "scripts/reload.sh"], [], "other workflows and scripts run nothing")
         check(root, ["ghostty"], PACKAGES, "the GhosttyKit revision runs everything")
         check(root, ["Loner.swift", "Sources/App.swift"], PACKAGES, "an unknown path runs everything")
 
         # Exercise the CLI used by the workflow, including mixed package/global
         # inputs. Full-suite selection retains its existing fail-open policy.
-        for extra in (".github/workflows/ci-macos.yml", "unknown.conf"):
+        for extra in (".github/workflows/localdeck-package.yml", "unknown.conf"):
             changed_file = root / "changed.txt"
             changed_file.write_text("Packages/macOS/Loner/Sources/A.swift\n" + extra + "\n")
             command = [sys.executable, str(ROOT / "scripts/ci/select_package_tests.py"),
@@ -170,7 +166,7 @@ def main() -> int:
         # the dependency-aware selector sees the diff.
         for path in ("vendor/bonsplit", "vendor/bonsplit/Sources/Bonsplit/A.swift"):
             changed_file = root / "changed.txt"
-            changed_file.write_text(path + "\n.github/workflows/ci-macos.yml\n")
+            changed_file.write_text(path + "\n.github/workflows/localdeck-package.yml\n")
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts/ci/select_package_tests.py"),
                  "--root", str(root), "--changed-files", str(changed_file),
@@ -178,22 +174,6 @@ def main() -> int:
                 text=True, capture_output=True, check=True,
             )
             assert result.stdout.splitlines() == ["Splitter"], (path, result.stdout)
-
-        # Check the actual PR router too: a normal package selector result is
-        # insufficient if the lane never starts. These are current declared
-        # local dependencies of packages in the workflow's test inventory.
-        for path in ("vendor/bonsplit", "vendor/stack-auth-swift-sdk-prerelease"):
-            changed_file = root / "router-changed.txt"
-            changed_file.write_text(path + "\n")
-            outputs = root / "router-outputs.txt"
-            outputs.unlink(missing_ok=True)
-            result = subprocess.run(
-                [sys.executable, str(ROOT / "scripts/ci/detect_ci_change_areas.py"),
-                 "--event-name", "pull_request", "--files-from", str(changed_file),
-                 "--github-output", str(outputs)],
-                cwd=ROOT, text=True, capture_output=True, check=True,
-            )
-            assert "swift_packages=true" in outputs.read_text().splitlines(), (path, result.stdout)
 
         try:
             select(root, ["Missing"], [])

@@ -31,7 +31,7 @@ STARTUP_HANG_EXIT_CODE = 122
 # relaunches it and resumes the remaining tests. Resuming is unbounded: a host
 # that crashes on contact keeps the shard running until the job-level timeout.
 # The run is already lost by then, because any restart makes it non-ratchetable
-# (run_is_complete in scripts/ci/app_host_result_accounting.py, added for
+# (run_is_complete in the build log consumer, added for
 # https://github.com/manaflow-ai/cmux/issues/7471). Same literal as that
 # module's RESTART_MARKER.
 RESTART_MARKER = b"Restarting after unexpected exit, crash, or test timeout"

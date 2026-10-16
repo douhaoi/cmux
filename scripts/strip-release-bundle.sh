@@ -64,8 +64,8 @@ strip_executable "$APP_PATH/Contents/Resources/bin/cmux-diff-sidecar"
 
 # cmux-tui SSH bootstrap payloads are installed 0644, so strip_if_macho's
 # executable check would skip them. Only the macOS builds are Mach-O; the Linux
-# builds arrive stripped. sign-cmux-tui-ssh-payloads.sh signs these afterwards
-# and re-pins their checksums in manifest.json, so the strip needs no re-pin.
+# builds arrive stripped. A caller must sign changed payloads and update their
+# manifest checksums before distributing them.
 if [ -d "$APP_PATH/Contents/Resources/bin/cmux-tui-ssh" ]; then
   while IFS= read -r -d '' payload; do
     if "$FILE_TOOL" "$payload" | grep -q 'Mach-O'; then
