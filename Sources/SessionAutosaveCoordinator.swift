@@ -27,6 +27,7 @@ final class SessionAutosaveCoordinator {
     private let save: Save
     private let saveCurrentSnapshot: SaveCurrentSnapshot
     private let onTimerTick: @MainActor () -> Void
+    private let hookStoreCache = SessionAutosaveHookStoreCache()
 
     private static let typingQuietPeriod: TimeInterval = 0.65
 
@@ -256,7 +257,8 @@ final class SessionAutosaveCoordinator {
 #endif
         let ttyDeviceBindings = currentTTYDeviceBindings()
         let resumeIndexes = await ProcessDetectedResumeIndexes.load(
-            ttyDeviceBindings: ttyDeviceBindings
+            ttyDeviceBindings: ttyDeviceBindings,
+            hookStoreCache: hookStoreCache
         )
 #if DEBUG
         loadMs = (ProcessInfo.processInfo.systemUptime - loadStart) * 1000.0

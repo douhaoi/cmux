@@ -3052,6 +3052,8 @@
 		FE003106 /* SessionAgentPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE003006 /* SessionAgentPresentation.swift */; };
 		A9F200000000000000000008 /* SessionAgentSessionPanelSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F100000000000000000008 /* SessionAgentSessionPanelSnapshot.swift */; };
 		E7E300000000000000000001 /* SessionAutosaveCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E300000000000000000002 /* SessionAutosaveCoordinator.swift */; };
+		C0AC4E000000000000000002 /* SessionAutosaveHookStoreCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0AC4E000000000000000001 /* SessionAutosaveHookStoreCache.swift */; };
+		67BFD9EF77E65923EF17C6DA /* SessionAutosaveHookStoreCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65FD028BBCE020FD96949CCC /* SessionAutosaveHookStoreCacheTests.swift */; };
 		F39581155797426199C03CFF /* SessionBrowserPanelSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FE2238F1F44DE98D6501DB /* SessionBrowserPanelSnapshot.swift */; };
 		A74770010000000000000005 /* SessionConfigFrameEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74770010000000000000006 /* SessionConfigFrameEntry.swift */; };
 		A74770010000000000000007 /* SessionConfigFrameRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74770010000000000000008 /* SessionConfigFrameRing.swift */; };
@@ -7447,6 +7449,8 @@
 		FE003006 /* SessionAgentPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAgentPresentation.swift; sourceTree = "<group>"; };
 		A9F100000000000000000008 /* SessionAgentSessionPanelSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAgentSessionPanelSnapshot.swift; sourceTree = "<group>"; };
 		E7E300000000000000000002 /* SessionAutosaveCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAutosaveCoordinator.swift; sourceTree = "<group>"; };
+		C0AC4E000000000000000001 /* SessionAutosaveHookStoreCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAutosaveHookStoreCache.swift; sourceTree = "<group>"; };
+		65FD028BBCE020FD96949CCC /* SessionAutosaveHookStoreCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionAutosaveHookStoreCacheTests.swift"; sourceTree = "<group>"; };
 		19FE2238F1F44DE98D6501DB /* SessionBrowserPanelSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionBrowserPanelSnapshot.swift"; sourceTree = "<group>"; };
 		A74770010000000000000006 /* SessionConfigFrameEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionConfigFrameEntry.swift; sourceTree = "<group>"; };
 		A74770010000000000000008 /* SessionConfigFrameRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionConfigFrameRing.swift; sourceTree = "<group>"; };
@@ -10895,6 +10899,7 @@
 				7A0CE1000000000000000019 /* AppDelegate+CloudTunnel.swift */,
 				D9E700000000000000000002 /* SessionSnapshotPersistenceWriter.swift */,
 				E7E300000000000000000002 /* SessionAutosaveCoordinator.swift */,
+				C0AC4E000000000000000001 /* SessionAutosaveHookStoreCache.swift */,
 				FEE012340000000000000002 /* FeedSidebarUITestCoordinator.swift */,
 				FEE012340000000000000004 /* FeedSidebarUITestPushClient.swift */,
 				FEE012340000000000000006 /* FeedSidebarUITestRecorder.swift */,
@@ -13418,6 +13423,7 @@
 				6363F4EA9220ADE6FA369B16 /* CLIMuseHookInstallTests.swift */,
 				80B2BBAC8B90CA286F4B2BF7 /* MainWindowHitTestMutationMonitorTests.swift */,
 				DB2534FB1BD7FDBD3A7474EE /* CloudManualMirrorHandshakeTests.swift */,
+				65FD028BBCE020FD96949CCC /* SessionAutosaveHookStoreCacheTests.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -15733,6 +15739,7 @@
 				FE003106 /* SessionAgentPresentation.swift in Sources */,
 				A9F200000000000000000008 /* SessionAgentSessionPanelSnapshot.swift in Sources */,
 				E7E300000000000000000001 /* SessionAutosaveCoordinator.swift in Sources */,
+				C0AC4E000000000000000002 /* SessionAutosaveHookStoreCache.swift in Sources */,
 				F39581155797426199C03CFF /* SessionBrowserPanelSnapshot.swift in Sources */,
 				A74770010000000000000005 /* SessionConfigFrameEntry.swift in Sources */,
 				A74770010000000000000007 /* SessionConfigFrameRing.swift in Sources */,
@@ -18056,6 +18063,7 @@
 				3C3FDDC0C744FA3350DA1D9B /* ScrollbackTestTerminal.swift in Sources */,
 				EE114DDACC6CBA385064EE27 /* SearchIndexAgentSessionTests.swift in Sources */,
 				3865A0043865A0043865A004 /* SearchIndexTests.swift in Sources */,
+				67BFD9EF77E65923EF17C6DA /* SessionAutosaveHookStoreCacheTests.swift in Sources */,
 				C71510010000000000000001 /* SessionContentWidthSettingsFileStoreTests.swift in Sources */,
 				992300019923000199230001 /* SessionEntryResumeLaunchTests.swift in Sources */,
 				850000000000000000000004 /* SessionIndexJSONLReaderTests.swift in Sources */,

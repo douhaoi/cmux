@@ -8,13 +8,15 @@ struct ProcessDetectedResumeIndexes: Sendable {
     static func load(
         homeDirectory: String = NSHomeDirectory(),
         fileManager: FileManager = .default,
-        ttyDeviceBindings: [SurfaceResumeBindingIndex.PanelKey: Int64] = [:]
+        ttyDeviceBindings: [SurfaceResumeBindingIndex.PanelKey: Int64] = [:],
+        hookStoreCache: SessionAutosaveHookStoreCache? = nil
     ) async -> ProcessDetectedResumeIndexes {
         await loadOnWorker(
             homeDirectory: homeDirectory,
             fileManager: fileManager,
             maximumSnapshotAge: 5,
-            ttyDeviceBindings: ttyDeviceBindings
+            ttyDeviceBindings: ttyDeviceBindings,
+            hookStoreCache: hookStoreCache
         )
     }
 
@@ -137,6 +139,7 @@ struct ProcessDetectedResumeIndexes: Sendable {
         maximumSnapshotAge: TimeInterval? = nil,
         cachedRestorableAgentIndex: RestorableAgentSessionIndex? = nil,
         ttyDeviceBindings: [SurfaceResumeBindingIndex.PanelKey: Int64] = [:],
+        hookStoreCache: SessionAutosaveHookStoreCache? = nil,
         processSnapshotService: ProcessSnapshotService<CmuxTopProcessCapture, CmuxTopProcessFields>? = nil
     ) async -> ProcessDetectedResumeIndexes {
         // `nil` uses the app's shared census. Tests inject their own so a
@@ -171,11 +174,21 @@ struct ProcessDetectedResumeIndexes: Sendable {
                 processSnapshot: processSnapshot,
                 capturedAt: capturedAt
             )
+            let hookStoreSnapshots: [URL: RestorableAgentHookSessionStoreFile]?
+            if let hookStoreCache {
+                let kinds = RestorableAgentKind.allCases + registry.registrations.map { .custom($0.id) }
+                hookStoreSnapshots = await hookStoreCache.load(urls: kinds.map {
+                    $0.hookStoreFileURL(homeDirectory: homeDirectory)
+                })
+            } else {
+                hookStoreSnapshots = nil
+            }
             restorableAgentIndex = RestorableAgentSessionIndex.load(
                 homeDirectory: homeDirectory,
                 fileManager: fileManager,
                 registry: registry,
-                detectedSnapshots: detectedSnapshots
+                detectedSnapshots: detectedSnapshots,
+                hookStoreSnapshots: hookStoreSnapshots
             )
         }
         let detectedBindings = SurfaceResumeBindingIndex.processDetectedTmuxBindings(

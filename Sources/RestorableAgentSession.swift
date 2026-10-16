@@ -1775,6 +1775,7 @@ struct RestorableAgentSessionIndex: Sendable {
         fileManager: FileManager,
         registry: CmuxVaultAgentRegistry,
         detectedSnapshots: [PanelKey: ProcessDetectedSnapshotEntry],
+        hookStoreSnapshots: [URL: RestorableAgentHookSessionStoreFile]? = nil,
         hibernationProcessScopes: [PanelKey: HibernationProcessScope] = [:],
         hookProcessScopeProvider: ((PanelKey, Int) -> HookProcessScope?)? = nil,
         environment: [String: String] = ProcessInfo.processInfo.environment,
@@ -1791,6 +1792,11 @@ struct RestorableAgentSessionIndex: Sendable {
         }
     ) -> RestorableAgentSessionIndex {
         let decoder = JSONDecoder()
+        func readHookStore(_ url: URL) -> RestorableAgentHookSessionStoreFile? {
+            if let hookStoreSnapshots { return hookStoreSnapshots[url] }
+            guard let data = try? Data(contentsOf: url) else { return nil }
+            return try? decoder.decode(RestorableAgentHookSessionStoreFile.self, from: data)
+        }
         var resolved: [PanelKey: Entry] = [:]
         var incompleteHookStoreKinds = Set<RestorableAgentKind>()
         let claudeTranscriptLookup = ClaudeTranscriptLookupCache(
@@ -1977,8 +1983,7 @@ struct RestorableAgentSessionIndex: Sendable {
                 environment: environment
             )
             if fileManager.fileExists(atPath: fileURL.path),
-               let data = try? Data(contentsOf: fileURL),
-               let state = try? decoder.decode(RestorableAgentHookSessionStoreFile.self, from: data) {
+               let state = readHookStore(fileURL) {
                 let selection = selectedCodexHookRecords(from: state.sessions.values)
                 codexHookRecordsForIndex = selection.records
                 if selection.truncated {
@@ -2078,8 +2083,7 @@ struct RestorableAgentSessionIndex: Sendable {
                 guard fileManager.fileExists(atPath: fileURL.path) else {
                     continue
                 }
-                guard let data = try? Data(contentsOf: fileURL),
-                      let state = try? decoder.decode(RestorableAgentHookSessionStoreFile.self, from: data) else {
+                guard let state = readHookStore(fileURL) else {
                     incompleteHookStoreKinds.insert(kind)
                     continue
                 }
