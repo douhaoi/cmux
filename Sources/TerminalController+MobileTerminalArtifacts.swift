@@ -209,19 +209,8 @@ extension TerminalController {
                 }
             }.value
             return TerminalArtifactWire.result(chunk)
-        } catch let error as MobileHostIrohArtifactTransferRegistry.Error {
-            switch error.issueFailure {
-            case .fileNotFound:
-                return mobileTerminalArtifactError(.fileNotFound, path: context.requestedPath)
-            case .permissionDenied:
-                return mobileArtifactReadFailure(.permissionDenied, path: context.requestedPath)
-            case .notRegularFile:
-                return mobileArtifactReadFailure(.notRegularFile, path: context.requestedPath)
-            case .readFailed:
-                return mobileArtifactReadFailure(.readFailed, path: context.requestedPath)
-            case .unavailable:
-                return mobileTerminalArtifactError(.unavailable, path: context.requestedPath)
-            }
+        } catch MobileHostRPCExecutionContext.ArtifactTransferError.unavailable {
+            return mobileTerminalArtifactError(.unavailable, path: context.requestedPath)
         } catch TerminalArtifactReadContext.Error.forbidden {
             debugLogMobileTerminalArtifactDenial(op: "fetch", path: context.requestedPath)
             return mobileTerminalArtifactError(.forbidden, path: context.requestedPath)

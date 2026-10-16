@@ -347,7 +347,7 @@ final class BrowserAppSessionController {
     private static func removeAppSessionWebsiteData(
         from store: WKWebsiteDataStore
     ) async -> BrowserAppSessionCallbackWaitOutcome {
-        await awaitBrowserAppSessionCallback(
+        await BrowserAppSessionCallbackWaiter().wait(
             timeout: Self.webKitCallbackTimeout
         ) { completion in
             store.removeData(
@@ -363,7 +363,7 @@ final class BrowserAppSessionController {
         _ cookie: HTTPCookie,
         in store: WKHTTPCookieStore
     ) async -> BrowserAppSessionCallbackWaitOutcome {
-        await awaitBrowserAppSessionCallback(
+        await BrowserAppSessionCallbackWaiter().wait(
             timeout: Self.webKitCallbackTimeout
         ) { completion in
             store.setCookie(cookie) { completion() }

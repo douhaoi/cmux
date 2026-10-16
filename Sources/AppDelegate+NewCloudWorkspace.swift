@@ -1,6 +1,7 @@
 import AppKit
 import CmuxCloud
 import CmuxCloudMachines
+import CmuxSettings
 import Foundation
 
 // MARK: - Cloud creation actions
@@ -14,19 +15,7 @@ extension AppDelegate {
         debugSource: String = "newCloudWorkspace",
         destination: CloudWorkspaceGroupDestination? = nil
     ) -> Bool {
-        if introduceCloudIfNeeded(
-            over: preferredWindow ?? preferredTabManager.flatMap { mainWindowContext(for: $0) }.flatMap { resolvedWindow(for: $0) },
-            resume: { [weak self, weak preferredTabManager, weak preferredWindow] in
-                _ = self?.performNewCloudWorkspaceOnResolvedMachineAction(
-                    tabManager: preferredTabManager,
-                    preferredWindow: preferredWindow,
-                    debugSource: "\(debugSource).afterEnable",
-                    destination: destination
-                )
-            }
-        ) {
-            return true
-        }
+        guard LocalProduct().includesHostedServices else { return false }
         guard let coordinator = cloudWorkspaceCoordinator,
               let operationController = cloudWorkspaceOperationController,
               coordinator.isAvailable, let scopeID = coordinator.scopeIdentifier else {
@@ -96,9 +85,8 @@ extension AppDelegate {
                         workspaceID, manager: manager, revision: revision, windowID: windowID
                     )
                 }
-                // Losing access mid-create falls back to New Machine only
-                // while Cloud can still run; the welcome is for a direct press.
-                if accessBecameUnavailable, self?.cloudCreationGate() == .proceed {
+                // Losing access mid-create falls back only while Cloud can still run.
+                if accessBecameUnavailable, operationController.isCurrentlyAvailable {
                     fallbackToNewMachine()
                 }
             } catch CloudWorkspaceCreationError.noMachines {
@@ -122,7 +110,8 @@ extension AppDelegate {
         vmID: String,
         destination: CloudWorkspaceGroupDestination? = nil
     ) -> Bool {
-        guard let coordinator = cloudWorkspaceCoordinator,
+        guard LocalProduct().includesHostedServices,
+              let coordinator = cloudWorkspaceCoordinator,
               let operationController = cloudWorkspaceOperationController,
               coordinator.isAvailable, let scopeID = coordinator.scopeIdentifier,
               let context = mainWindowContext(for: tabManager) else { return false }
@@ -203,22 +192,7 @@ extension AppDelegate {
         debugSource: String = "newCloudMachine",
         destination: CloudWorkspaceGroupDestination? = nil
     ) -> Bool {
-        let introductionWindow = preferredWindow
-            ?? preferredTabManager.flatMap { mainWindowContext(for: $0) }.flatMap { resolvedWindow(for: $0) }
-            ?? event?.window
-        if introduceCloudIfNeeded(
-            over: introductionWindow,
-            resume: { [weak self, weak preferredTabManager, weak introductionWindow] in
-                _ = self?.performNewCloudMachineAction(
-                    tabManager: preferredTabManager,
-                    preferredWindow: introductionWindow,
-                    debugSource: "\(debugSource).afterEnable",
-                    destination: destination
-                )
-            }
-        ) {
-            return true
-        }
+        guard LocalProduct().includesHostedServices else { return false }
         guard let operationController = cloudWorkspaceOperationController,
               operationController.isCurrentlyAvailable else { return false }
         let context = preferredTabManager.flatMap { mainWindowContext(for: $0) }
@@ -234,29 +208,5 @@ extension AppDelegate {
                 destination?.apply(workspaceID: workspaceID)
             }
         }
-    }
-
-    private func cloudCreationGate() -> CloudCreationGate {
-        CloudCreationGate.resolve(
-            isAvailable: CloudMachinesFeature.isAvailable,
-            isEnabled: CloudMachinesFeature.isEnabled,
-            canRunCloudOperations: cloudWorkspaceOperationController?.isCurrentlyAvailable,
-            isAuthInProgress: auth?.accountFlow.isWorkingOnAuth == true
-        )
-    }
-
-    /// Cloud creation shortcuts and menu rows introduce Cloud while it is off
-    /// or signed out, instead of doing nothing. The welcome card's own next
-    /// step decides between Enable and Upgrade; Enable then resumes `resume`.
-    private func introduceCloudIfNeeded(
-        over window: NSWindow?,
-        resume: @escaping @MainActor () -> Void
-    ) -> Bool {
-        guard cloudCreationGate() == .introduceCloud else { return false }
-        cloudWelcomeWindowController.present(
-            over: window ?? NSApp.keyWindow ?? NSApp.mainWindow,
-            onEnabled: resume
-        )
-        return true
     }
 }

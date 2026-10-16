@@ -18,24 +18,21 @@ enum MobileHostConnectionAuthorizationContext: Equatable, Sendable {
 
 /// Immutable trust context carried from transport admission into RPC dispatch.
 struct MobileHostRPCExecutionContext: Sendable {
+    enum ArtifactTransferError: Error {
+        case unavailable
+    }
+
     /// The per-connection identity, used to key long-lived subscriptions
     /// (e.g. browser stream sessions) and route pushed events back to the
     /// originating phone connection.
     let connectionID: UUID
     let authorization: MobileHostConnectionAuthorizationContext
-    let artifactTransfers: MobileHostIrohArtifactTransferRegistry?
 
+    /// Independent artifact lanes are not shipped by the local distribution.
     func issueArtifactTransfer(
         canonicalPath: String
     ) async throws -> ChatArtifactLaneDescriptor {
-        guard case let .irohAdmission(peer) = authorization,
-              let artifactTransfers else {
-            throw MobileHostIrohArtifactTransferRegistry.Error.unavailable
-        }
-        return try await artifactTransfers.issue(
-            canonicalPath: canonicalPath,
-            peer: peer
-        )
+        throw ArtifactTransferError.unavailable
     }
 }
 

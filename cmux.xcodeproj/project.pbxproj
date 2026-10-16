@@ -399,6 +399,7 @@
 		B5A5E5620000000000000001 /* BrowserAppLinkPlacementPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E5620000000000000002 /* BrowserAppLinkPlacementPolicy.swift */; };
 		B5A5E55C0000000000000001 /* BrowserAppSessionAdmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E55C0000000000000002 /* BrowserAppSessionAdmission.swift */; };
 		B5A5E55D0000000000000001 /* BrowserAppSessionAuthOwner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E55D0000000000000002 /* BrowserAppSessionAuthOwner.swift */; };
+		B5A5E55F0000000000000001 /* BrowserAppSessionCallbackWaiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E55F0000000000000002 /* BrowserAppSessionCallbackWaiter.swift */; };
 		B5A5E55E0000000000000001 /* BrowserAppSessionCallbackWaitOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E55E0000000000000002 /* BrowserAppSessionCallbackWaitOutcome.swift */; };
 		B5A5E5510000000000000001 /* BrowserAppSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E5510000000000000002 /* BrowserAppSessionController.swift */; };
 		B5A5E5550000000000000001 /* BrowserAppSessionEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A5E5550000000000000002 /* BrowserAppSessionEnvironment.swift */; };
@@ -4951,6 +4952,7 @@
 		B5A5E5620000000000000002 /* BrowserAppLinkPlacementPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppLinkPlacementPolicy.swift; sourceTree = "<group>"; };
 		B5A5E55C0000000000000002 /* BrowserAppSessionAdmission.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppSessionAdmission.swift; sourceTree = "<group>"; };
 		B5A5E55D0000000000000002 /* BrowserAppSessionAuthOwner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppSessionAuthOwner.swift; sourceTree = "<group>"; };
+		B5A5E55F0000000000000002 /* BrowserAppSessionCallbackWaiter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppSessionCallbackWaiter.swift; sourceTree = "<group>"; };
 		B5A5E55E0000000000000002 /* BrowserAppSessionCallbackWaitOutcome.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppSessionCallbackWaitOutcome.swift; sourceTree = "<group>"; };
 		B5A5E5510000000000000002 /* BrowserAppSessionController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppSessionController.swift; sourceTree = "<group>"; };
 		B5A5E5550000000000000002 /* BrowserAppSessionEnvironment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserAppSession/BrowserAppSessionEnvironment.swift; sourceTree = "<group>"; };
@@ -9150,6 +9152,7 @@
 				B5A5E55C0000000000000002 /* BrowserAppSessionAdmission.swift */,
 				B5A5E55D0000000000000002 /* BrowserAppSessionAuthOwner.swift */,
 				B5A5E55E0000000000000002 /* BrowserAppSessionCallbackWaitOutcome.swift */,
+				B5A5E55F0000000000000002 /* BrowserAppSessionCallbackWaiter.swift */,
 				B5A5E5510000000000000002 /* BrowserAppSessionController.swift */,
 				B5A5E5550000000000000002 /* BrowserAppSessionEnvironment.swift */,
 				B5A5E5520000000000000002 /* BrowserAppSessionNavigation.swift */,
@@ -14387,6 +14390,7 @@
 				B5A5E5620000000000000001 /* BrowserAppLinkPlacementPolicy.swift in Sources */,
 				B5A5E55C0000000000000001 /* BrowserAppSessionAdmission.swift in Sources */,
 				B5A5E55D0000000000000001 /* BrowserAppSessionAuthOwner.swift in Sources */,
+				B5A5E55F0000000000000001 /* BrowserAppSessionCallbackWaiter.swift in Sources */,
 				B5A5E55E0000000000000001 /* BrowserAppSessionCallbackWaitOutcome.swift in Sources */,
 				B5A5E5510000000000000001 /* BrowserAppSessionController.swift in Sources */,
 				B5A5E5550000000000000001 /* BrowserAppSessionEnvironment.swift in Sources */,

@@ -1,5 +1,6 @@
 import CmuxControlSocket
 import CmuxBrowser
+import CmuxSettings
 import Foundation
 
 /// Async socket-dispatch helpers kept separate from the legacy synchronous

@@ -15978,6 +15978,7 @@ class TerminalController {
     }
 
     func v2MobileTerminalReplay(params: [String: Any]) -> V2CallResult {
+        let captureStartedAt = DispatchTime.now().uptimeNanoseconds
         if let error = mobileWorkspaceIDValidationError(params: params) {
             return error
         }
@@ -16150,13 +16151,12 @@ class TerminalController {
                 payload["data_b64"] = data.base64EncodedString()
             }
         }
-        recordTrace("host_capture_finished")
         // Hand the phone the host's own share of this round trip. Without it a
         // slow replay is unattributable: the phone cannot tell a slow capture
         // here from a slow or stalled transport between us.
         addSharedSizingReplayFields(to: &payload, surfaceID: surfaceId, clientID: v2String(params, "client_id"))
         payload["host_elapsed_ms"] = Int(
-            (DispatchTime.now().uptimeNanoseconds &- traceStartedAt) / 1_000_000
+            (DispatchTime.now().uptimeNanoseconds &- captureStartedAt) / 1_000_000
         )
         return .ok(payload)
     }

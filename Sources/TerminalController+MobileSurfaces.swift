@@ -272,44 +272,13 @@ extension TerminalController {
                 )
             }.value
             return mobilePanelArtifactResult(chunk)
-        } catch let error as MobileHostIrohArtifactTransferRegistry.Error {
-            switch error.issueFailure {
-            case .fileNotFound:
-                return mobilePanelArtifactFileError(
-                    code: "file_not_found",
-                    key: "mobile.chat.artifact.error.fileNotFound",
-                    defaultValue: "That file is no longer available on the Mac.",
-                    path: v2RawString(params, "path")
-                )
-            case .permissionDenied:
-                return mobilePanelArtifactFileError(
-                    code: "permission_denied",
-                    key: "mobile.chat.artifact.error.permissionDenied",
-                    defaultValue: "cmux does not have permission to read that file.",
-                    path: v2RawString(params, "path")
-                )
-            case .notRegularFile:
-                return mobilePanelArtifactFileError(
-                    code: "not_regular_file",
-                    key: "mobile.chat.artifact.error.notRegularFile",
-                    defaultValue: "That path is not a regular file.",
-                    path: v2RawString(params, "path")
-                )
-            case .readFailed:
-                return mobilePanelArtifactFileError(
-                    code: "read_failed",
-                    key: "mobile.chat.artifact.error.readFailed",
-                    defaultValue: "The Mac found that file but could not read it.",
-                    path: v2RawString(params, "path")
-                )
-            case .unavailable:
-                return mobilePanelArtifactFileError(
-                    code: "unavailable",
-                    key: "mobile.chat.artifact.error.transferUnavailable",
-                    defaultValue: "Artifact transfer is temporarily unavailable.",
-                    path: nil
-                )
-            }
+        } catch MobileHostRPCExecutionContext.ArtifactTransferError.unavailable {
+            return mobilePanelArtifactFileError(
+                code: "unavailable",
+                key: "mobile.chat.artifact.error.transferUnavailable",
+                defaultValue: "Artifact transfer is temporarily unavailable.",
+                path: nil
+            )
         } catch ArtifactByteReader.Error.fileNotFound {
             return mobilePanelArtifactFileError(
                 code: "file_not_found",

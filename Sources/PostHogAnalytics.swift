@@ -1,3 +1,4 @@
+import CmuxSettings
 import Foundation
 
 /// Compatibility sink for older call sites; this distribution has no analytics transport.

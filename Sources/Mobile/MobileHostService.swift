@@ -813,7 +813,6 @@ final class MobileHostService {
         authorization: MobileHostConnectionAuthorizationContext,
         registry: MobileHostConnectionRegistry = .shared,
         hostDeviceID: String? = nil,
-        artifactTransfers: MobileHostIrohArtifactTransferRegistry? = nil,
         independentEventWriter: (any MobileHostIndependentEventWriting)? = nil,
         firstFrameTimeoutNanoseconds: UInt64? = nil,
         promoteUsableSession: @escaping @Sendable () async -> Bool = { true },
@@ -894,7 +893,7 @@ final class MobileHostService {
                         for: request,
                         authorization: authorization,
                         hostDeviceID: hostDeviceID,
-                        supportsArtifactLane: artifactTransfers != nil,
+                        supportsArtifactLane: false,
                         stackStatus: { request in
                             await MobileHostService.networkStatusResult(for: request)
                         }
@@ -910,8 +909,7 @@ final class MobileHostService {
                     request,
                     executionContext: MobileHostRPCExecutionContext(
                         connectionID: id,
-                        authorization: authorization,
-                        artifactTransfers: artifactTransfers
+                        authorization: authorization
                     )
                 )
                 await MobileHostService.shared.recordCreatedResourcesIfNeeded(
